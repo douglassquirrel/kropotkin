@@ -2,6 +2,10 @@
 # This program comes with ABSOLUTELY NO WARRANTY. 
 # It is free software, and you are welcome to redistribute it under certain conditions; see the GPLv3 license in the file LICENSE for details.
 
+# Copyright Douglas Squirrel 2011
+# This program comes with ABSOLUTELY NO WARRANTY. 
+# It is free software, and you are welcome to redistribute it under certain conditions; see the GPLv3 license in the file LICENSE for details.
+
 import messageboard, time, unittest
 
 class TestStartProcess(unittest.TestCase):
@@ -15,6 +19,12 @@ class TestStartProcess(unittest.TestCase):
         messageboard.post('start_process', str({'verb':'start_process_test_echo', 'code':self.echo_code}))
         time.sleep(1)
         self.assert_echo_responds_normally()
+
+    def test_runs_tests_on_process_start(self):
+        (channel, queue_name) = messageboard.bind('start_process_test_run_tests_called')
+        messageboard.post('start_process', str({'verb':'start_process_test_echo', 'code':self.echo_code}))
+        (method, body) = messageboard.get_one_message(channel, queue_name, 'start_process_test_run_tests_called')
+        self.assertNotEqual(method, None)
 
     def test_process_with_typo_does_not_start(self):
         messageboard.post('start_process', str({'verb':'start_process_test_echo', 'code':self.code_with_typos}))

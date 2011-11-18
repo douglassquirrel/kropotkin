@@ -18,6 +18,10 @@ def start_process(serialised_process_data):
     
         print "Process started"
 
+        time.sleep(1)
+        print "Running tests"
+        messageboard.post(verb='run_tests.%s' % verb, noun='')
+
     except StandardError as e:
         print "Got exception %s" % str(e)
 
