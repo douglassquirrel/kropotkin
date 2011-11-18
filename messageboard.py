@@ -4,10 +4,14 @@
 
 import pika, sys, time
 
-def bind(*routing_keys):
+def connect():
     connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
     channel = connection.channel()
     channel.exchange_declare(exchange='kropotkin', type='topic')
+    return channel
+    
+def bind(*routing_keys):
+    channel = connect()
     result = channel.queue_declare(exclusive=True)
     queue_name = result.method.queue
     for routing_key in routing_keys:
@@ -46,10 +50,6 @@ def get_one_message(channel, queue_name, verb, seconds_to_wait=10):
     return (None, None)
 
 def post(verb, noun=None):
-    connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
-    channel = connection.channel()
-    channel.exchange_declare(exchange='kropotkin', type='topic')
-
+    channel = connect()    
     channel.basic_publish(exchange='kropotkin', routing_key=verb, body=noun)
     print "Sent %r %r" % (verb, noun)
-    connection.close()
