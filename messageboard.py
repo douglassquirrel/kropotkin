@@ -12,8 +12,7 @@ def connect():
     
 def bind(*routing_keys):
     channel = connect()
-    result = channel.queue_declare(exclusive=True)
-    queue_name = result.method.queue
+    queue_name = channel.queue_declare(exclusive=True).method.queue
     for routing_key in routing_keys:
         channel.queue_bind(exchange='kropotkin', queue=queue_name, routing_key=routing_key)
     return (channel, queue_name)
