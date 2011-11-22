@@ -28,9 +28,9 @@ class TestStartProcess(unittest.TestCase):
         self.assert_echo_does_not_respond()
 
     def test_start_process_with_typo_then_good_process(self):
-        messageboard.post('start_process', str({'verb':'start_process_test_echo', 'code':self.code_with_typos}))
-        messageboard.post('start_process', str({'verb':'start_process_test_echo', 'code':self.echo_code}))
-        time.sleep(1)
+        messageboard.post('start_process', str({'verb':'start_process_test_echo', 'code': self.code_with_typos}))
+        messageboard.post('start_process', str({'verb':'start_process_test_echo', 'code': self.echo_code}))
+        time.sleep(2)
         self.assert_echo_responds_normally()
 
     def test_send_malformed_message_then_start_process(self):
