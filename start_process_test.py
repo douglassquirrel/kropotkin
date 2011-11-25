@@ -40,8 +40,6 @@ def echo(text):
     messageboard.post('__echo_response', text)
 
 def run_tests():
-    print 'run_tests() has been called'
-    messageboard.post('start_process_test_run_tests_called', '')
     return True
 
 messageboard.start_consuming(verb='__echo', callback=echo, run_tests=run_tests)
