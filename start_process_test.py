@@ -15,7 +15,7 @@ class TestStartProcess(unittest.TestCase):
         self.start_echo_process(self.echo_code)
         self.assert_echo_responds_normally()
 
-    def test_send_malformed_message_then_start_process(self):
+    def test_handles_malformed_message_then_starts_process(self):
         messageboard.post('start_process', "I am not valid Python code")
         self.start_echo_process(self.echo_code)
         self.assert_echo_responds_normally()
