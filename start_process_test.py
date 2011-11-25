@@ -11,16 +11,16 @@ class TestStartProcess(unittest.TestCase):
     def tearDown(self):
         messageboard.post('stop.start_process_test_echo')
 
-    def test_starts_a_process(self):
-        messageboard.post('start_process', str({'verb':'start_process_test_echo', 'code':self.echo_code}))
-        time.sleep(1)
-        self.assert_echo_responds_normally()
-
     def test_sends_process_started_message(self):
         (channel, queue_name) = messageboard.bind('process_started.start_process_test_echo')
         messageboard.post('start_process', str({'verb':'start_process_test_echo', 'code':self.echo_code}))
         (method, body) = messageboard.get_one_message(channel, queue_name, 'process_started.start_process_test_echo')
         self.assertNotEqual(method, None)
+
+    def test_starts_a_process(self):
+        messageboard.post('start_process', str({'verb':'start_process_test_echo', 'code':self.echo_code}))
+        time.sleep(1)
+        self.assert_echo_responds_normally()
 
     def test_process_with_typo_does_not_start(self):
         messageboard.post('start_process', str({'verb':'start_process_test_echo', 'code':self.code_with_typos}))
