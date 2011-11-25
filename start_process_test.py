@@ -2,7 +2,7 @@
 # This program comes with ABSOLUTELY NO WARRANTY. 
 # It is free software, and you are welcome to redistribute it under certain conditions; see the GPLv3 license in the file LICENSE for details.
 
-import messageboard, time, unittest
+import messageboard, unittest
 
 class TestStartProcess(unittest.TestCase):
     def setUp(self):
@@ -11,45 +11,26 @@ class TestStartProcess(unittest.TestCase):
     def tearDown(self):
         messageboard.post('stop.__echo')
 
-    def test_sends_process_started_message(self):
-        (channel, queue_name) = messageboard.bind('process_started.__echo')
-        messageboard.post('start_process', str({'verb':'__echo', 'code':self.echo_code}))
-        (method, body) = messageboard.get_one_message(channel, queue_name, 'process_started.__echo')
-        self.assertNotEqual(method, None)
-
     def test_starts_a_process(self):
-        messageboard.post('start_process', str({'verb':'__echo', 'code':self.echo_code}))
-        time.sleep(1)
-        self.assert_echo_responds_normally()
-
-    def test_process_with_typo_does_not_start(self):
-        messageboard.post('start_process', str({'verb':'__echo', 'code':self.code_with_typos}))
-        time.sleep(1)
-        self.assert_echo_does_not_respond()
-
-    def test_start_process_with_typo_then_good_process(self):
-        messageboard.post('start_process', str({'verb':'__echo', 'code': self.code_with_typos}))
-        messageboard.post('start_process', str({'verb':'__echo', 'code': self.echo_code}))
-        time.sleep(2)
+        self.start_echo_process(self.echo_code)
         self.assert_echo_responds_normally()
 
     def test_send_malformed_message_then_start_process(self):
         messageboard.post('start_process', "I am not valid Python code")
-        messageboard.post('start_process', str({'verb':'__echo', 'code':self.echo_code}))
-        time.sleep(1)
+        self.start_echo_process(self.echo_code)
         self.assert_echo_responds_normally()
 
-    def assert_echo_responds_with(self, expected_result):
+    def start_echo_process(self, code):
+        (channel, queue_name) = messageboard.bind('process_started.__echo')
+        messageboard.post('start_process', str({'verb':'__echo', 'code': self.echo_code}))
+        (method, body) = messageboard.get_one_message(channel, queue_name, 'process_started.__echo')
+        self.assertNotEqual(None, method)
+
+    def assert_echo_responds_normally(self):
         (channel, queue_name) = messageboard.bind('__echo_response')
         messageboard.post('__echo', self.text)
         (method, body) = messageboard.get_one_message(channel, queue_name, '__echo_response')
-        self.assertEqual(expected_result, body)
-
-    def assert_echo_responds_normally(self):
-        self.assert_echo_responds_with(self.text)
-
-    def assert_echo_does_not_respond(self):
-        self.assert_echo_responds_with(None)
+        self.assertEqual(self.text, body)
 
     def create_strings(self):
         self.echo_code = """
@@ -65,7 +46,6 @@ def run_tests():
 
 messageboard.start_consuming(verb='__echo', callback=echo, run_tests=run_tests)
 """
-        self.code_with_typos = self.echo_code.replace('e', '$')
         self.text = 'I am a message to be echoed, hear me roar!'
 
 if __name__ == '__main__':

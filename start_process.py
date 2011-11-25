@@ -2,7 +2,7 @@
 # This program comes with ABSOLUTELY NO WARRANTY. 
 # It is free software, and you are welcome to redistribute it under certain conditions; see the GPLv3 license in the file LICENSE for details.
 
-import messageboard, subprocess, time
+import messageboard, subprocess
 
 def start_process(serialised_process_data):
     try:
