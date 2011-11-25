@@ -16,10 +16,10 @@ class TestStartProcess(unittest.TestCase):
         time.sleep(1)
         self.assert_echo_responds_normally()
 
-    def test_runs_tests_on_process_start(self):
-        (channel, queue_name) = messageboard.bind('start_process_test_run_tests_called')
+    def test_sends_process_started_message(self):
+        (channel, queue_name) = messageboard.bind('process_started.start_process_test_echo')
         messageboard.post('start_process', str({'verb':'start_process_test_echo', 'code':self.echo_code}))
-        (method, body) = messageboard.get_one_message(channel, queue_name, 'start_process_test_run_tests_called')
+        (method, body) = messageboard.get_one_message(channel, queue_name, 'process_started.start_process_test_echo')
         self.assertNotEqual(method, None)
 
     def test_process_with_typo_does_not_start(self):
