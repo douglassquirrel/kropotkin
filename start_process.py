@@ -16,7 +16,7 @@ def start_process(serialised_process_data):
         p.stdin.write(code)
         p.stdin.close()
     
-        messageboard.post(verb='process_started.%s' % verb, noun='')
+        messageboard.post(verb='process_started', noun=verb)
         print "Process started"
 
     except StandardError as e:

@@ -21,10 +21,10 @@ class TestStartProcess(unittest.TestCase):
         self.assert_echo_responds_normally()
 
     def start_echo_process(self, code):
-        (channel, queue_name) = messageboard.bind('process_started.__echo')
+        (channel, queue_name) = messageboard.bind('process_started')
         messageboard.post('start_process', str({'verb':'__echo', 'code': self.echo_code}))
-        (method, body) = messageboard.get_one_message(channel, queue_name, 'process_started.__echo')
-        self.assertNotEqual(None, method)
+        (method, body) = messageboard.get_one_message(channel, queue_name, 'process_started')
+        self.assertEqual('__echo', body)
 
     def assert_echo_responds_normally(self):
         (channel, queue_name) = messageboard.bind('__echo_response')
