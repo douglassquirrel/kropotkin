@@ -4,22 +4,21 @@
 
 import messageboard, subprocess
 
+def launch_code(code):
+    p = subprocess.Popen(args="python", stdin=subprocess.PIPE)
+    p.stdin.write(code)
+    p.stdin.close()
+    
 def start_process(serialised_process_data):
     try:
         process_data = eval(serialised_process_data)
         verb, code, test_code = process_data['verb'], process_data['code'], process_data['test_code']
 
         print "Starting process for %s" % verb
-
-        p = subprocess.Popen(args="python", stdin=subprocess.PIPE)
-        p.stdin.write(code)
-        p.stdin.close()
-
+        launch_code(code)
+        
         print "Starting test process for %s" % verb
-
-        p = subprocess.Popen(args="python", stdin=subprocess.PIPE)
-        p.stdin.write(test_code)
-        p.stdin.close()
+        launch_code(test_code)
     
         messageboard.post(verb='process_started', noun=verb)
         print "Process started"
