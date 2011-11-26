@@ -5,13 +5,9 @@
 import messageboard
 
 def run_tests(verb):
-    #try:
         print "Running tests for %s" % verb
         messageboard.post(verb='run_tests.%s' % verb, noun='')
         print "Sent run_tests message"
-
-    #except StandardError as e:
-    #    print "Got exception %s" % str(e)
 
 def run_tests_tests():
     return True
