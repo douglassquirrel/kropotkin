@@ -7,13 +7,18 @@ import messageboard, subprocess
 def start_process(serialised_process_data):
     try:
         process_data = eval(serialised_process_data)
-        verb, code = process_data['verb'], process_data['code']
+        verb, code, test_code = process_data['verb'], process_data['code'], process_data['test_code']
 
-        print "Starting process"
-        print "Process code:\n%s" % code
+        print "Starting process for %s" % verb
 
         p = subprocess.Popen(args="python", stdin=subprocess.PIPE)
         p.stdin.write(code)
+        p.stdin.close()
+
+        print "Starting test process for %s" % verb
+
+        p = subprocess.Popen(args="python", stdin=subprocess.PIPE)
+        p.stdin.write(test_code)
         p.stdin.close()
     
         messageboard.post(verb='process_started', noun=verb)
@@ -22,7 +27,4 @@ def start_process(serialised_process_data):
     except StandardError as e:
         print "Got exception %s" % str(e)
 
-def run_tests():
-    return True
-
-messageboard.start_consuming(verb='start_process', callback=start_process, run_tests=run_tests)
+messageboard.start_consuming(verb='start_process', callback=start_process)

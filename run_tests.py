@@ -9,7 +9,4 @@ def run_tests(verb):
         messageboard.post(verb='run_tests.%s' % verb, noun='')
         print "Sent run_tests message"
 
-def run_tests_tests():
-    return True
-
-messageboard.start_consuming(verb='process_started', callback=run_tests, run_tests=run_tests_tests)
+messageboard.start_consuming(verb='process_started', callback=run_tests)

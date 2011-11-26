@@ -17,24 +17,18 @@ def bind(*routing_keys):
         channel.queue_bind(exchange='kropotkin', queue=queue_name, routing_key=routing_key)
     return (channel, queue_name)
 
-def start_consuming(verb, callback, run_tests):
-    tests_key = 'run_tests.%s' % verb
+def start_consuming(verb, callback):
     stop_key = 'stop.%s' % verb
     def dispatch_message(channel, method, properties, body):
         if method.routing_key == verb:
             callback(body)
-        elif method.routing_key == tests_key:
-            print "Got run_tests message"
-            if not run_tests():
-                print "Tests failed for %s - stopping process" % verb
-                channel.stop_consuming()
         elif method.routing_key == stop_key:
             print "Stopping process for %s messages" % verb
             channel.stop_consuming()
         else:
             print "Unknown message: %r:%r" % (method.routing_key, body)
 
-    (channel, queue_name) = bind(verb, tests_key, stop_key)
+    (channel, queue_name) = bind(verb, stop_key)
     print "Waiting for %s messages. To exit send %s" % (verb, stop_key)
 
     channel.basic_consume(dispatch_message, queue=queue_name, no_ack=True)
