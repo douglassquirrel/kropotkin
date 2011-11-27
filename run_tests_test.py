@@ -9,9 +9,9 @@ class TestRunTests(unittest.TestCase):
         messageboard.post('stop.__go')
 
     def test_runs_tests_and_reports_success(self):
-        (channel, queue_name) = messageboard.bind('run_tests.__go')
+        (channel, queue_name) = messageboard.bind('__go_test')
         messageboard.post(verb='process_started', noun='__go')
-        (method, body) = messageboard.get_one_message(channel, queue_name, 'run_tests.__go')
+        (method, body) = messageboard.get_one_message(channel, queue_name, '__go_test')
         self.assertNotEqual(None, method)
 
 if __name__ == '__main__':
