@@ -1,0 +1,18 @@
+ANARCHIST PRINCIPLES
+1. Small is Beautiful.
+2. We Build Strength Through Diversity.
+3. There is Plenty for Everyone.
+4. Co-Operation is the Natural State.
+5. Machines are the Best Drudges.
+
+KROPOTKIN PRACTISES
+A. We limit code to at most 100 lines (in any language). [Principle 1]
+B. We limit side effects to specialist code (for database changes, external messages, and so on). [Principle 1]
+C. We allow multiple handlers for the same messages (using Resolvers). [Principles 2 and 4]
+D. All messages are public and may be received by any process. [Principle 4]
+E. All communication is via messaging. [Principles 3 and 4]
+F. We only create and read data, never update or delete it. [Principles 1 and 3]
+G. We require thorough tests and comprehensive monitors for all components. [Principle 5]
+H. We deploy changes when they pass all tests. [Principles 3 and 5]
+I. Processes may run in any reasonable language. [Principle 2]
+
