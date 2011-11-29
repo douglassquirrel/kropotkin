@@ -45,7 +45,6 @@ class TestStartProcess(unittest.TestCase):
 import messageboard
 
 def echo(text):
-    print 'Echoing %s' % text
     messageboard.post('__echo_response', text)
 
 messageboard.start_consuming(verb='__echo', callback=echo)
@@ -54,7 +53,6 @@ messageboard.start_consuming(verb='__echo', callback=echo)
 import messageboard
 
 def echo_test(ignored):
-    print 'Got test message'
     messageboard.post('__echo_test_called', '')
 
 messageboard.start_consuming(verb='__echo_test', callback=echo_test)

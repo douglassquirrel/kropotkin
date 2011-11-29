@@ -23,15 +23,15 @@ def start_consuming(verb, callback):
         if method.routing_key == verb:
             callback(body)
         elif method.routing_key == stop_key:
-            print "Stopping process for %s messages" % verb
             channel.stop_consuming()
+            post(verb="process_stopped", noun=verb)
         else:
-            print "Unknown message: %r:%r" % (method.routing_key, body)
+            post(verb="unknown_message", noun=str({"key": method.routing_key, "body": body}))
 
     (channel, queue_name) = bind(verb, stop_key)
-    print "Waiting for %s messages. To exit send %s" % (verb, stop_key)
 
     channel.basic_consume(dispatch_message, queue=queue_name, no_ack=True)
+    post(verb="process_ready", noun=verb)
     channel.start_consuming()
 
 def get_one_message(channel, queue_name, verb, seconds_to_wait=10):

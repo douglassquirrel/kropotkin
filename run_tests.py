@@ -5,7 +5,6 @@
 import messageboard
 
 def run_tests(verb):
-    print "Running tests for %s" % verb
     messageboard.post(verb='%s_test' % verb, noun='')
 
 messageboard.start_consuming(verb='process_started', callback=run_tests)

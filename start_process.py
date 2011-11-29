@@ -14,14 +14,10 @@ def start_process(serialised_process_data):
         process_data = eval(serialised_process_data)
         verb, code, test_code = process_data['verb'], process_data['code'], process_data['test_code']
 
-        print "Starting process for %s" % verb
         launch_code(code)
-        
-        print "Starting test process for %s" % verb
         launch_code(test_code)
     
         messageboard.post(verb='process_started', noun=verb)
-        print "Process started"
 
     except StandardError as e:
         print "Got exception %s" % str(e)
