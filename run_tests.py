@@ -5,6 +5,7 @@
 import messageboard
 
 def run_tests(verb):
-    messageboard.post(verb='%s_test' % verb, noun='')
+    if verb.endswith("_test"):
+        messageboard.post(verb=verb, noun='')
 
-messageboard.start_consuming(verb='process_started', callback=run_tests)
+messageboard.start_consuming(verb='process_ready', callback=run_tests)
