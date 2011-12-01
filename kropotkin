@@ -9,37 +9,42 @@ def basename_without_extension(file_path):
     return os.path.splitext(os.path.basename(file_path))[0]
 
 def start_directly(file_path):
-    print "Starting process directly using file %s" % file_path
+    messageboard.post("process_start_direct", file_path)
     with open(file_path, "r") as f:
         code = f.read()
     p = subprocess.Popen(args="python", stdin=subprocess.PIPE)
     p.stdin.write(code)
     p.stdin.close()
-    print "Process using file %s now running" % file_path
 
 def start(file_path):
     verb = basename_without_extension(file_path)
     test_file_path = file_path.replace(".py", "_test.py")
-    print "Starting %s, using verb %s, via start_process message" % (file_path, verb)
     with open(file_path, "r") as f:
         code = f.read()
     with open(test_file_path, "r") as f:
         test_code = f.read()
     messageboard.post("start_process", str({'verb':verb, 'code':code, 'test_code':test_code}))
 
+def non_test_python_files(directory):
+    return [f for f in glob.glob(os.path.join(directory, "*.py")) if not f.endswith("_test.py")]
+
+def start_component_directly(directory):
+    for file_path in non_test_python_files(directory):
+        start_directly(file_path)
+
+def start_component(directory):
+    for file_path in non_test_python_files(directory):
+        start(file_path)
+      
+direct_start_path = os.path.join(os.getcwd(), "direct_start")
+core_path = os.path.join(os.getcwd(), "core")
 app_directory_path = sys.argv[1] if len(sys.argv) >= 2 else os.path.expanduser("~/kropotkin-app")
-print "Starting bootstrap using app directory %s" % app_directory_path
 
-files_to_start_directly = ["start_process.py", "run_tests.py"]
-for file_path in files_to_start_directly:
-    start_directly(file_path)
+start_component_directly(direct_start_path)
 time.sleep(1)
+start_component(core_path)
+start_component(app_directory_path)
 
-python_app_files = glob.glob(app_directory_path + "/*.py")
-files_to_start_normally = [f for f in python_app_files if not f.endswith("_test.py")]
-for file_path in files_to_start_normally:
-    start(file_path)
-
-print "Bootstrap finished"
+messageboard.post("bootstrap_finished", "")
 while 1:
     pass
