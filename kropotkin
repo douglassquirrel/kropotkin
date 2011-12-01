@@ -18,22 +18,19 @@ def start_directly(file_path):
 
 def start(file_path):
     verb = basename_without_extension(file_path)
-    test_file_path = file_path.replace(".py", "_test.py")
     with open(file_path, "r") as f:
         code = f.read()
-    with open(test_file_path, "r") as f:
-        test_code = f.read()
-    messageboard.post("start_process", str({'verb':verb, 'code':code, 'test_code':test_code}))
+    messageboard.post("start_process", str({'verb':verb, 'code':code}))
 
-def non_test_python_files(directory):
-    return [f for f in glob.glob(os.path.join(directory, "*.py")) if not f.endswith("_test.py")]
+def python_files(directory):
+    return sorted(glob.glob(os.path.join(directory, "*.py")))
 
 def start_component_directly(directory):
-    for file_path in non_test_python_files(directory):
+    for file_path in python_files(directory):
         start_directly(file_path)
 
 def start_component(directory):
-    for file_path in non_test_python_files(directory):
+    for file_path in python_files(directory):
         start(file_path)
       
 direct_start_path = os.path.join(os.getcwd(), "direct_start")

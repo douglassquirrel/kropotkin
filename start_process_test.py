@@ -10,12 +10,10 @@ class TestStartProcess(unittest.TestCase):
 
     def tearDown(self):
         messageboard.post('stop.__echo')
-        messageboard.post('stop.__echo_test')
 
     def test_starts_a_process(self):
         self.start_echo_process()
         self.assert_echo_responds_normally()
-        self.assert_echo_test_responds_normally()
 
     def test_handles_malformed_message_then_starts_process(self):
         messageboard.post('start_process', "I am not valid Python code")
@@ -24,7 +22,7 @@ class TestStartProcess(unittest.TestCase):
 
     def start_echo_process(self):
         (channel, queue_name) = messageboard.bind('process_started')
-        messageboard.post('start_process', str({'verb':'__echo', 'code': self.echo_code, 'test_code': self.echo_test_code}))
+        messageboard.post('start_process', str({'verb':'__echo', 'code': self.echo_code}))
         (method, body) = messageboard.get_one_message(channel, queue_name, 'process_started')
         self.assertEqual('__echo', body)
 
@@ -33,12 +31,6 @@ class TestStartProcess(unittest.TestCase):
         messageboard.post('__echo', self.text)
         (method, body) = messageboard.get_one_message(channel, queue_name, '__echo_response')
         self.assertEqual(self.text, body)
-
-    def assert_echo_test_responds_normally(self):
-        (channel, queue_name) = messageboard.bind('__echo_test_called')
-        messageboard.post('__echo_test')
-        (method, body) = messageboard.get_one_message(channel, queue_name, '__echo_test_called')
-        self.assertNotEqual(None, method)
 
     def create_strings(self):
         self.echo_code = """
@@ -49,15 +41,6 @@ def echo(text):
 
 messageboard.start_consuming(verb='__echo', callback=echo)
 """
-        self.echo_test_code = """
-import messageboard
-
-def echo_test(ignored):
-    messageboard.post('__echo_test_called', '')
-
-messageboard.start_consuming(verb='__echo_test', callback=echo_test)
-"""
-
         self.text = 'I am a message to be echoed, hear me roar!'
 
 if __name__ == '__main__':

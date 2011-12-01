@@ -12,10 +12,9 @@ def launch_code(code):
 def start_process(serialised_process_data):
     try:
         process_data = eval(serialised_process_data)
-        verb, code, test_code = process_data['verb'], process_data['code'], process_data['test_code']
+        verb, code = process_data['verb'], process_data['code']
 
         launch_code(code)
-        launch_code(test_code)
     
         messageboard.post(verb='process_started', noun=verb)
 
