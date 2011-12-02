@@ -2,7 +2,7 @@
 # This program comes with ABSOLUTELY NO WARRANTY. 
 # It is free software, and you are welcome to redistribute it under certain conditions; see the GPLv3 license in the file LICENSE for details.
 
-import pika, sys, time
+import datetime, os, pika, time
 
 def connect():
     connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
@@ -45,4 +45,4 @@ def get_one_message(channel, queue_name, verb, seconds_to_wait=10):
 def post(verb, noun=None):
     channel = connect()    
     channel.basic_publish(exchange='kropotkin', routing_key=verb, body=noun)
-    print "Sent %r %r" % (verb, noun)
+    print "PID=%s %s: %s %s" % (os.getpid(), datetime.datetime.now(), verb, noun)
