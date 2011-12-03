@@ -21,4 +21,6 @@ def start_process(serialised_process_data):
     except StandardError as e:
         print "Got exception %s" % str(e)
 
+import time
+time.sleep(1)
 messageboard.start_consuming(verb='start_process', callback=start_process)

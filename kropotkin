@@ -37,8 +37,13 @@ direct_start_path = os.path.join(os.getcwd(), "direct_start")
 core_path = os.path.join(os.getcwd(), "core")
 app_directory_path = sys.argv[1] if len(sys.argv) >= 2 else os.path.expanduser("~/kropotkin-app")
 
+(channel, queue_name) = messageboard.bind('start_process_test_result')
 start_component_directly(direct_start_path)
-time.sleep(1)
+(method, body) = messageboard.get_one_message(channel, queue_name, 'start_process_test_result')
+if not "True" == body:
+    messageboard.post("bootstrap_failed", "")
+    exit()
+
 start_component(core_path)
 start_component(app_directory_path)
 
