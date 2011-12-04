@@ -3,7 +3,7 @@
 # This program comes with ABSOLUTELY NO WARRANTY. 
 # It is free software, and you are welcome to redistribute it under certain conditions; see the GPLv3 license in the file LICENSE for details.
 
-import glob, messageboard, os.path, sys, subprocess, time
+import glob, json, messageboard, os.path, sys, subprocess, time
 
 def basename_without_extension(file_path):
     return os.path.splitext(os.path.basename(file_path))[0]
@@ -20,7 +20,7 @@ def start(file_path):
     verb = basename_without_extension(file_path)
     with open(file_path, "r") as f:
         code = f.read()
-    messageboard.post("start_process", str({'verb':verb, 'code':code}))
+    messageboard.post("start_process", json.dumps({'verb':verb, 'code':code}))
 
 def python_files(directory):
     return sorted(glob.glob(os.path.join(directory, "*.py")))
@@ -40,7 +40,7 @@ app_directory_path = sys.argv[1] if len(sys.argv) >= 2 else os.path.expanduser("
 (channel, queue_name) = messageboard.bind('start_process_test_result')
 start_component_directly(direct_start_path)
 (method, body) = messageboard.get_one_message(channel, queue_name, 'start_process_test_result')
-if not "True" == body:
+if not True == json.loads(body):
     messageboard.post("bootstrap_failed", "")
     exit()
 

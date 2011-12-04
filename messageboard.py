@@ -2,7 +2,7 @@
 # This program comes with ABSOLUTELY NO WARRANTY. 
 # It is free software, and you are welcome to redistribute it under certain conditions; see the GPLv3 license in the file LICENSE for details.
 
-import datetime, os, pika, time
+import datetime, json, os, pika, time
 
 def connect():
     connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
@@ -26,7 +26,7 @@ def start_consuming(verb, callback):
             channel.stop_consuming()
             post(verb="process_stopped", noun=verb)
         else:
-            post(verb="unknown_message", noun=str({"key": method.routing_key, "body": body}))
+            post(verb="unknown_message", noun=json.dumps({"key": method.routing_key, "body": body}))
 
     (channel, queue_name) = bind(verb, stop_key)
 
