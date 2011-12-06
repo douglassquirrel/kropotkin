@@ -34,7 +34,7 @@ def start_process_test(key):
     if not check_echo_process():
         result = False
     else:
-        messageboard.post('start_process', "I am not valid Python code")
+        messageboard.post('start_process', "I am not valid JSON")
         result = check_echo_process()
     messageboard.post('start_process_test_result', json.dumps(result))
 
