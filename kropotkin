@@ -17,10 +17,11 @@ def start_directly(file_path):
     p.stdin.close()
 
 def start(file_path):
-    key = basename_without_extension(file_path)
+    name = basename_without_extension(file_path)
+    key = name #remove when processes bind themselves
     with open(file_path, "r") as f:
         code = f.read()
-    messageboard.post("start_process", json.dumps({'key':key, 'code':code}))
+    messageboard.post("start_process", json.dumps({'name':name, 'key':key, 'code':code}))
 
 def python_files(directory):
     return sorted(glob.glob(os.path.join(directory, "*.py")))

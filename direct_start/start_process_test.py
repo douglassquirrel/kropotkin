@@ -11,14 +11,14 @@ import messageboard
 def echo(text):
     messageboard.post('__echo_response', text)
 
-messageboard.start_consuming(key='__echo', callback=echo)
+messageboard.start_consuming(name='__echo_process', key='__echo', callback=echo)
 """
     text = 'I am a message to be echoed, hear me roar!'
 
     (channel, queue_name) = messageboard.bind('process_started')
-    messageboard.post('start_process', json.dumps({'key':'__echo', 'code': echo_code}))
+    messageboard.post('start_process', json.dumps({'name': '__echo_process', 'key':'__echo', 'code': echo_code}))
     (method, body) = messageboard.get_one_message(channel, queue_name)
-    if not '__echo' == body:
+    if not '__echo_process' == body:
         messageboard.post('stop.__echo')
         return False
 
@@ -38,4 +38,4 @@ def start_process_test(key):
         result = check_echo_process()
     messageboard.post('start_process_test_result', json.dumps(result))
 
-messageboard.start_consuming(key='process_ready', callback=start_process_test)
+messageboard.start_consuming(name='start_process_test', key='process_ready', callback=start_process_test)

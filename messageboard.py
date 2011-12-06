@@ -17,7 +17,7 @@ def bind(*routing_keys):
         channel.queue_bind(exchange='kropotkin', queue=queue_name, routing_key=routing_key)
     return (channel, queue_name)
 
-def start_consuming(key, callback):
+def start_consuming(name, key, callback):
     stop_key = 'stop.%s' % key
     def dispatch_message(channel, method, properties, body):
         if method.routing_key == key:
