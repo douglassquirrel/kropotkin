@@ -17,24 +17,24 @@ def bind(*routing_keys):
         channel.queue_bind(exchange='kropotkin', queue=queue_name, routing_key=routing_key)
     return (channel, queue_name)
 
-def start_consuming(verb, callback):
-    stop_key = 'stop.%s' % verb
+def start_consuming(key, callback):
+    stop_key = 'stop.%s' % key
     def dispatch_message(channel, method, properties, body):
-        if method.routing_key == verb:
+        if method.routing_key == key:
             callback(body)
         elif method.routing_key == stop_key:
             channel.stop_consuming()
-            post(verb="process_stopped", noun=verb)
+            post(key="process_stopped", body=key)
         else:
-            post(verb="unknown_message", noun=json.dumps({"key": method.routing_key, "body": body}))
+            post(key="unknown_message", body=json.dumps({"key": method.routing_key, "body": body}))
 
-    (channel, queue_name) = bind(verb, stop_key)
+    (channel, queue_name) = bind(key, stop_key)
 
     channel.basic_consume(dispatch_message, queue=queue_name, no_ack=True)
-    post(verb="process_ready", noun=verb)
+    post(key="process_ready", body=key)
     channel.start_consuming()
 
-def get_one_message(channel, queue_name, verb, seconds_to_wait=10):
+def get_one_message(channel, queue_name, seconds_to_wait=10):
     for i in range(seconds_to_wait):
         method, properties, body = channel.basic_get(queue=queue_name, no_ack=True)
         if method.NAME != 'Basic.GetEmpty':
@@ -42,7 +42,7 @@ def get_one_message(channel, queue_name, verb, seconds_to_wait=10):
         time.sleep(1)
     return (None, None)
 
-def post(verb, noun=None):
+def post(key, body=None):
     channel = connect()    
-    channel.basic_publish(exchange='kropotkin', routing_key=verb, body=noun)
-    print "PID=%s %s: %s %s" % (os.getpid(), datetime.datetime.now(), verb, noun)
+    channel.basic_publish(exchange='kropotkin', routing_key=key, body=body)
+    print "PID=%s %s: %s %s" % (os.getpid(), datetime.datetime.now(), key, body)

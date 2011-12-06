@@ -17,10 +17,10 @@ def start_directly(file_path):
     p.stdin.close()
 
 def start(file_path):
-    verb = basename_without_extension(file_path)
+    key = basename_without_extension(file_path)
     with open(file_path, "r") as f:
         code = f.read()
-    messageboard.post("start_process", json.dumps({'verb':verb, 'code':code}))
+    messageboard.post("start_process", json.dumps({'key':key, 'code':code}))
 
 def python_files(directory):
     return sorted(glob.glob(os.path.join(directory, "*.py")))
@@ -39,7 +39,7 @@ app_directory_path = sys.argv[1] if len(sys.argv) >= 2 else os.path.expanduser("
 
 (channel, queue_name) = messageboard.bind('start_process_test_result')
 start_component_directly(direct_start_path)
-(method, body) = messageboard.get_one_message(channel, queue_name, 'start_process_test_result')
+(method, body) = messageboard.get_one_message(channel, queue_name)
 if not True == json.loads(body):
     messageboard.post("bootstrap_failed", "")
     exit()

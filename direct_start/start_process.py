@@ -14,15 +14,15 @@ def start_process(serialised_process_data):
         print "Serialised process data: %s" % serialised_process_data
         process_data = json.loads(serialised_process_data)
         print "Process data: %s" % process_data
-        verb, code = process_data['verb'], process_data['code']
+        key, code = process_data['key'], process_data['code']
 
         launch_code(code)
     
-        messageboard.post(verb='process_started', noun=verb)
+        messageboard.post(key='process_started', body=key)
 
     except StandardError as e:
         print "Got exception %s" % str(e)
 
 import time
 time.sleep(1)
-messageboard.start_consuming(verb='start_process', callback=start_process)
+messageboard.start_consuming(key='start_process', callback=start_process)

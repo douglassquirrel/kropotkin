@@ -11,25 +11,25 @@ import messageboard
 def echo(text):
     messageboard.post('__echo_response', text)
 
-messageboard.start_consuming(verb='__echo', callback=echo)
+messageboard.start_consuming(key='__echo', callback=echo)
 """
     text = 'I am a message to be echoed, hear me roar!'
 
     (channel, queue_name) = messageboard.bind('process_started')
-    messageboard.post('start_process', json.dumps({'verb':'__echo', 'code': echo_code}))
-    (method, body) = messageboard.get_one_message(channel, queue_name, 'process_started')
+    messageboard.post('start_process', json.dumps({'key':'__echo', 'code': echo_code}))
+    (method, body) = messageboard.get_one_message(channel, queue_name)
     if not '__echo' == body:
         messageboard.post('stop.__echo')
         return False
 
     (channel, queue_name) = messageboard.bind('__echo_response')
     messageboard.post('__echo', text)
-    (method, body) = messageboard.get_one_message(channel, queue_name, '__echo_response')
+    (method, body) = messageboard.get_one_message(channel, queue_name)
     messageboard.post('stop.__echo')
     return text==body    
 
-def start_process_test(verb):
-    if verb != 'start_process':
+def start_process_test(key):
+    if key != 'start_process':
         return
     if not check_echo_process():
         result = False
@@ -38,4 +38,4 @@ def start_process_test(verb):
         result = check_echo_process()
     messageboard.post('start_process_test_result', json.dumps(result))
 
-messageboard.start_consuming(verb='process_ready', callback=start_process_test)
+messageboard.start_consuming(key='process_ready', callback=start_process_test)
