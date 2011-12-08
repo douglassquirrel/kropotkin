@@ -8,11 +8,11 @@ def get_connection():
     connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
     channel = connection.channel()
     channel.exchange_declare(exchange='kropotkin', type='topic')
-    return {'channel': channel}
+    queue_name = channel.queue_declare(exclusive=True).method.queue
+    return {'channel': channel, 'queue_name': queue_name}
     
 def bind(connection, *routing_keys):
-    channel = connection['channel']
-    queue_name = channel.queue_declare(exclusive=True).method.queue
+    channel, queue_name = connection['channel'], connection['queue_name']
     for routing_key in routing_keys:
         channel.queue_bind(exchange='kropotkin', queue=queue_name, routing_key=routing_key)
     return queue_name
