@@ -4,38 +4,40 @@
 
 import json, messageboard
 
-def check_echo_process():
+def check_echo_process(channel):
     echo_code = """
 import messageboard
 
-def echo(text):
-    messageboard.post('__echo_response', text)
+def echo(channel, text):
+    messageboard.post(channel, '__echo_response', text)
 
-messageboard.start_consuming(name='__echo_process', key='__echo', callback=echo)
+channel = messageboard.get_connection()
+messageboard.start_consuming(channel=channel, name='__echo_process', key='__echo', callback=echo)
 """
     text = 'I am a message to be echoed, hear me roar!'
-
-    (channel, queue_name) = messageboard.bind('process_started')
-    messageboard.post('start_process', json.dumps({'name': '__echo_process', 'key':'__echo', 'code': echo_code}))
+    
+    queue_name = messageboard.bind(channel, 'process_started')
+    messageboard.post(channel, 'start_process', json.dumps({'name': '__echo_process', 'key':'__echo', 'code': echo_code}))
     (method, body) = messageboard.get_one_message(channel, queue_name)
     if not '__echo_process' == body:
-        messageboard.post('stop.__echo')
+        messageboard.post(channel, 'stop.__echo')
         return False
 
-    (channel, queue_name) = messageboard.bind('__echo_response')
-    messageboard.post('__echo', text)
+    queue_name = messageboard.bind(channel, '__echo_response')
+    messageboard.post(channel, '__echo', text)
     (method, body) = messageboard.get_one_message(channel, queue_name)
-    messageboard.post('stop.__echo')
+    messageboard.post(channel, 'stop.__echo')
     return text==body    
 
-def start_process_test(key):
+def start_process_test(channel, key):
     if key != 'start_process':
         return
-    if not check_echo_process():
+    if not check_echo_process(channel):
         result = False
     else:
-        messageboard.post('start_process', "I am not valid JSON")
-        result = check_echo_process()
-    messageboard.post('start_process_test_result', json.dumps(result))
+        messageboard.post(channel, 'start_process', "I am not valid JSON")
+        result = check_echo_process(channel)
+    messageboard.post(channel, 'start_process_test_result', json.dumps(result))
 
-messageboard.start_consuming(name='start_process_test', key='process_ready', callback=start_process_test)
+channel = messageboard.get_connection()
+messageboard.start_consuming(channel=channel, name='start_process_test', key='process_ready', callback=start_process_test)
