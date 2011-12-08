@@ -9,7 +9,7 @@ def launch_code(code):
     p.stdin.write(code)
     p.stdin.close()
     
-def start_process(channel, serialised_process_data):
+def start_process(connection, serialised_process_data):
     try:
         print "Serialised process data: %s" % serialised_process_data
         process_data = json.loads(serialised_process_data)
@@ -18,12 +18,12 @@ def start_process(channel, serialised_process_data):
 
         launch_code(code)
     
-        messageboard.post(channel=channel, key='process_started', body=name)
+        messageboard.post(connection=connection, key='process_started', body=name)
 
     except StandardError as e:
         print "Got exception %s" % str(e)
 
 import time
 time.sleep(1)
-channel = messageboard.get_connection()
-messageboard.start_consuming(channel=channel, name='start_process', key='start_process', callback=start_process)
+connection = messageboard.get_connection()
+messageboard.start_consuming(connection=connection, name='start_process', key='start_process', callback=start_process)

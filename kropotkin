@@ -8,47 +8,47 @@ import glob, json, messageboard, os.path, sys, subprocess, time
 def basename_without_extension(file_path):
     return os.path.splitext(os.path.basename(file_path))[0]
 
-def start_directly(channel, file_path):
-    messageboard.post(channel, "process_start_direct", file_path)
+def start_directly(connection, file_path):
+    messageboard.post(connection, "process_start_direct", file_path)
     with open(file_path, "r") as f:
         code = f.read()
     p = subprocess.Popen(args="python", stdin=subprocess.PIPE)
     p.stdin.write(code)
     p.stdin.close()
 
-def start(channel, file_path):
+def start(connection, file_path):
     name = basename_without_extension(file_path)
     key = name #remove when processes bind themselves
     with open(file_path, "r") as f:
         code = f.read()
-    messageboard.post(channel, "start_process", json.dumps({'name':name, 'key':key, 'code':code}))
+    messageboard.post(connection, "start_process", json.dumps({'name':name, 'key':key, 'code':code}))
 
 def python_files(directory):
     return sorted(glob.glob(os.path.join(directory, "*.py")))
 
-def start_component_directly(channel, directory):
+def start_component_directly(connection, directory):
     for file_path in python_files(directory):
-        start_directly(channel, file_path)
+        start_directly(connection, file_path)
 
-def start_component(channel, directory):
+def start_component(connection, directory):
     for file_path in python_files(directory):
-        start(channel, file_path)
+        start(connection, file_path)
       
 direct_start_path = os.path.join(os.getcwd(), "direct_start")
 core_path = os.path.join(os.getcwd(), "core")
 app_directory_path = sys.argv[1] if len(sys.argv) >= 2 else os.path.expanduser("~/kropotkin-app")
 
-channel = messageboard.get_connection()
-queue_name = messageboard.bind(channel, 'start_process_test_result')
-start_component_directly(channel, direct_start_path)
-(method, body) = messageboard.get_one_message(channel, queue_name, 15)
+connection = messageboard.get_connection()
+queue_name = messageboard.bind(connection, 'start_process_test_result')
+start_component_directly(connection, direct_start_path)
+(method, body) = messageboard.get_one_message(connection, queue_name, 15)
 if not (body and True == json.loads(body)):
-    messageboard.post(channel, "bootstrap_failed", "")
+    messageboard.post(connection, "bootstrap_failed", "")
     exit()
 
-start_component(channel, core_path)
-start_component(channel, app_directory_path)
+start_component(connection, core_path)
+start_component(connection, app_directory_path)
 
-messageboard.post(channel, "bootstrap_finished", "")
+messageboard.post(connection, "bootstrap_finished", "")
 while 1:
     pass
