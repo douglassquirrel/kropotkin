@@ -11,9 +11,7 @@ def launch_code(code):
     
 def start_process(connection, serialised_process_data):
     try:
-        print "Serialised process data: %s" % serialised_process_data
         process_data = json.loads(serialised_process_data)
-        print "Process data: %s" % process_data
         name, code = process_data['name'], process_data['code']
 
         launch_code(code)
