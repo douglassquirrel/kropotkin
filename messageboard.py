@@ -18,7 +18,7 @@ def bind(connection, *routing_keys):
 
 def start_consuming(connection, name, key, callback):
     channel, queue_name = connection['channel'], connection['queue_name']
-    stop_key = 'stop.%s' % key
+    stop_key = 'stop.%s' % name
     def dispatch_message(channel, method, properties, body):
         if method.routing_key == key:
             callback(connection, body)
