@@ -39,9 +39,9 @@ core_path = os.path.join(os.getcwd(), "core")
 app_directory_path = sys.argv[1] if len(sys.argv) >= 2 else os.path.expanduser("~/kropotkin-app")
 
 connection = messageboard.get_connection()
-queue_name = messageboard.bind(connection, 'start_process_test_result')
+messageboard.bind(connection, 'start_process_test_result')
 start_component_directly(connection, direct_start_path)
-(method, body) = messageboard.get_one_message(connection, queue_name, 15)
+(method, body) = messageboard.get_one_message(connection, 15)
 if not (body and True == json.loads(body)):
     messageboard.post(connection, "bootstrap_failed", "")
     exit()
