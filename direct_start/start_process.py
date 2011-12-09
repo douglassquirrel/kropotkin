@@ -9,7 +9,7 @@ def launch_code(code):
     p.stdin.write(code)
     p.stdin.close()
     
-def start_process(connection, serialised_process_data):
+def start_process(connection, key, serialised_process_data):
     try:
         process_data = json.loads(serialised_process_data)
         name, code = process_data['name'], process_data['code']

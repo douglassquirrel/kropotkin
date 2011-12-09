@@ -19,11 +19,12 @@ def start_consuming(connection, name, callback):
     channel, queue_name = connection['channel'], connection['queue_name']
     stop_key = 'stop.%s' % name
     def dispatch_message(channel, method, properties, body):
-        if method.routing_key == stop_key:
+        key = method.routing_key
+        if key == stop_key:
             channel.stop_consuming()
             post(connection, key="process_stopped", body=name)
         else:
-            callback(connection, body)
+            callback(connection, key, body)
     
     bind(connection, stop_key)
 

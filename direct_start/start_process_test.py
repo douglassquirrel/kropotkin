@@ -8,7 +8,7 @@ def check_echo_process():
     echo_code = """
 import messageboard
 
-def echo(connection, text):
+def echo(connection, key, text):
     messageboard.post(connection, '__echo_response', text)
 
 connection = messageboard.get_connection()
@@ -31,7 +31,7 @@ messageboard.start_consuming(connection=connection, name='__echo_process', callb
     messageboard.post(connection, 'stop.__echo_process')
     return text==body    
 
-def start_process_test(connection, body):
+def start_process_test(connection, key, body):
     if not check_echo_process():
         result = False
     else:
