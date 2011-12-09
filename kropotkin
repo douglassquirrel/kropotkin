@@ -23,7 +23,7 @@ def start(connection, file_path):
     messageboard.post(connection, "start_process", json.dumps({'name':name, 'code':code}))
 
 def python_files(directory):
-    return sorted(glob.glob(os.path.join(directory, "*.py")))
+    return glob.glob(os.path.join(directory, "*.py"))
 
 def start_component_directly(connection, directory):
     for file_path in python_files(directory):
