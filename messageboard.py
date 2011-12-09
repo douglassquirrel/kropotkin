@@ -11,24 +11,21 @@ def get_connection():
     queue_name = channel.queue_declare(exclusive=True).method.queue
     return {'channel': channel, 'queue_name': queue_name}
     
-def bind(connection, *routing_keys):
+def bind(connection, key):
     channel, queue_name = connection['channel'], connection['queue_name']
-    for routing_key in routing_keys:
-        channel.queue_bind(exchange='kropotkin', queue=queue_name, routing_key=routing_key)
+    channel.queue_bind(exchange='kropotkin', queue=queue_name, routing_key=key)
 
-def start_consuming(connection, name, key, callback):
+def start_consuming(connection, name, callback):
     channel, queue_name = connection['channel'], connection['queue_name']
     stop_key = 'stop.%s' % name
     def dispatch_message(channel, method, properties, body):
-        if method.routing_key == key:
-            callback(connection, body)
-        elif method.routing_key == stop_key:
+        if method.routing_key == stop_key:
             channel.stop_consuming()
-            post(connection, key="process_stopped", body=key)
+            post(connection, key="process_stopped", body=name)
         else:
-            post(connection, key="unknown_message", body=json.dumps({"key": method.routing_key, "body": body}))
+            callback(connection, body)
     
-    bind(connection, key, stop_key)
+    bind(connection, stop_key)
 
     channel.basic_consume(dispatch_message, queue=queue_name, no_ack=True)
     post(connection, key="process_ready", body=name)

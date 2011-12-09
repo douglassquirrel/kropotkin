@@ -26,4 +26,5 @@ def start_process(connection, serialised_process_data):
 import time
 time.sleep(1)
 connection = messageboard.get_connection()
-messageboard.start_consuming(connection=connection, name='start_process', key='start_process', callback=start_process)
+messageboard.bind(connection=connection, key='start_process')
+messageboard.start_consuming(connection=connection, name='start_process', callback=start_process)

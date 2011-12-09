@@ -12,7 +12,8 @@ def echo(connection, text):
     messageboard.post(connection, '__echo_response', text)
 
 connection = messageboard.get_connection()
-messageboard.start_consuming(connection=connection, name='__echo_process', key='__echo', callback=echo)
+messageboard.bind(connection=connection, key='__echo')
+messageboard.start_consuming(connection=connection, name='__echo_process', callback=echo)
 """
     text = 'I am a message to be echoed, hear me roar!'
     
@@ -41,4 +42,5 @@ def start_process_test(connection, key):
     messageboard.post(connection, 'start_process_test_result', json.dumps(result))
 
 connection = messageboard.get_connection()
-messageboard.start_consuming(connection=connection, name='start_process_test', key='process_ready', callback=start_process_test)
+messageboard.bind(connection=connection, key='process_ready')
+messageboard.start_consuming(connection=connection, name='start_process_test', callback=start_process_test)
