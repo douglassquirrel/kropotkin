@@ -37,7 +37,7 @@ def get_one_message(connection, seconds_to_wait=10):
     for i in range(seconds_to_wait):
         method, properties, body = channel.basic_get(queue=queue_name, no_ack=True)
         if method.NAME != 'Basic.GetEmpty':
-            return (method, body)
+            return (method.routing_key, body)
         time.sleep(1)
     return (None, None)
 
