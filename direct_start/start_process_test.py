@@ -19,7 +19,7 @@ messageboard.start_consuming(connection=connection, name='__echo_process', callb
     
     connection = messageboard.get_connection()
     messageboard.bind(connection, 'process_started')
-    messageboard.post(connection, 'start_process', json.dumps({'name': '__echo_process', 'key':'__echo', 'code': echo_code}))
+    messageboard.post(connection, 'start_process', json.dumps({'name': '__echo_process', 'code': echo_code}))
     (method, body) = messageboard.get_one_message(connection)
     if not '__echo_process' == body:
         messageboard.post(connection, 'stop.__echo_process')
