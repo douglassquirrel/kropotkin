@@ -16,7 +16,7 @@ def start_process(connection, serialised_process_data):
 
         launch_code(code)
     
-        messageboard.post(connection=connection, key='process_started', body=name)
+        messageboard.post(connection=connection, key='process_started.%s' % name)
 
     except StandardError as e:
         print "Got exception %s" % str(e)

@@ -28,7 +28,7 @@ def start_consuming(connection, name, callback):
     bind(connection, stop_key)
 
     channel.basic_consume(dispatch_message, queue=queue_name, no_ack=True)
-    post(connection, key="process_ready", body=name)
+    post(connection, key="process_ready.%s" % name)
     channel.start_consuming()
 
 def get_one_message(connection, seconds_to_wait=10):
