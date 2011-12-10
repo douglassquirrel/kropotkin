@@ -4,7 +4,7 @@
 
 import json, messageboard
 
-def check_echo_process():
+def check_echo_process(connection):
     echo_code = """
 import messageboard
 
@@ -17,7 +17,6 @@ messageboard.start_consuming(connection=connection, name='__echo_process', callb
 """
     text = 'I am a message to be echoed, hear me roar!'
     
-    connection = messageboard.get_connection()
     messageboard.bind(connection, 'process_started.__echo_process')
     messageboard.post(connection, 'start_process', json.dumps({'name': '__echo_process', 'code': echo_code}))
     (key, body) = messageboard.get_one_message(connection)
@@ -31,12 +30,14 @@ messageboard.start_consuming(connection=connection, name='__echo_process', callb
     messageboard.post(connection, 'stop.__echo_process')
     return text==body    
 
+def check_echo_process_after_bad_process(connection):
+    messageboard.post(connection, 'start_process', "I am not valid JSON")
+    return check_echo_process(connection)
+    
 def start_process_test(connection, key, body):
-    if not check_echo_process():
-        result = False
-    else:
-        messageboard.post(connection, 'start_process', "I am not valid JSON")
-        result = check_echo_process()
+    connection = messageboard.get_connection()
+    result   = check_echo_process(connection) \
+           and check_echo_process_after_bad_process(connection)
     messageboard.post(connection, 'start_process_test_result', json.dumps(result))
 
 connection = messageboard.get_connection()
