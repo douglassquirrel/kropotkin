@@ -4,16 +4,22 @@
 
 import json, messageboard
 
+global statuses, response
 def collect(connection, key, serialised_data):
-    global response
+    global statuses, response
     try:
         if key == 'collect':
             collection_data = json.loads(serialised_data)
-            messages, response = collection_data['messages'], collection_data['response']
-            messageboard.bind(connection=connection, key=str(messages[0]))
+            messages, response = map(str, collection_data['messages']), collection_data['response']
+            for message in messages:
+                messageboard.bind(connection=connection, key=message)
+            statuses = dict(map(lambda x: (x, False), messages))
             messageboard.post(connection, 'ready_to_collect.%s' % response)
         else:
-            messageboard.post(connection, response)
+            if key in statuses:
+                statuses[key] = True
+            if all(statuses.values()):
+                messageboard.post(connection, response)
 
     except StandardError as e:
         print "Got exception %s" % str(e)

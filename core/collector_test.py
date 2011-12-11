@@ -30,7 +30,21 @@ def collect_one_message():
     return ('c1m_test_messages_received' == key)
 
 def collect_two_messages():
-    return True
+    connection = messageboard.get_connection()
+    messageboard.bind(connection=connection, key='ready_to_collect.c2m_test_messages_received')
+    messageboard.post(connection, 'collect', json.dumps({'messages': ['c2m_1', 'c2m_2'], 'response': 'c2m_test_messages_received'}))
+    (method, body) = messageboard.get_one_message(connection)
+    if None == method:
+        return False    
+
+    messageboard.bind(connection=connection, key='c2m_test_messages_received')
+    messageboard.post(connection, 'c2m_1')
+    (key, body) = messageboard.get_one_message(connection)
+    if None != key:
+        return False
+    messageboard.post(connection, 'c2m_2')
+    (key, body) = messageboard.get_one_message(connection)
+    return ('c2m_test_messages_received' == key)
 
 def collector_test(connection, key, body):
     result =   collect_no_message() \
