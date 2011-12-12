@@ -30,9 +30,25 @@ def collect_two_messages():
         return False
     return send_message_and_check(connection=connection, message_key='c2m_1', response_key='c2m_test_messages_received')
 
+def collect_interleaved():
+    connection = messageboard.get_connection()
+    register_messages(connection=connection, prefix='ci1', number=2)
+    register_messages(connection=connection, prefix='ci2', number=2)
+    if True == send_message_and_check(connection=connection, message_key='ci1_0', response_key='ci1_test_messages_received'):
+        return False
+    if True == send_message_and_check(connection=connection, message_key='ci2_0', response_key='ci2_test_messages_received'):
+        return False
+    if False == send_message_and_check(connection=connection, message_key='ci1_1', response_key='ci1_test_messages_received'):
+        return False
+    return send_message_and_check(connection=connection, message_key='ci2_1', response_key='ci2_test_messages_received')
+
+#def collect_twice() - call again with same messages
+#def collect_only_once() - call once, then send same messages without registering again
+
 def collector_test(connection, key, body):
     result =   collect_one_message() \
-           and collect_two_messages()
+           and collect_two_messages() \
+           and collect_interleaved()
     messageboard.post(connection, 'collector_test_result', json.dumps(result))
 
 connection = messageboard.get_connection()
