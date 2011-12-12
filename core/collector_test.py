@@ -12,35 +12,31 @@ def register_messages(connection, prefix, number):
     (key, body) = messageboard.get_one_message(connection=connection)
     return None != key
 
-def send_message_and_check(connection, message_key, response_key):
+def send_message_and_check_response_key(connection, message_key, response_key):
     messageboard.bind(connection=connection, key=response_key)
     messageboard.post(connection=connection, key=message_key)
-    (actual_response_key, body) = messageboard.get_one_message(connection=connection)
-    return (actual_response_key == response_key)
+    actual_response_key, body = messageboard.get_one_message(connection=connection)
+    return actual_response_key == response_key
 
 def collect_one_message():
     connection = messageboard.get_connection()
     register_messages(connection=connection, prefix='c1m', number=1)
-    return send_message_and_check(connection=connection, message_key='c1m_0', response_key='c1m_test_messages_received')
+    return send_message_and_check_response_key(connection=connection, message_key='c1m_0', response_key='c1m_test_messages_received')
 
 def collect_two_messages():
     connection = messageboard.get_connection()
     register_messages(connection=connection, prefix='c2m', number=2)
-    if True == send_message_and_check(connection=connection, message_key='c2m_0', response_key='c2m_test_messages_received'):
-        return False
-    return send_message_and_check(connection=connection, message_key='c2m_1', response_key='c2m_test_messages_received')
+    return False == send_message_and_check_response_key(connection=connection, message_key='c2m_0', response_key='c2m_test_messages_received') \
+       and True  == send_message_and_check_response_key(connection=connection, message_key='c2m_1', response_key='c2m_test_messages_received')
 
 def collect_interleaved():
     connection = messageboard.get_connection()
     register_messages(connection=connection, prefix='ci1', number=2)
     register_messages(connection=connection, prefix='ci2', number=2)
-    if True == send_message_and_check(connection=connection, message_key='ci1_0', response_key='ci1_test_messages_received'):
-        return False
-    if True == send_message_and_check(connection=connection, message_key='ci2_0', response_key='ci2_test_messages_received'):
-        return False
-    if False == send_message_and_check(connection=connection, message_key='ci1_1', response_key='ci1_test_messages_received'):
-        return False
-    return send_message_and_check(connection=connection, message_key='ci2_1', response_key='ci2_test_messages_received')
+    return False == send_message_and_check_response_key(connection=connection, message_key='ci1_0', response_key='ci1_test_messages_received') \
+       and False == send_message_and_check_response_key(connection=connection, message_key='ci2_0', response_key='ci2_test_messages_received') \
+       and True == send_message_and_check_response_key(connection=connection, message_key='ci1_1', response_key='ci1_test_messages_received') \
+       and True == send_message_and_check_response_key(connection=connection, message_key='ci2_1', response_key='ci2_test_messages_received') \
 
 #def collect_twice() - call again with same messages
 #def collect_only_once() - call once, then send same messages without registering again
