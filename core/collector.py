@@ -27,6 +27,7 @@ def collect(connection, key, serialised_data):
                 if all(statuses.values()):
                     messageboard.post(connection, response)
                     collections.pop(i)
+            messageboard.post(connection=connection, key='collector_done_processing.%s' % key)
 
     except StandardError as e:
         print "Got exception %s" % str(e)

@@ -22,6 +22,11 @@ messageboard.start_consuming(connection=connection, name='__echo_process', callb
     return None != body
 
 def check_echo_response(connection):
+    messageboard.bind(connection, 'process_ready.__echo_process')
+    (key, body) = messageboard.get_one_message(connection)
+    if None == key:
+        return false
+
     text = 'I am a message to be echoed, hear me roar!'
     messageboard.bind(connection, '__echo_response')
     messageboard.post(connection, '__echo', text)

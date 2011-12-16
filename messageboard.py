@@ -41,11 +41,11 @@ def get_message(connection):
         return (None, None)
 
 def get_one_message(connection, seconds_to_wait=10):
-    for i in range(seconds_to_wait):
+    for i in range(seconds_to_wait * 100):
         key, body = get_message(connection)
         if key != None:
             return (key, body)
-        time.sleep(1)
+        time.sleep(0.01)
     return (None, None)
 
 def post(connection, key, body=None):
