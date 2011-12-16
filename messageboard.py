@@ -32,12 +32,19 @@ def start_consuming(connection, name, callback):
     post(connection, key="process_ready.%s" % name)
     channel.start_consuming()
 
-def get_one_message(connection, seconds_to_wait=10):
+def get_message(connection):
     channel, queue_name = connection['channel'], connection['queue_name']
+    method, properties, body = channel.basic_get(queue=queue_name, no_ack=True)
+    if method.NAME != 'Basic.GetEmpty':
+        return (method.routing_key, body)
+    else:
+        return (None, None)
+
+def get_one_message(connection, seconds_to_wait=10):
     for i in range(seconds_to_wait):
-        method, properties, body = channel.basic_get(queue=queue_name, no_ack=True)
-        if method.NAME != 'Basic.GetEmpty':
-            return (method.routing_key, body)
+        key, body = get_message(connection)
+        if key != None:
+            return (key, body)
         time.sleep(1)
     return (None, None)
 
