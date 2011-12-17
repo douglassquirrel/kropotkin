@@ -8,13 +8,6 @@ import glob, json, messageboard, os.path, sys, subprocess, time
 def basename_without_extension(file_path):
     return os.path.splitext(os.path.basename(file_path))[0]
 
-def start_directly(connection, file_path):
-    with open(file_path, "r") as f:
-        code = f.read()
-    p = subprocess.Popen(args="python", stdin=subprocess.PIPE)
-    p.stdin.write(code)
-    p.stdin.close()
-
 def start(connection, file_path):
     name = basename_without_extension(file_path)
     with open(file_path, "r") as f:
@@ -24,27 +17,34 @@ def start(connection, file_path):
 def python_files(directory):
     return glob.glob(os.path.join(directory, "*.py"))
 
-def start_component_directly(connection, directory):
-    for file_path in python_files(directory):
-        start_directly(connection, file_path)
+def bootstrap_start_process(connection):
+    for file_path in ['bootstrap/start_process.py', 'bootstrap/start_process_test.py']:
+        with open(file_path, "r") as f:
+            code = f.read()
+        p = subprocess.Popen(args="python", stdin=subprocess.PIPE)
+        p.stdin.write(code)
+        p.stdin.close()
+
+def bootstrap_collector(connection):
+    for file_path in ['bootstrap/collector.py', 'bootstrap/collector_test.py']:
+        start(connection, file_path)
 
 def start_component(connection, directory):
     for file_path in python_files(directory):
         start(connection, file_path)
       
-direct_start_path = os.path.join(os.getcwd(), "direct_start")
-core_path = os.path.join(os.getcwd(), "core")
+bootstrap_path = os.path.join(os.getcwd(), "bootstrap")
 app_directory_path = sys.argv[1] if len(sys.argv) >= 2 else os.path.expanduser("~/kropotkin-app")
 
 connection = messageboard.get_connection()
 messageboard.bind(connection, key='start_process_test_result')
-start_component_directly(connection, direct_start_path)
+bootstrap_start_process(connection)
 (key, body) = messageboard.get_one_message(connection)
 if not (body and True == json.loads(body)):
     messageboard.post(connection, key="bootstrap_failed")
     exit()
 
-start_component(connection, core_path)
+bootstrap_collector(connection)
 start_component(connection, app_directory_path)
 
 messageboard.post(connection, key="bootstrap_finished")
