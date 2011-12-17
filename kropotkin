@@ -3,7 +3,7 @@
 # This program comes with ABSOLUTELY NO WARRANTY. 
 # It is free software, and you are welcome to redistribute it under certain conditions; see the GPLv3 license in the file LICENSE for details.
 
-import glob, json, messageboard, os.path, sys, subprocess
+import glob, messageboard, os.path, sys, subprocess
 
 def basename_without_extension(file_path):
     return os.path.splitext(os.path.basename(file_path))[0]
@@ -21,14 +21,14 @@ def manual_start(connection, file_path, file_name):
 def start(connection, file_path, file_name):
     with open(file_path, "r") as f:
         code = f.read()
-    messageboard.post(connection, key="start_process", body=json.dumps({'name':file_name, 'code':code}))
+    messageboard.post(connection, key="start_process", data={'name':file_name, 'code':code})
 
 def start_and_check(connection, file_path, starter):
     file_name = basename_without_extension(file_path)
     ready_key = 'process_ready.%s' % file_name
     messageboard.bind(connection, key=ready_key)
     starter(connection, file_path, file_name)
-    key, body = messageboard.get_one_message(connection)
+    key, data = messageboard.get_one_message(connection)
     return ready_key == key
 
 def bootstrap_start(connection, name, starter, test_key):
@@ -37,7 +37,7 @@ def bootstrap_start(connection, name, starter, test_key):
         if not start_and_check(connection, file_path, starter):
             return False
 
-    return messageboard.post_and_check(connection, post_key='component_ready.%s' % name, response_key=test_key, response_body=json.dumps(True))
+    return messageboard.post_and_check(connection, post_key='component_ready.%s' % name, response_key=test_key, response_data=True)
 
 def start_component(connection, name, directory):
     for file_path in python_files(directory):

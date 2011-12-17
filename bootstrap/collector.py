@@ -2,16 +2,15 @@
 # This program comes with ABSOLUTELY NO WARRANTY. 
 # It is free software, and you are welcome to redistribute it under certain conditions; see the GPLv3 license in the file LICENSE for details.
 
-import json, messageboard
+import messageboard
 
 global collections
 collections = []
-def collect(connection, key, serialised_data):
+def collect(connection, key, data):
     global collections
     try:
         if key == 'collect':
-            collection_data = json.loads(serialised_data)
-            messages, response = map(str, collection_data['messages']), collection_data['response']
+            messages, response = map(str, data['messages']), data['response']
             for message in messages:
                 messageboard.bind(connection, key=message)
             statuses = dict(map(lambda x: (x, False), messages))

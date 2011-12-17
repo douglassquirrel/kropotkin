@@ -1,10 +1,14 @@
+# Copyright Douglas Squirrel 2011
+# This program comes with ABSOLUTELY NO WARRANTY. 
+# It is free software, and you are welcome to redistribute it under certain conditions; see the GPLv3 license in the file LICENSE for details.
+
 import messageboard, unittest
 
-def hello(connection, key, name):
+def hello(connection, key, data):
     connection = messageboard.get_connection()
     try:
-        response = "Hello, %s!" % name
-        messageboard.post(connection, key="hello-response.%s" % name, body=response)
+        response = "Hello, %s!" % data
+        messageboard.post(connection, key="hello-response.%s" % name, data=response)
 
     except StandardError as e:
         print "Got exception %s" % str(e)

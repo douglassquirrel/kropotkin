@@ -4,6 +4,12 @@
 
 import datetime, json, os, pika, time
 
+def json_to_python(s):
+    return json.loads(s) if s else None
+
+def python_to_json(x):
+    return json.dumps(x) if x else None
+
 def get_connection():
     connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
     channel = connection.channel()
@@ -20,11 +26,12 @@ def start_consuming(connection, name, callback):
     stop_key = 'stop.%s' % name
     def dispatch_message(channel, method, properties, body):
         key = method.routing_key
+        data = json_to_python(body)
         if key == stop_key:
             channel.stop_consuming()
-            post(connection, key="process_stopped", body=name)
+            post(connection, key="process_stopped", data=name)
         else:
-            callback(connection, key, body)
+            callback(connection, key=key, data=data)
     
     bind(connection, key=stop_key)
 
@@ -36,26 +43,28 @@ def get_message(connection):
     channel, queue_name = connection['channel'], connection['queue_name']
     method, properties, body = channel.basic_get(queue=queue_name, no_ack=True)
     if method.NAME != 'Basic.GetEmpty':
-        return (method.routing_key, body)
+        data = json_to_python(body)
+        return (method.routing_key, data)
     else:
         return (None, None)
 
 def get_one_message(connection, seconds_to_wait=10):
     for i in range(seconds_to_wait * 100):
-        key, body = get_message(connection)
+        key, data = get_message(connection)
         if key != None:
-            return (key, body)
+            return (key, data)
         time.sleep(0.01)
     return (None, None)
 
-def post(connection, key, body=None):
+def post(connection, key, data=None):
+    body = python_to_json(data)
     channel = connection['channel']
     channel.basic_publish(exchange='kropotkin', routing_key=key, body=body)
     print "PID=%s %s: %s %s" % (os.getpid(), datetime.datetime.now(), key, body)
 
-def post_and_check(connection, post_key, response_key, post_body=None, response_body=None):
+def post_and_check(connection, post_key, response_key, post_data=None, response_data=None):
     bind(connection, key=response_key)
-    post(connection, key=post_key, body=post_body)
-    actual_response_key, actual_response_body = get_one_message(connection)
-    return response_key == actual_response_key and (response_body==None or actual_response_body == response_body)
+    post(connection, key=post_key, data=post_data)
+    actual_response_key, actual_response_data = get_one_message(connection)
+    return response_key == actual_response_key and (response_data==None or actual_response_data == response_data)
     

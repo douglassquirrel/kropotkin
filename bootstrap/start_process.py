@@ -2,12 +2,11 @@
 # This program comes with ABSOLUTELY NO WARRANTY. 
 # It is free software, and you are welcome to redistribute it under certain conditions; see the GPLv3 license in the file LICENSE for details.
 
-import json, messageboard, subprocess
+import messageboard, subprocess
     
-def start_process(connection, key, serialised_process_data):
+def start_process(connection, key, data):
     try:
-        process_data = json.loads(serialised_process_data)
-        name, code = process_data['name'], process_data['code']
+        name, code = data['name'], data['code']
 
         p = subprocess.Popen(args="python", stdin=subprocess.PIPE)
         p.stdin.write(code)

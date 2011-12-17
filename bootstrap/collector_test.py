@@ -2,12 +2,12 @@
 # This program comes with ABSOLUTELY NO WARRANTY. 
 # It is free software, and you are welcome to redistribute it under certain conditions; see the GPLv3 license in the file LICENSE for details.
 
-import json, messageboard
+import messageboard
 
 def register_messages(connection, prefix, number):
     response = '%s_test_messages_received' % prefix
     messages = ['%s_%s' % (prefix, i) for i in range(number)]
-    return messageboard.post_and_check(connection, post_key='collect', post_body=json.dumps({'messages': messages, 'response': response}), 
+    return messageboard.post_and_check(connection, post_key='collect', post_data={'messages': messages, 'response': response}, 
                                                    response_key='ready_to_collect.%s' % response)
 
 def no_collect_response(connection, message_key):
@@ -19,8 +19,8 @@ def collect_response(connection, message_key, response_key):
     messageboard.bind(connection, key=done_key)
     messageboard.post(connection, key=message_key)
 
-    key1, body1 = messageboard.get_one_message(connection)
-    key2, body2 = messageboard.get_one_message(connection)
+    key1, data1 = messageboard.get_one_message(connection)
+    key2, data2 = messageboard.get_one_message(connection)
 
     return key1==response_key and key2==done_key
 
@@ -58,13 +58,13 @@ def collect_twice():
     register_messages(connection, prefix='c2x', number=1)
     return collect_response(connection, message_key='c2x_0', response_key='c2x_test_messages_received')
 
-def collector_test(connection, key, body):
+def collector_test(connection, key, data):
     result =   collect_one_message() \
            and collect_two_messages() \
            and collect_interleaved() \
            and collect_only_once() \
            and collect_twice()
-    messageboard.post(connection, key='collector_test_result', body=json.dumps(result))
+    messageboard.post(connection, key='collector_test_result', data=result)
 
 connection = messageboard.get_connection()
 messageboard.bind(connection, key='component_ready.collector')
