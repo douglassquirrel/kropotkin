@@ -4,7 +4,6 @@
 
 import json, messageboard
 
-
 def start_echo_process(connection):
     echo_code = """
 import messageboard
@@ -17,16 +16,13 @@ messageboard.bind(connection, key='__echo')
 messageboard.start_consuming(connection, name='__echo_process', callback=echo)
 """    
     messageboard.bind(connection, key='process_started.__echo_process')
+    messageboard.bind(connection, key='process_ready.__echo_process')
     messageboard.post(connection, key='start_process', body=json.dumps({'name': '__echo_process', 'code': echo_code}))
-    (key, body) = messageboard.get_one_message(connection)
-    return None != body
+    key1, body1 = messageboard.get_one_message(connection)
+    key2, body2 = messageboard.get_one_message(connection)
+    return 'process_started.__echo_process' == key1 and 'process_ready.__echo_process' == key2
 
 def check_echo_response(connection):
-    messageboard.bind(connection, key='process_ready.__echo_process')
-    (key, body) = messageboard.get_one_message(connection)
-    if None == key:
-        return false
-
     text = 'I am a message to be echoed, hear me roar!'
     messageboard.bind(connection, key='__echo_response')
     messageboard.post(connection, key='__echo', body=text)
