@@ -32,9 +32,6 @@ def collect(connection, key, serialised_data):
     except StandardError as e:
         print "Got exception %s" % str(e)
 
-import time
-time.sleep(1)
-
 connection = messageboard.get_connection()
 messageboard.bind(connection, key='collect')
 messageboard.start_consuming(connection, name='collector', callback=collect)

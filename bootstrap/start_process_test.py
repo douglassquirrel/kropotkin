@@ -50,5 +50,5 @@ def start_process_test(connection, key, body):
     messageboard.post(connection, key='start_process_test_result', body=json.dumps(result))
 
 connection = messageboard.get_connection()
-messageboard.bind(connection, key='process_ready.start_process')
+messageboard.bind(connection, key='component_ready.start_process')
 messageboard.start_consuming(connection, name='start_process_test', callback=start_process_test)

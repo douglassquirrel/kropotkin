@@ -73,5 +73,5 @@ def collector_test(connection, key, body):
     messageboard.post(connection, key='collector_test_result', body=json.dumps(result))
 
 connection = messageboard.get_connection()
-messageboard.bind(connection, key='process_ready.collector')
+messageboard.bind(connection, key='component_ready.collector')
 messageboard.start_consuming(connection, name='collector_test', callback=collector_test)

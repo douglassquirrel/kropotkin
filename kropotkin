@@ -3,49 +3,60 @@
 # This program comes with ABSOLUTELY NO WARRANTY. 
 # It is free software, and you are welcome to redistribute it under certain conditions; see the GPLv3 license in the file LICENSE for details.
 
-import glob, json, messageboard, os.path, sys, subprocess, time
+import glob, json, messageboard, os.path, sys, subprocess
 
 def basename_without_extension(file_path):
     return os.path.splitext(os.path.basename(file_path))[0]
 
-def start(connection, file_path):
-    name = basename_without_extension(file_path)
-    with open(file_path, "r") as f:
-        code = f.read()
-    messageboard.post(connection, key="start_process", body=json.dumps({'name':name, 'code':code}))
-
 def python_files(directory):
     return glob.glob(os.path.join(directory, "*.py"))
 
-def bootstrap_start_process(connection):
-    for file_path in ['bootstrap/start_process.py', 'bootstrap/start_process_test.py']:
-        with open(file_path, "r") as f:
-            code = f.read()
-        p = subprocess.Popen(args="python", stdin=subprocess.PIPE)
-        p.stdin.write(code)
-        p.stdin.close()
+def manual_start(connection, file_path, file_name):
+    with open(file_path, "r") as f:
+        code = f.read()
+    p = subprocess.Popen(args="python", stdin=subprocess.PIPE)
+    p.stdin.write(code)
+    p.stdin.close()
 
-def bootstrap_collector(connection):
-    for file_path in ['bootstrap/collector.py', 'bootstrap/collector_test.py']:
-        start(connection, file_path)
+def start(connection, file_path, file_name):
+    with open(file_path, "r") as f:
+        code = f.read()
+    messageboard.post(connection, key="start_process", body=json.dumps({'name':file_name, 'code':code}))
 
-def start_component(connection, directory):
+def start_and_check(connection, file_path, starter):
+    file_name = basename_without_extension(file_path)
+    ready_key = 'process_ready.%s' % file_name
+    messageboard.bind(connection, key=ready_key)
+    starter(connection, file_path, file_name)
+    key, body = messageboard.get_one_message(connection)
+    return ready_key == key
+
+def bootstrap_start(connection, name, starter, test_key):
+    file_paths = glob.glob(os.path.join('bootstrap', '%s*.py' % name))
+    for file_path in file_paths:
+        if not start_and_check(connection, file_path, starter):
+            return False
+
+    messageboard.bind(connection, key=test_key)
+    messageboard.post(connection, key='component_ready.%s' % name)
+    (key, body) = messageboard.get_one_message(connection)
+    return (body and True == json.loads(body))
+
+def start_component(connection, name, directory):
     for file_path in python_files(directory):
-        start(connection, file_path)
-      
-bootstrap_path = os.path.join(os.getcwd(), "bootstrap")
-app_directory_path = sys.argv[1] if len(sys.argv) >= 2 else os.path.expanduser("~/kropotkin-app")
+        if not start_and_check(connection, file_path, starter=start):
+            return False
+    messageboard.post(connection, key='component_ready.app')
+    return True
 
+app_directory_path = sys.argv[1] if len(sys.argv) >= 2 else os.path.expanduser("~/kropotkin-app")
 connection = messageboard.get_connection()
-messageboard.bind(connection, key='start_process_test_result')
-bootstrap_start_process(connection)
-(key, body) = messageboard.get_one_message(connection)
-if not (body and True == json.loads(body)):
+
+if not (bootstrap_start(connection, name='start_process', starter=manual_start, test_key='start_process_test_result') 
+        and bootstrap_start(connection, name='collector', starter=start, test_key='collector_test_result') 
+        and start_component(connection, name='app', directory=app_directory_path)):
     messageboard.post(connection, key="bootstrap_failed")
     exit()
-
-bootstrap_collector(connection)
-start_component(connection, app_directory_path)
 
 messageboard.post(connection, key="bootstrap_finished")
 while 1:

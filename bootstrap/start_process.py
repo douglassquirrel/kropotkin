@@ -21,8 +21,6 @@ def start_process(connection, key, serialised_process_data):
     except StandardError as e:
         print "Got exception %s" % str(e)
 
-import time
-time.sleep(1)
 connection = messageboard.get_connection()
 messageboard.bind(connection, key='start_process')
 messageboard.start_consuming(connection, name='start_process', callback=start_process)
