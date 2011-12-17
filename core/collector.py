@@ -13,10 +13,10 @@ def collect(connection, key, serialised_data):
             collection_data = json.loads(serialised_data)
             messages, response = map(str, collection_data['messages']), collection_data['response']
             for message in messages:
-                messageboard.bind(connection=connection, key=message)
+                messageboard.bind(connection, key=message)
             statuses = dict(map(lambda x: (x, False), messages))
             collections.append({'statuses': statuses, 'response': response})
-            messageboard.post(connection, 'ready_to_collect.%s' % response)
+            messageboard.post(connection, key='ready_to_collect.%s' % response)
         else:
             for collection in collections:
                 statuses = collection['statuses']
@@ -25,9 +25,9 @@ def collect(connection, key, serialised_data):
             for i, collection in enumerate(collections[:]):
                 statuses, response = collection['statuses'], collection['response']
                 if all(statuses.values()):
-                    messageboard.post(connection, response)
+                    messageboard.post(connection, key=response)
                     collections.pop(i)
-            messageboard.post(connection=connection, key='collector_done_processing.%s' % key)
+            messageboard.post(connection, key='collector_done_processing.%s' % key)
 
     except StandardError as e:
         print "Got exception %s" % str(e)
@@ -36,5 +36,5 @@ import time
 time.sleep(1)
 
 connection = messageboard.get_connection()
-messageboard.bind(connection=connection, key='collect')
-messageboard.start_consuming(connection=connection, name='collector', callback=collect)
+messageboard.bind(connection, key='collect')
+messageboard.start_consuming(connection, name='collector', callback=collect)

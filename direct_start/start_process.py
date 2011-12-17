@@ -16,7 +16,7 @@ def start_process(connection, key, serialised_process_data):
 
         launch_code(code)
     
-        messageboard.post(connection=connection, key='process_started.%s' % name)
+        messageboard.post(connection, key='process_started.%s' % name)
 
     except StandardError as e:
         print "Got exception %s" % str(e)
@@ -24,5 +24,5 @@ def start_process(connection, key, serialised_process_data):
 import time
 time.sleep(1)
 connection = messageboard.get_connection()
-messageboard.bind(connection=connection, key='start_process')
-messageboard.start_consuming(connection=connection, name='start_process', callback=start_process)
+messageboard.bind(connection, key='start_process')
+messageboard.start_consuming(connection, name='start_process', callback=start_process)

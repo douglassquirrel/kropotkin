@@ -26,7 +26,7 @@ def start_consuming(connection, name, callback):
         else:
             callback(connection, key, body)
     
-    bind(connection, stop_key)
+    bind(connection, key=stop_key)
 
     channel.basic_consume(dispatch_message, queue=queue_name, no_ack=True)
     post(connection, key="process_ready.%s" % name)

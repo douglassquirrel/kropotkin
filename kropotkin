@@ -9,7 +9,7 @@ def basename_without_extension(file_path):
     return os.path.splitext(os.path.basename(file_path))[0]
 
 def start_directly(connection, file_path):
-    messageboard.post(connection, "process_start_direct", file_path)
+    messageboard.post(connection, key="process_start_direct", body=file_path)
     with open(file_path, "r") as f:
         code = f.read()
     p = subprocess.Popen(args="python", stdin=subprocess.PIPE)
@@ -20,7 +20,7 @@ def start(connection, file_path):
     name = basename_without_extension(file_path)
     with open(file_path, "r") as f:
         code = f.read()
-    messageboard.post(connection, "start_process", json.dumps({'name':name, 'code':code}))
+    messageboard.post(connection, key="start_process", body=json.dumps({'name':name, 'code':code}))
 
 def python_files(directory):
     return glob.glob(os.path.join(directory, "*.py"))
@@ -38,16 +38,16 @@ core_path = os.path.join(os.getcwd(), "core")
 app_directory_path = sys.argv[1] if len(sys.argv) >= 2 else os.path.expanduser("~/kropotkin-app")
 
 connection = messageboard.get_connection()
-messageboard.bind(connection, 'start_process_test_result')
+messageboard.bind(connection, key='start_process_test_result')
 start_component_directly(connection, direct_start_path)
-(key, body) = messageboard.get_one_message(connection, 15)
+(key, body) = messageboard.get_one_message(connection)
 if not (body and True == json.loads(body)):
-    messageboard.post(connection, "bootstrap_failed", "")
+    messageboard.post(connection, key="bootstrap_failed")
     exit()
 
 start_component(connection, core_path)
 start_component(connection, app_directory_path)
 
-messageboard.post(connection, "bootstrap_finished", "")
+messageboard.post(connection, key="bootstrap_finished")
 while 1:
     pass
