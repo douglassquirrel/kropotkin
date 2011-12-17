@@ -24,10 +24,7 @@ messageboard.start_consuming(connection, name='__echo_process', callback=echo)
 
 def check_echo_response(connection):
     text = 'I am a message to be echoed, hear me roar!'
-    messageboard.bind(connection, key='__echo_response')
-    messageboard.post(connection, key='__echo', body=text)
-    (key, body) = messageboard.get_one_message(connection)
-    return text==body
+    return messageboard.post_and_check(connection, post_key='__echo', post_body=text, response_key='__echo_response', response_body=text)
 
 def check_echo_process(connection):
     result = start_echo_process(connection) \

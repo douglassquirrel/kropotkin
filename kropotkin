@@ -37,10 +37,7 @@ def bootstrap_start(connection, name, starter, test_key):
         if not start_and_check(connection, file_path, starter):
             return False
 
-    messageboard.bind(connection, key=test_key)
-    messageboard.post(connection, key='component_ready.%s' % name)
-    (key, body) = messageboard.get_one_message(connection)
-    return (body and True == json.loads(body))
+    return messageboard.post_and_check(connection, post_key='component_ready.%s' % name, response_key=test_key, response_body=json.dumps(True))
 
 def start_component(connection, name, directory):
     for file_path in python_files(directory):

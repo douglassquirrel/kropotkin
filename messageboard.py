@@ -52,3 +52,10 @@ def post(connection, key, body=None):
     channel = connection['channel']
     channel.basic_publish(exchange='kropotkin', routing_key=key, body=body)
     print "PID=%s %s: %s %s" % (os.getpid(), datetime.datetime.now(), key, body)
+
+def post_and_check(connection, post_key, response_key, post_body=None, response_body=None):
+    bind(connection, key=response_key)
+    post(connection, key=post_key, body=post_body)
+    actual_response_key, actual_response_body = get_one_message(connection)
+    return response_key == actual_response_key and (response_body==None or actual_response_body == response_body)
+    

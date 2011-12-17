@@ -7,17 +7,11 @@ import json, messageboard
 def register_messages(connection, prefix, number):
     response = '%s_test_messages_received' % prefix
     messages = ['%s_%s' % (prefix, i) for i in range(number)]
-    messageboard.bind(connection, key='ready_to_collect.%s' % response)
-    messageboard.post(connection, key='collect', body=json.dumps({'messages': messages, 'response': response}))
-    (key, body) = messageboard.get_one_message(connection)
-    return None != key
+    return messageboard.post_and_check(connection, post_key='collect', post_body=json.dumps({'messages': messages, 'response': response}), 
+                                                   response_key='ready_to_collect.%s' % response)
 
 def no_collect_response(connection, message_key):
-    done_key = "collector_done_processing.%s" % message_key
-    messageboard.bind(connection, key=done_key)
-    messageboard.post(connection, key=message_key)
-    key, body = messageboard.get_one_message(connection)
-    return key==done_key
+    return messageboard.post_and_check(connection, post_key=message_key, response_key='collector_done_processing.%s' % message_key)
 
 def collect_response(connection, message_key, response_key):
     done_key = "collector_done_processing.%s" % message_key
