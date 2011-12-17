@@ -43,17 +43,25 @@ def start_component(connection, name, directory):
     for file_path in python_files(directory):
         if not start_and_check(connection, file_path, starter=start):
             return False
-    messageboard.post(connection, key='component_ready.app')
     return True
 
-app_directory_path = sys.argv[1] if len(sys.argv) >= 2 else os.path.expanduser("~/kropotkin-app")
+def start_components(connection, directories):
+    for directory in directories:
+        name = os.path.basename(directory)
+        if start_component(connection, name, directory):
+            messageboard.post(connection, key='component_ready.%s' % name)
+        else:
+            messageboard.post(connection, key='component_failed.%s' % name)
+
+component_directories = sys.argv[1:]
 connection = messageboard.get_connection()
 
 if not (bootstrap_start(connection, name='start_process', starter=manual_start, test_key='start_process_test_result') 
-        and bootstrap_start(connection, name='collector', starter=start, test_key='collector_test_result') 
-        and start_component(connection, name='app', directory=app_directory_path)):
+        and bootstrap_start(connection, name='collector', starter=start, test_key='collector_test_result')):
     messageboard.post(connection, key="bootstrap_failed")
     exit()
+
+start_components(connection, component_directories)
 
 messageboard.post(connection, key="bootstrap_finished")
 while 1:
