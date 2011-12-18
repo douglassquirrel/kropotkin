@@ -7,7 +7,7 @@ from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 
 class HTTPHandler(BaseHTTPRequestHandler):
     def do_GET(self):
-        incoming_key = 'http%s' % urlparse.urlparse(self.path).path.replace('/','.')
+        incoming_key = 'http_GET%s' % urlparse.urlparse(self.path).path.replace('/','.')
         connection = messageboard.get_connection()
         messageboard.post(connection, key=incoming_key)
 

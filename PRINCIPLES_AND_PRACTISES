@@ -13,6 +13,20 @@ D. All communication is via messaging. [Principles 3 and 4]
 E. All messages are public and may be received by any process. [Principle 4]
 F. We only create and read data, never update or delete it. [Principles 1 and 3]
 G. We require thorough tests and comprehensive monitors for all components. [Principle 5]
-H. We deploy changes when they pass all tests. [Principles 3 and 5]
+H. We deploy changes, then ensure they pass all tests. [Principles 3 and 5]
 I. Processes may run in any reasonable language. [Principle 2]
 
+PROBLEMS
+Running tests locally
+Dev/CI/Prod out of sync [Practise H]
+Browser testing
+Speed testing
+Acceptance tests [Practise G]
+Database upgrade path
+Deployment [Practise H]
+Legacy code [Practises A, C, I]
+Insufficient test coverage [Practise G]
+Urgent fixes in production [Practise H]
+Poor design
+Production outages [Practises C, I]
+Code dependencies [Practise D]
