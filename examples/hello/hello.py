@@ -8,7 +8,7 @@ def hello(connection, key, data):
     connection = messageboard.get_connection()
     try:
         response = "Hello, %s!" % data
-        messageboard.post(connection, key="hello-response.%s" % name, data=response)
+        messageboard.post(connection, key="hello-response.%s" % data, data=response)
 
     except StandardError as e:
         print "Got exception %s" % str(e)
