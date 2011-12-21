@@ -5,10 +5,10 @@
 import datetime, json, os, pika, time
 
 def json_to_python(s):
-    return json.loads(s) if s else None
+    return json.loads(s) if not (s in [None, '']) else None
 
 def python_to_json(x):
-    return json.dumps(x) if x else None
+    return json.dumps(x) if x != None else None
 
 def get_connection():
     connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
