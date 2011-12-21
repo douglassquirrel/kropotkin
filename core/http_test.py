@@ -4,17 +4,20 @@
 
 import messageboard, urllib2
 
-def send_GET_and_check(connection, GET_path, response_key, response_data=None):
+def send_GET_and_check(connection, GET_path, response_key, response_html, response_data=None):
     messageboard.bind(connection, key=response_key)
     response = urllib2.urlopen('http://localhost:8080/%s' % GET_path)
-    html = response.read()
-    ############### check the html
+    actual_html = response.read()
+    content_type = response.info().gettype()
     actual_response_key, actual_response_data = messageboard.get_one_message(connection)
-    return response_key == actual_response_key and (response_data==None or actual_response_data == response_data)
+    return 'application/json' == content_type \
+       and response_key == actual_response_key \
+       and (response_data==None or actual_response_data == response_data) \
+       and actual_html == response_html
 
 def test_converts_http_path_to_message(connection):
-    return send_GET_and_check(connection, GET_path='example', response_key='http_GET.example') \
-       and send_GET_and_check(connection, GET_path='example/path', response_key='http_GET.example.path')
+    return send_GET_and_check(connection, GET_path='example', response_key='http_GET.example', response_html='"/example"') \
+       and send_GET_and_check(connection, GET_path='example/path', response_key='http_GET.example.path', response_html='"/example/path"')
 
 def http_test(connection, key, data):
     connection = messageboard.get_connection()
