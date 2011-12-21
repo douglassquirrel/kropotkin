@@ -2,7 +2,7 @@
 # This program comes with ABSOLUTELY NO WARRANTY. 
 # It is free software, and you are welcome to redistribute it under certain conditions; see the GPLv3 license in the file LICENSE for details.
 
-import messageboard, unittest
+import messageboard
 
 def test_says_hello_when_given_a_name(connection):
     return messageboard.post_and_check(connection, post_key='hello', post_data='foo', response_key='hello-response.foo', response_data='Hello, foo!')
