@@ -4,26 +4,26 @@
 
 import messageboard, urllib2
 
-def send_GET_and_check(connection, GET_path, response_key, response_html, response_data=None):
-    messageboard.bind(connection, key=response_key)
+def send_GET_and_check(mb, GET_path, response_key, response_html, response_data=None):
+    mb.bind(key=response_key)
     response = urllib2.urlopen('http://localhost:8080/%s' % GET_path)
     actual_html = response.read()
     content_type = response.info().gettype()
-    actual_response_key, actual_response_data = messageboard.get_one_message(connection)
+    actual_response_key, actual_response_data = mb.get_one_message()
     return 'application/json' == content_type \
        and response_key == actual_response_key \
        and (response_data==None or actual_response_data == response_data) \
        and actual_html == response_html
 
-def test_converts_http_path_to_message(connection):
-    return send_GET_and_check(connection, GET_path='example', response_key='http_GET.example', response_html='"/example"') \
-       and send_GET_and_check(connection, GET_path='example/path', response_key='http_GET.example.path', response_html='"/example/path"')
+def test_converts_http_path_to_message(mb):
+    return send_GET_and_check(mb, GET_path='example', response_key='http_GET.example', response_html='"/example"') \
+       and send_GET_and_check(mb, GET_path='example/path', response_key='http_GET.example.path', response_html='"/example/path"')
 
-def http_test(connection, key, data):
-    connection = messageboard.get_connection()
-    result = test_converts_http_path_to_message(connection)
-    messageboard.post(connection, key='http_test_result', data=result)
+def http_test(mb, key, data):
+    mb = messageboard.MessageBoard()
+    result = test_converts_http_path_to_message(mb)
+    mb.post(key='http_test_result', data=result)
 
-connection = messageboard.get_connection()
-messageboard.bind(connection, key='component_ready.core')
-messageboard.start_consuming(connection, name='http_test', callback=http_test)
+mb = messageboard.MessageBoard()
+mb.bind(key='component_ready.core')
+mb.start_consuming(name='http_test', callback=http_test)

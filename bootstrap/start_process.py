@@ -4,7 +4,7 @@
 
 import messageboard, subprocess
     
-def start_process(connection, key, data):
+def start_process(mb, key, data):
     try:
         name, code = data['name'], data['code']
 
@@ -12,11 +12,11 @@ def start_process(connection, key, data):
         p.stdin.write(code)
         p.stdin.close()
     
-        messageboard.post(connection, key='process_started.%s' % name)
+        mb.post(key='process_started.%s' % name)
 
     except StandardError as e:
         print "Got exception %s" % str(e)
 
-connection = messageboard.get_connection()
-messageboard.bind(connection, key='start_process')
-messageboard.start_consuming(connection, name='start_process', callback=start_process)
+mb = messageboard.MessageBoard()
+mb.bind(key='start_process')
+mb.start_consuming(name='start_process', callback=start_process)

@@ -8,8 +8,8 @@ from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 class HTTPHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         incoming_key = 'http_GET%s' % urlparse.urlparse(self.path).path.replace('/','.')
-        connection = messageboard.get_connection()
-        messageboard.post(connection, key=incoming_key)
+        mb = messageboard.MessageBoard()
+        mb.post(key=incoming_key)
 
         self.send_response(200)
         self.send_header('Content-type', 'application/json')
@@ -18,9 +18,9 @@ class HTTPHandler(BaseHTTPRequestHandler):
         return
 
 try:
-    connection = messageboard.get_connection()
+    mb = messageboard.MessageBoard()    
     server = HTTPServer(('', 8080), HTTPHandler)
-    messageboard.post(connection, key='process_ready.http')
+    mb.post(key='process_ready.http')
     server.serve_forever()
 except KeyboardInterrupt:
     server.socket.close()

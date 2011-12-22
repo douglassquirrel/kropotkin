@@ -4,15 +4,14 @@
 
 import messageboard, unittest
 
-def hello(connection, key, data):
-    connection = messageboard.get_connection()
+def hello(mb, key, data):
     try:
         response = "Hello, %s!" % data
-        messageboard.post(connection, key="hello-response.%s" % data, data=response)
+        mb.post(key="hello-response.%s" % data, data=response)
 
     except StandardError as e:
         print "Got exception %s" % str(e)
 
-connection = messageboard.get_connection()
-messageboard.bind(connection, key='hello')
-messageboard.start_consuming(connection, name='hello', callback=hello)
+mb = messageboard.MessageBoard()
+mb.bind(key='hello')
+mb.start_consuming(name='hello', callback=hello)

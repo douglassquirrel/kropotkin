@@ -4,67 +4,63 @@
 
 import datetime, json, os, pika, time
 
-def _deserialise(s):
-    return json.loads(s) if not (s in [None, '']) else None
+class MessageBoard:
+    def _deserialise(self, s):
+        return json.loads(s) if not (s in [None, '']) else None
 
-def _serialise(x):
-    return json.dumps(x) if x != None else None
+    def _serialise(self, x):
+        return json.dumps(x) if x != None else None
 
-def get_connection():
-    connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
-    channel = connection.channel()
-    channel.exchange_declare(exchange='kropotkin', type='topic')
-    queue_name = channel.queue_declare(exclusive=True).method.queue
-    return {'channel': channel, 'queue_name': queue_name}
+    def __init__(self):
+        connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
+        self.channel = connection.channel()
+        self.channel.exchange_declare(exchange='kropotkin', type='topic')
+        self.queue_name = self.channel.queue_declare(exclusive=True).method.queue
     
-def bind(connection, key):
-    channel, queue_name = connection['channel'], connection['queue_name']
-    channel.queue_bind(exchange='kropotkin', queue=queue_name, routing_key=key)
+    def bind(self, key):
+        self.channel.queue_bind(exchange='kropotkin', queue=self.queue_name, routing_key=key)
 
-def start_consuming(connection, name, callback):
-    channel, queue_name = connection['channel'], connection['queue_name']
-    stop_key = 'stop.%s' % name
-    def dispatch_message(channel, method, properties, body):
-        key = method.routing_key
-        data = _deserialise(body)
-        if key == stop_key:
-            channel.stop_consuming()
-            post(connection, key="process_stopped", data=name)
+    def start_consuming(self, name, callback):
+        stop_key = 'stop.%s' % name
+        def dispatch_message(channel, method, properties, body):
+            key = method.routing_key
+            data = self._deserialise(body)
+            if key == stop_key:
+                channel.stop_consuming()
+                self.post(key="process_stopped", data=name)
+            else:
+                callback(self, key=key, data=data)
+    
+        self.bind(key=stop_key)
+                
+        self.channel.basic_consume(dispatch_message, queue=self.queue_name, no_ack=True)
+        self.post(key="process_ready.%s" % name)
+        self.channel.start_consuming()
+
+    def get_message(self):
+        method, properties, body = self.channel.basic_get(queue=self.queue_name, no_ack=True)
+        if method.NAME != 'Basic.GetEmpty':
+            data = self._deserialise(body)
+            return (method.routing_key, data)
         else:
-            callback(connection, key=key, data=data)
-    
-    bind(connection, key=stop_key)
+            return (None, None)
 
-    channel.basic_consume(dispatch_message, queue=queue_name, no_ack=True)
-    post(connection, key="process_ready.%s" % name)
-    channel.start_consuming()
-
-def get_message(connection):
-    channel, queue_name = connection['channel'], connection['queue_name']
-    method, properties, body = channel.basic_get(queue=queue_name, no_ack=True)
-    if method.NAME != 'Basic.GetEmpty':
-        data = _deserialise(body)
-        return (method.routing_key, data)
-    else:
+    def get_one_message(self, seconds_to_wait=10):
+        for i in range(seconds_to_wait * 100):
+            key, data = self.get_message()
+            if key != None:
+                return (key, data)
+            time.sleep(0.01)
         return (None, None)
 
-def get_one_message(connection, seconds_to_wait=10):
-    for i in range(seconds_to_wait * 100):
-        key, data = get_message(connection)
-        if key != None:
-            return (key, data)
-        time.sleep(0.01)
-    return (None, None)
-
-def post(connection, key, data=None):
-    body = _serialise(data)
-    channel = connection['channel']
-    channel.basic_publish(exchange='kropotkin', routing_key=key, body=body)
-    print "PID=%s %s: %s %s" % (os.getpid(), datetime.datetime.now(), key, body)
-
-def post_and_check(connection, post_key, response_key, post_data=None, response_data=None):
-    bind(connection, key=response_key)
-    post(connection, key=post_key, data=post_data)
-    actual_response_key, actual_response_data = get_one_message(connection)
-    return response_key == actual_response_key and (response_data==None or actual_response_data == response_data)
+    def post(self, key, data=None):
+        body = self._serialise(data)
+        self.channel.basic_publish(exchange='kropotkin', routing_key=key, body=body)
+        print "PID=%s %s: %s %s" % (os.getpid(), datetime.datetime.now(), key, body)
+        
+    def post_and_check(self, post_key, response_key, post_data=None, response_data=None):
+        self.bind(key=response_key)
+        self.post(key=post_key, data=post_data)
+        actual_response_key, actual_response_data = self.get_one_message()
+        return response_key == actual_response_key and (response_data==None or actual_response_data == response_data)
     

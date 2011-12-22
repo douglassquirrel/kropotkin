@@ -4,44 +4,44 @@
 
 import messageboard
 
-def start_echo_process(connection):
+def start_echo_process(mb):
     echo_code = """
 import messageboard
 
-def echo(connection, key, data):
-    messageboard.post(connection, key='__echo_response', data=data)
+def echo(mb, key, data):
+    mb.post(key='__echo_response', data=data)
 
-connection = messageboard.get_connection()
-messageboard.bind(connection, key='__echo')
-messageboard.start_consuming(connection, name='__echo_process', callback=echo)
+mb = messageboard.MessageBoard()
+mb.bind(key='__echo')
+mb.start_consuming(name='__echo_process', callback=echo)
 """    
-    messageboard.bind(connection, key='process_started.__echo_process')
-    messageboard.bind(connection, key='process_ready.__echo_process')
-    messageboard.post(connection, key='start_process', data={'name': '__echo_process', 'code': echo_code})
-    key1, data1 = messageboard.get_one_message(connection)
-    key2, data2 = messageboard.get_one_message(connection)
+    mb.bind(key='process_started.__echo_process')
+    mb.bind(key='process_ready.__echo_process')
+    mb.post(key='start_process', data={'name': '__echo_process', 'code': echo_code})
+    key1, data1 = mb.get_one_message()
+    key2, data2 = mb.get_one_message()
     return 'process_started.__echo_process' == key1 and 'process_ready.__echo_process' == key2
 
-def check_echo_response(connection):
+def check_echo_response(mb):
     text = 'I am a message to be echoed, hear me roar!'
-    return messageboard.post_and_check(connection, post_key='__echo', post_data=text, response_key='__echo_response', response_data=text)
+    return mb.post_and_check(post_key='__echo', post_data=text, response_key='__echo_response', response_data=text)
 
-def check_echo_process(connection):
-    result = start_echo_process(connection) \
-         and check_echo_response(connection)
-    messageboard.post(connection, key='stop.__echo_process')
+def check_echo_process(mb):
+    result = start_echo_process(mb) \
+         and check_echo_response(mb)
+    mb.post(key='stop.__echo_process')
     return result    
 
-def check_echo_process_after_bad_process(connection):
-    messageboard.post(connection, key='start_process', data="I am not a dictionary")
-    return check_echo_process(connection)
+def check_echo_process_after_bad_process(mb):
+    mb.post(key='start_process', data="I am not a dictionary")
+    return check_echo_process(mb)
     
-def start_process_test(connection, key, data):
-    connection = messageboard.get_connection()
-    result   = check_echo_process(connection) \
-           and check_echo_process_after_bad_process(connection)
-    messageboard.post(connection, key='start_process_test_result', data=result)
+def start_process_test(mb, key, data):
+    mb = messageboard.MessageBoard()
+    result   = check_echo_process(mb) \
+           and check_echo_process_after_bad_process(mb)
+    mb.post(key='start_process_test_result', data=result)
 
-connection = messageboard.get_connection()
-messageboard.bind(connection, key='component_ready.start_process')
-messageboard.start_consuming(connection, name='start_process_test', callback=start_process_test)
+mb = messageboard.MessageBoard()
+mb.bind(key='component_ready.start_process')
+mb.start_consuming(name='start_process_test', callback=start_process_test)
