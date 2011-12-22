@@ -4,10 +4,10 @@
 
 import datetime, json, os, pika, time
 
-def json_to_python(s):
+def _deserialise(s):
     return json.loads(s) if not (s in [None, '']) else None
 
-def python_to_json(x):
+def _serialise(x):
     return json.dumps(x) if x != None else None
 
 def get_connection():
@@ -26,7 +26,7 @@ def start_consuming(connection, name, callback):
     stop_key = 'stop.%s' % name
     def dispatch_message(channel, method, properties, body):
         key = method.routing_key
-        data = json_to_python(body)
+        data = _deserialise(body)
         if key == stop_key:
             channel.stop_consuming()
             post(connection, key="process_stopped", data=name)
@@ -43,7 +43,7 @@ def get_message(connection):
     channel, queue_name = connection['channel'], connection['queue_name']
     method, properties, body = channel.basic_get(queue=queue_name, no_ack=True)
     if method.NAME != 'Basic.GetEmpty':
-        data = json_to_python(body)
+        data = _deserialise(body)
         return (method.routing_key, data)
     else:
         return (None, None)
@@ -57,7 +57,7 @@ def get_one_message(connection, seconds_to_wait=10):
     return (None, None)
 
 def post(connection, key, data=None):
-    body = python_to_json(data)
+    body = _serialise(data)
     channel = connection['channel']
     channel.basic_publish(exchange='kropotkin', routing_key=key, body=body)
     print "PID=%s %s: %s %s" % (os.getpid(), datetime.datetime.now(), key, body)
