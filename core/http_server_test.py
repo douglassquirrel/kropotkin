@@ -19,11 +19,11 @@ def test_converts_http_path_to_message(mb):
     return send_GET_and_check(mb, GET_path='example', response_key='http_GET.example', response_html='"/example"') \
        and send_GET_and_check(mb, GET_path='example/path', response_key='http_GET.example.path', response_html='"/example/path"')
 
-def http_test(mb, key, data):
+def http_server_test(mb, key, data):
     mb = messageboard.MessageBoard()
     result = test_converts_http_path_to_message(mb)
-    mb.post(key='http_test_result', data=result)
+    mb.post(key='http_server_test_result', data=result)
 
 mb = messageboard.MessageBoard()
 mb.bind(key='component_ready.core')
-mb.start_consuming(name='http_test', callback=http_test)
+mb.start_consuming(name='http_server_test', callback=http_server_test)

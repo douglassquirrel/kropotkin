@@ -20,7 +20,7 @@ class HTTPHandler(BaseHTTPRequestHandler):
 try:
     mb = messageboard.MessageBoard()    
     server = HTTPServer(('', 8080), HTTPHandler)
-    mb.post(key='process_ready.http')
+    mb.post(key='process_ready.http_server')
     server.serve_forever()
 except KeyboardInterrupt:
     server.socket.close()

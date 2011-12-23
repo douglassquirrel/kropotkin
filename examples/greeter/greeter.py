@@ -4,14 +4,14 @@
 
 import messageboard, unittest
 
-def hello(mb, key, data):
+def greet(mb, key, data):
     try:
         response = "Hello, %s!" % data
-        mb.post(key="hello-response.%s" % data, data=response)
+        mb.post(key="greet-response.%s" % data, data=response)
 
     except StandardError as e:
         print "Got exception %s" % str(e)
 
 mb = messageboard.MessageBoard()
-mb.bind(key='hello')
-mb.start_consuming(name='hello', callback=hello)
+mb.bind(key='greet')
+mb.start_consuming(name='greeter', callback=greet)

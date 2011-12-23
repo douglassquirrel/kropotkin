@@ -19,4 +19,4 @@ def start_process(mb, key, data):
 
 mb = messageboard.MessageBoard()
 mb.bind(key='start_process')
-mb.start_consuming(name='start_process', callback=start_process)
+mb.start_consuming(name='process_starter', callback=start_process)
