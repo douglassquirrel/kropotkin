@@ -67,5 +67,5 @@ def collector_test(mb, key, data):
     mb.post(key='collector_test_result', data=result)
 
 mb = messageboard.MessageBoard()
-mb.bind(key='component_ready.collector')
+mb.bind(key='component_ready.core')
 mb.start_consuming(name='collector_test', callback=collector_test)
