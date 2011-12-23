@@ -21,7 +21,8 @@ mb.start_consuming(name='__echoer', callback=echo)
     mb.post(key='start_process', data={'name': '__echoer', 'code': echo_code})
     key1, data1 = mb.get_one_message()
     key2, data2 = mb.get_one_message()
-    return 'process_started.__echoer' == key1 and 'process_ready.__echoer' == key2
+    return 'process_started.__echoer' == key1 and 'id' in data1 \
+       and 'process_ready.__echoer' == key2 and 'id' in data2
 
 def check_echo_response(mb):
     text = 'I am a message to be echoed, hear me roar!'
