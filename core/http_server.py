@@ -18,7 +18,6 @@ class HTTPHandler(BaseHTTPRequestHandler):
         return
 
 try:
-    pid = 0
     mb = messageboard.MessageBoard()    
     server = HTTPServer(('', 8080), HTTPHandler)
     mb.post(key='process_ready.http_server')
