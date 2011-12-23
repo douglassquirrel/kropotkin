@@ -25,18 +25,18 @@ def collect_response(mb, message_key, response_key):
     return key1==response_key and key2==done_key
 
 def collect_one_message():
-    mb = messageboard.MessageBoard()
+    mb = messageboard.MessageBoard(pid)
     register_messages(mb, prefix='c1m', number=1)
     return collect_response(mb, message_key='c1m_0', response_key='c1m_test_messages_received')
 
 def collect_two_messages():
-    mb = messageboard.MessageBoard()
+    mb = messageboard.MessageBoard(pid)
     register_messages(mb, prefix='c2m', number=2)
     return no_collect_response(mb, message_key='c2m_0') \
        and collect_response(mb, message_key='c2m_1', response_key='c2m_test_messages_received')
 
 def collect_interleaved():
-    mb = messageboard.MessageBoard()
+    mb = messageboard.MessageBoard(pid)
     register_messages(mb, prefix='ci1', number=2)
     register_messages(mb, prefix='ci2', number=2)
     return no_collect_response(mb, message_key='ci1_0') \
@@ -45,13 +45,13 @@ def collect_interleaved():
        and collect_response(mb, message_key='ci2_1', response_key='ci2_test_messages_received') \
 
 def collect_only_once():
-    mb = messageboard.MessageBoard()
+    mb = messageboard.MessageBoard(pid)
     register_messages(mb, prefix='c1x', number=1)
     return collect_response(mb, message_key='c1x_0', response_key='c1x_test_messages_received') \
        and no_collect_response(mb, message_key='c1x_0')
 
 def collect_twice():
-    mb = messageboard.MessageBoard()
+    mb = messageboard.MessageBoard(pid)
     register_messages(mb, prefix='c2x', number=1)
     if False == collect_response(mb, message_key='c2x_0', response_key='c2x_test_messages_received'):
         return False
@@ -66,6 +66,7 @@ def collector_test(mb, key, data):
            and collect_twice()
     mb.post(key='collector_test_result', data=result)
 
-mb = messageboard.MessageBoard()
+pid = 0
+mb = messageboard.MessageBoard(pid)
 mb.bind(key='component_ready.collector')
 mb.start_consuming(name='collector_test', callback=collector_test)

@@ -31,6 +31,7 @@ def collect(mb, key, data):
     except StandardError as e:
         print "Got exception %s" % str(e)
 
-mb = messageboard.MessageBoard()
+pid = 0
+mb = messageboard.MessageBoard(pid)
 mb.bind(key='collect')
 mb.start_consuming(name='collector', callback=collect)

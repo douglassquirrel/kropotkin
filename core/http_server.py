@@ -8,7 +8,7 @@ from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 class HTTPHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         incoming_key = 'http_GET%s' % urlparse.urlparse(self.path).path.replace('/','.')
-        mb = messageboard.MessageBoard()
+        mb = messageboard.MessageBoard(pid)
         mb.post(key=incoming_key)
 
         self.send_response(200)
@@ -18,7 +18,8 @@ class HTTPHandler(BaseHTTPRequestHandler):
         return
 
 try:
-    mb = messageboard.MessageBoard()    
+    pid = 0
+    mb = messageboard.MessageBoard(pid)    
     server = HTTPServer(('', 8080), HTTPHandler)
     mb.post(key='process_ready.http_server')
     server.serve_forever()

@@ -20,10 +20,11 @@ def test_converts_http_path_to_message(mb):
        and send_GET_and_check(mb, GET_path='example/path', response_key='http_GET.example.path', response_html='"/example/path"')
 
 def http_server_test(mb, key, data):
-    mb = messageboard.MessageBoard()
+    mb = messageboard.MessageBoard(pid)
     result = test_converts_http_path_to_message(mb)
     mb.post(key='http_server_test_result', data=result)
 
-mb = messageboard.MessageBoard()
+pid = 0
+mb = messageboard.MessageBoard(pid)
 mb.bind(key='component_ready.core')
 mb.start_consuming(name='http_server_test', callback=http_server_test)

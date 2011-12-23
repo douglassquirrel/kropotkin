@@ -17,6 +17,7 @@ def start_process(mb, key, data):
     except StandardError as e:
         print "Got exception %s" % str(e)
 
-mb = messageboard.MessageBoard()
+pid = 0
+mb = messageboard.MessageBoard(pid)
 mb.bind(key='start_process')
 mb.start_consuming(name='process_starter', callback=start_process)

@@ -11,7 +11,8 @@ class MessageBoard:
     def _serialise(self, x):
         return json.dumps(x) if x != None else None
 
-    def __init__(self):
+    def __init__(self, pid):
+        self.pid = pid
         connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
         self.channel = connection.channel()
         self.channel.exchange_declare(exchange='kropotkin', type='topic')
@@ -27,14 +28,14 @@ class MessageBoard:
             data = self._deserialise(body)
             if key == stop_key:
                 channel.stop_consuming()
-                self.post(key="process_stopped", data=name)
+                self.post(key="process_stopped", data={'name': name, 'id': self.pid})
             else:
                 callback(self, key=key, data=data)
     
         self.bind(key=stop_key)
                 
         self.channel.basic_consume(dispatch_message, queue=self.queue_name, no_ack=True)
-        self.post(key="process_ready.%s" % name)
+        self.post(key="process_ready.%s" % name, data={'id': self.pid})
         self.channel.start_consuming()
 
     def get_message(self):
