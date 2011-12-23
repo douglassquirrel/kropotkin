@@ -8,7 +8,7 @@ def start_process(mb, key, data):
     try:
         name, code = data['name'], data['code']
 
-        pid = 2
+        pid = 1000
         p = subprocess.Popen(args=["python", "-", str(pid)], stdin=subprocess.PIPE)
         p.stdin.write(code)
         p.stdin.close()
