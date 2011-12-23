@@ -8,16 +8,16 @@ def start_process(mb, key, data):
     try:
         name, code = data['name'], data['code']
 
-        p = subprocess.Popen(args="python", stdin=subprocess.PIPE)
+        pid = 2
+        p = subprocess.Popen(args=["python", "-", str(pid)], stdin=subprocess.PIPE)
         p.stdin.write(code)
         p.stdin.close()
     
-        mb.post(key='process_started.%s' % name)
+        mb.post(key='process_started.%s' % name, data={'id': pid})
 
     except StandardError as e:
         print "Got exception %s" % str(e)
 
-pid = 0
-mb = messageboard.MessageBoard(pid)
+mb = messageboard.MessageBoard()
 mb.bind(key='start_process')
 mb.start_consuming(name='process_starter', callback=start_process)

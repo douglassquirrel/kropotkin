@@ -12,8 +12,7 @@ import messageboard
 def echo(mb, key, data):
     mb.post(key='__echo_response', data=data)
 
-pid = 0
-mb = messageboard.MessageBoard(pid)
+mb = messageboard.MessageBoard()
 mb.bind(key='__echo')
 mb.start_consuming(name='__echoer', callback=echo)
 """    
@@ -39,12 +38,12 @@ def check_echo_process_after_bad_process(mb):
     return check_echo_process(mb)
     
 def process_starter_test(mb, key, data):
-    mb = messageboard.MessageBoard(pid)
+    mb = messageboard.MessageBoard()
     result   = check_echo_process(mb) \
            and check_echo_process_after_bad_process(mb)
     mb.post(key='process_starter_test_result', data=result)
 
 pid=0
-mb = messageboard.MessageBoard(pid)
+mb = messageboard.MessageBoard()
 mb.bind(key='component_ready.process_starter')
 mb.start_consuming(name='process_starter_test', callback=process_starter_test)

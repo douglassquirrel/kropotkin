@@ -13,6 +13,6 @@ def greet(mb, key, data):
         print "Got exception %s" % str(e)
 
 pid = 0
-mb = messageboard.MessageBoard(pid)
+mb = messageboard.MessageBoard()
 mb.bind(key='greet')
 mb.start_consuming(name='greeter', callback=greet)

@@ -2,7 +2,7 @@
 # This program comes with ABSOLUTELY NO WARRANTY. 
 # It is free software, and you are welcome to redistribute it under certain conditions; see the GPLv3 license in the file LICENSE for details.
 
-import datetime, json, os, pika, time
+import datetime, json, os, pika, sys, time
 
 class MessageBoard:
     def _deserialise(self, s):
@@ -11,8 +11,8 @@ class MessageBoard:
     def _serialise(self, x):
         return json.dumps(x) if x != None else None
 
-    def __init__(self, pid):
-        self.pid = pid
+    def __init__(self, pid=None):
+        self.pid = int(sys.argv[1]) if None == pid else pid
         connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
         self.channel = connection.channel()
         self.channel.exchange_declare(exchange='kropotkin', type='topic')
