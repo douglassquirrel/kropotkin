@@ -15,9 +15,13 @@ class TestMessageBoard(unittest.TestCase):
             time.sleep(0.01)
         self.fail('Did not get expected message key=%s, body=%s' % (expected_key, expected_body))
 
-    def _post_and_check(self, mb, title):
-        mb.post(title=title)
-        self._wait_for_message_and_check(expected_key='post', expected_body=json.dumps({'title': title}))
+    def _post_and_check_without_content(self, mb, key):
+        mb.post(key=key)
+        self._wait_for_message_and_check(expected_key='mb.post', expected_body=json.dumps({'key': key}))
+
+    def _post_and_check_with_content(self, mb, key, content):
+        mb.post(key=key, content=content)
+        self._wait_for_message_and_check(expected_key='mb.post', expected_body=json.dumps({'key': key, 'content': content}))
 
     def setUp(self):
         connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
@@ -25,11 +29,16 @@ class TestMessageBoard(unittest.TestCase):
         self.channel.exchange_declare(exchange='kropotkin', type='topic')
         self.queue_name = self.channel.queue_declare(exclusive=True).method.queue
 
-    def test_post_without_data(self):
-        self.channel.queue_bind(exchange='kropotkin', queue=self.queue_name, routing_key='post')        
+    def test_post_without_content(self):
+        self.channel.queue_bind(exchange='kropotkin', queue=self.queue_name, routing_key='mb.post')        
         mb = mb2.MessageBoard()
-        self._post_and_check(mb, title='_test_title') 
-        self._post_and_check(mb, title='_another_test_title') 
+        self._post_and_check_without_content(mb, key='_test_key') 
+        self._post_and_check_without_content(mb, key='_another_test_key') 
+
+    def test_post_with_content(self):
+        self.channel.queue_bind(exchange='kropotkin', queue=self.queue_name, routing_key='mb.post')        
+        mb = mb2.MessageBoard()
+        self._post_and_check_with_content(mb, key='_test_key', content='_test_content') 
 
 if __name__ == '__main__':
     unittest.main()

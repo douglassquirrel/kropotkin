@@ -9,5 +9,10 @@ class MessageBoard:
         connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
         self.channel = connection.channel()
 
-    def post(self, title):
-        self.channel.basic_publish(exchange='kropotkin', routing_key='post', body=json.dumps({'title': title}))
+    def post(self, key, content=None):
+        if None == content:
+            body=json.dumps({'key': key})
+        else:
+            body=json.dumps({'key': key, 'content': content})
+
+        self.channel.basic_publish(exchange='kropotkin', routing_key='mb.post', body=body)
