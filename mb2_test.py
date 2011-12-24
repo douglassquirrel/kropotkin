@@ -12,17 +12,17 @@ class TestMessageBoard(unittest.TestCase):
         self.queue_name = self.channel.queue_declare(exclusive=True).method.queue
         self.mb = mb2.MessageBoard()
 
-    def test_post_without_content(self):
+    def test_posts_without_content(self):
         self.channel.queue_bind(exchange='kropotkin', queue=self.queue_name, routing_key='mb.post')        
         self._post_and_check_without_content(key='_test_key') 
         self._post_and_check_without_content(key='_another_test_key') 
 
-    def test_post_with_content(self):
+    def test_posts_with_content(self):
         self.channel.queue_bind(exchange='kropotkin', queue=self.queue_name, routing_key='mb.post')        
         self._post_and_check_with_content(key='_test_key', content='_test_content') 
         self._post_and_check_with_content(key='_another_test_key', content='_another_test_content') 
 
-    def test_watch_for_and_get_one_message(self):
+    def test_watches_for_and_gets_one_message(self):
         mb = mb2.MessageBoard()
         self._watch_for_send_and_check(key='_test_key', content={'datum': '_test_datum'})
         self._watch_for_send_and_check(key='another_test_key', content={'datum': 'another_test_datum'})
@@ -32,6 +32,18 @@ class TestMessageBoard(unittest.TestCase):
         received_key, received_content = self.mb.get_one_message(queue)
         self.assertEqual(None, received_key)
         self.assertEqual(None, received_content)
+
+    def test_does_not_wait_if_message_ready(self):
+        time_to_run = self._time_get_one_message(send_message=True)
+        self.assertTrue(time_to_run < 0.2, 'Time to run of %s was too long' % time_to_run)
+
+    def test_waits_one_second_by_default_before_giving_up(self):
+        time_to_run = self._time_get_one_message(send_message=False)
+        self.assertTrue(0.8 < time_to_run < 1.2, 'Time to run of %s was not about 1 second' % time_to_run)
+
+    def test_waits_given_time_before_giving_up(self):
+        time_to_run = self._time_get_one_message(send_message=False, seconds_to_wait=2)
+        self.assertTrue(1.8 < time_to_run < 2.2, 'Time to run of %s was not about 2 seconds' % time_to_run)
 
     def _wait_for_message_and_check(self, expected_key, expected_body, seconds_to_wait=1):
         for i in range(seconds_to_wait * 100):
@@ -57,6 +69,18 @@ class TestMessageBoard(unittest.TestCase):
         received_key, received_content = self.mb.get_one_message(queue)
         self.assertEqual(key, received_key)
         self.assertEqual(content, received_content)
+
+    def _time_get_one_message(self, send_message, seconds_to_wait=None):
+        queue = self.mb.watch_for(key='_test_key') 
+        if send_message:
+            self.channel.basic_publish(exchange='kropotkin', routing_key='_test_key', body=json.dumps('test_content'))
+        time_before = time.time()
+        if seconds_to_wait:
+            self.mb.get_one_message(queue, seconds_to_wait)
+        else:
+            self.mb.get_one_message(queue)
+        time_to_run = time.time() - time_before
+        return time_to_run
 
 if __name__ == '__main__':
     unittest.main()
