@@ -23,9 +23,8 @@ class TestMessageBoard(unittest.TestCase):
         self._post_and_check_with_content(key='_another_test_key', content='_another_test_content') 
 
     def test_watches_for_and_gets_one_message(self):
-        mb = mb2.MessageBoard()
         self._watch_for_send_and_check(key='_test_key', content={'datum': '_test_datum'})
-        self._watch_for_send_and_check(key='another_test_key', content={'datum': 'another_test_datum'})
+        self._watch_for_send_and_check(key='another_test_key', content=None)
 
     def test_returns_none_if_no_message(self):
         queue = self.mb.watch_for(key='_test_key') 
@@ -44,6 +43,34 @@ class TestMessageBoard(unittest.TestCase):
     def test_waits_given_time_before_giving_up(self):
         time_to_run = self._time_get_one_message(send_message=False, seconds_to_wait=2)
         self.assertTrue(1.8 < time_to_run < 2.2, 'Time to run of %s was not about 2 seconds' % time_to_run)
+
+    def test_adds_a_key_to_watch_for(self):
+        keys = ['_test_key', '_test_key_two']
+        queue = self.mb.watch_for(key=keys[0]) 
+        self.mb.watch_for(key=keys[1], queue=queue)
+        for key in keys:
+            self.channel.basic_publish(exchange='kropotkin', routing_key=key, body=None)
+
+        received_keys = [self.mb.get_one_message(queue)[0] for i in range(2)]
+        self.assertEqual(keys, received_keys)
+
+    def test_receives_until_stopped(self):
+        received_messages = []
+        def callback(mb, key, content):
+            if 'stop' == key:
+                mb.stop_receive_loop()
+            else:
+                received_messages.append((key, content))
+
+        queue = self.mb.watch_for(key='_test_key')
+        self.mb.watch_for(key='stop', queue=queue)
+        data = ['_datum1', '_datum2', '_datum3']
+        for datum in data:
+            self.channel.basic_publish(exchange='kropotkin', routing_key='_test_key', body=json.dumps(datum))
+        self.channel.basic_publish(exchange='kropotkin', routing_key='stop', body=None)
+        
+        self.mb.start_receive_loop(queue=queue, callback=callback)
+        self.assertEqual([('_test_key', datum) for datum in data], received_messages)
 
     def _wait_for_message_and_check(self, expected_key, expected_body, seconds_to_wait=1):
         for i in range(seconds_to_wait * 100):
@@ -65,7 +92,8 @@ class TestMessageBoard(unittest.TestCase):
 
     def _watch_for_send_and_check(self, key, content):
         queue = self.mb.watch_for(key=key) 
-        self.channel.basic_publish(exchange='kropotkin', routing_key=key, body=json.dumps(content))
+        body = json.dumps(content) if None != content else None
+        self.channel.basic_publish(exchange='kropotkin', routing_key=key, body=body)
         received_key, received_content = self.mb.get_one_message(queue)
         self.assertEqual(key, received_key)
         self.assertEqual(content, received_content)
