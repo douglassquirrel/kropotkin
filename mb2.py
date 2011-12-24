@@ -5,6 +5,9 @@
 import json, pika, time
 
 class MessageBoard:
+    def _serialise(self, c):
+        return json.dumps(c) if c != None else None
+
     def _deserialise(self, s):
         return json.loads(s) if not (s in [None, '']) else None
 
@@ -13,11 +16,7 @@ class MessageBoard:
         self.channel = connection.channel()
 
     def post(self, key, content=None):
-        if None == content:
-            body=json.dumps({'key': key})
-        else:
-            body=json.dumps({'key': key, 'content': content})
-        self.channel.basic_publish(exchange='kropotkin', routing_key='mb.post', body=body)
+        self.channel.basic_publish(exchange='kropotkin', routing_key=key, body=self._serialise(content))
 
     def watch_for(self, key, queue=None):
         if not queue:

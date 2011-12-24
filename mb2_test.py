@@ -13,12 +13,14 @@ class TestMessageBoard(unittest.TestCase):
         self.mb = mb2.MessageBoard()
 
     def test_posts_without_content(self):
-        self.channel.queue_bind(exchange='kropotkin', queue=self.queue_name, routing_key='mb.post')        
+        self.channel.queue_bind(exchange='kropotkin', queue=self.queue_name, routing_key='_test_key')
+        self.channel.queue_bind(exchange='kropotkin', queue=self.queue_name, routing_key='_another_test_key')        
         self._post_and_check_without_content(key='_test_key') 
         self._post_and_check_without_content(key='_another_test_key') 
 
     def test_posts_with_content(self):
-        self.channel.queue_bind(exchange='kropotkin', queue=self.queue_name, routing_key='mb.post')        
+        self.channel.queue_bind(exchange='kropotkin', queue=self.queue_name, routing_key='_test_key')
+        self.channel.queue_bind(exchange='kropotkin', queue=self.queue_name, routing_key='_another_test_key')        
         self._post_and_check_with_content(key='_test_key', content='_test_content') 
         self._post_and_check_with_content(key='_another_test_key', content='_another_test_content') 
 
@@ -84,11 +86,11 @@ class TestMessageBoard(unittest.TestCase):
 
     def _post_and_check_without_content(self, key):
         self.mb.post(key=key)
-        self._wait_for_message_and_check(expected_key='mb.post', expected_body=json.dumps({'key': key}))
+        self._wait_for_message_and_check(expected_key=key, expected_body='')
 
     def _post_and_check_with_content(self, key, content):
         self.mb.post(key=key, content=content)
-        self._wait_for_message_and_check(expected_key='mb.post', expected_body=json.dumps({'key': key, 'content': content}))
+        self._wait_for_message_and_check(expected_key=key, expected_body=json.dumps(content))
 
     def _watch_for_send_and_check(self, key, content):
         queue = self.mb.watch_for(key=key) 
