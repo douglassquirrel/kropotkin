@@ -1,6 +1,9 @@
 # Copyright Douglas Squirrel 2011
 # This program comes with ABSOLUTELY NO WARRANTY. 
 # It is free software, and you are welcome to redistribute it under certain conditions; see the GPLv3 license in the file LICENSE for details.
+# Copyright Douglas Squirrel 2011
+# This program comes with ABSOLUTELY NO WARRANTY. 
+# It is free software, and you are welcome to redistribute it under certain conditions; see the GPLv3 license in the file LICENSE for details.
 
 import json, pika, time
 
@@ -36,8 +39,14 @@ class MessageBoard:
         def dispatch_message(channel, method, properties, body):
             callback(self, key=method.routing_key, content=self._deserialise(body))
     
-        self.channel.basic_consume(dispatch_message, queue=queue, no_ack=True)
+        self.channel.basic_consume(consumer_callback=dispatch_message, queue=queue, no_ack=True)
         self.channel.start_consuming()
 
     def stop_receive_loop(self):
         self.channel.stop_consuming()
+
+    def post_and_check(self, post_key, response_key, post_content=None, response_content=None):
+        queue = self.watch_for(key=response_key)
+        self.post(key=post_key, content=post_content)
+        actual_response_key, actual_response_content = self.get_one_message(queue)
+        return response_key == actual_response_key and (response_content == None or response_content == actual_response_content)
