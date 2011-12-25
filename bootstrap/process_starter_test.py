@@ -12,12 +12,11 @@ def echo(mb, key, content):
     mb.post(key='__echo_response', content=content)
 
 mb = messageboard.MessageBoard()
-queue = mb.watch_for(key='__echo')
+queue = mb.watch_for(keys=['__echo'])
 mb.post(key='process_ready.__echoer')
 mb.start_receive_loop(queue=queue, callback=echo)
 """    
-    queue = mb.watch_for(key='process_started.__echoer')
-    mb.watch_for(key='process_ready.__echoer', queue=queue)
+    queue = mb.watch_for(keys=['process_started.__echoer', 'process_ready.__echoer'])
     mb.post(key='start_process', content={'name': '__echoer', 'code': echo_code})
     key1, data1 = mb.get_one_message(queue)
     key2, data2 = mb.get_one_message(queue)
@@ -43,6 +42,6 @@ def process_starter_test(mb, key, content):
     mb.post(key='process_starter_test_result', content=result)
 
 mb = messageboard.MessageBoard()
-queue = mb.watch_for(key='component_ready.process_starter')
+queue = mb.watch_for(keys=['component_ready.process_starter'])
 mb.post(key='process_ready.process_starter_test')
 mb.start_receive_loop(queue=queue, callback=process_starter_test)

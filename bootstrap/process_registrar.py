@@ -16,6 +16,6 @@ def register_process(mb, key, content):
 
 pid = 1000
 mb = messageboard.MessageBoard()
-queue = mb.watch_for(key='register_process')
+queue = mb.watch_for(keys=['register_process'])
 mb.post(key='process_ready.process_registrar')
 mb.start_receive_loop(queue=queue, callback=register_process)

@@ -15,8 +15,7 @@ def no_collect_response(mb, message_key):
 
 def collect_response(mb, message_key, response_key):
     done_key = "collector_done_processing.%s" % message_key
-    queue = mb.watch_for(key=response_key)
-    mb.watch_for(key=done_key, queue=queue)
+    queue = mb.watch_for(keys=[response_key, done_key])
     mb.post(key=message_key)
 
     key1, data1 = mb.get_one_message(queue)
@@ -62,6 +61,6 @@ def collector_test(mb, key, content):
     mb.post(key='collector_test_result', content=result)
 
 mb = messageboard.MessageBoard()
-queue = mb.watch_for(key='component_ready.core')
+queue = mb.watch_for(keys=['component_ready.core'])
 mb.post(key='process_ready.collector_test')
 mb.start_receive_loop(queue, callback=collector_test)

@@ -11,8 +11,7 @@ def collect(mb, key, content):
     try:
         if key == 'collect':
             messages, response = map(str, content['messages']), content['response']
-            for message in messages:
-                mb.watch_for(key=message, queue=queue)
+            mb.watch_for(keys=messages, queue=queue)
             statuses = dict(map(lambda x: (x, False), messages))
             collections.append({'statuses': statuses, 'response': response})
             mb.post(key='ready_to_collect.%s' % response)
@@ -32,6 +31,6 @@ def collect(mb, key, content):
         print "Got exception %s" % str(e)
 
 mb = messageboard.MessageBoard()
-queue = mb.watch_for(key='collect')
+queue = mb.watch_for(keys=['collect'])
 mb.post(key='process_ready.collector')
 mb.start_receive_loop(queue, callback=collect)

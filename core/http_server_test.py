@@ -5,7 +5,7 @@
 import messageboard, urllib2
 
 def send_GET_and_check(mb, GET_path, response_key, response_html, response_data=None):
-    queue = mb.watch_for(key=response_key)
+    queue = mb.watch_for(keys=[response_key])
     response = urllib2.urlopen('http://localhost:8080/%s' % GET_path)
     actual_html = response.read()
     content_type = response.info().gettype()
@@ -24,6 +24,6 @@ def http_server_test(mb, key, content):
     mb.post(key='http_server_test_result', content=result)
 
 mb = messageboard.MessageBoard()
-queue = mb.watch_for(key='component_ready.core')
+queue = mb.watch_for(keys=['component_ready.core'])
 mb.post('process_ready.http_server_test')
 mb.start_receive_loop(queue, callback=http_server_test)

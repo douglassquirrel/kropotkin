@@ -17,15 +17,17 @@ class MessageBoard:
     def __init__(self):
         connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
         self.channel = connection.channel()
+        self.channel.exchange_declare(exchange='kropotkin', type='topic')
 
     def post(self, key, content=None):
         self.channel.basic_publish(exchange='kropotkin', routing_key=key, body=self._serialise(content))
         print "PID=%s %s: %s %s" % (os.getpid(), datetime.datetime.now(), key, content)
 
-    def watch_for(self, key, queue=None):
+    def watch_for(self, keys, queue=None):
         if not queue:
             queue = self.channel.queue_declare(exclusive=True).method.queue
-        self.channel.queue_bind(exchange='kropotkin', queue=queue, routing_key=key)
+        for key in keys:
+            self.channel.queue_bind(exchange='kropotkin', queue=queue, routing_key=key)
         return queue
 
     def get_one_message(self, queue, seconds_to_wait=1):
@@ -47,7 +49,7 @@ class MessageBoard:
         self.channel.stop_consuming()
 
     def post_and_check(self, post_key, response_key, post_content=None, response_content=None):
-        queue = self.watch_for(key=response_key)
+        queue = self.watch_for(keys=[response_key])
         self.post(key=post_key, content=post_content)
         actual_response_key, actual_response_content = self.get_one_message(queue)
         return response_key == actual_response_key and (response_content == None or response_content == actual_response_content)

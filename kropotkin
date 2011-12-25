@@ -28,7 +28,7 @@ def start(mb, file_path, file_name):
 def start_and_check(mb, file_path, starter):
     file_name = basename_without_extension(file_path)
     ready_key = 'process_ready.%s' % file_name
-    queue = mb.watch_for(key=ready_key)
+    queue = mb.watch_for(keys=[ready_key])
     starter(mb, file_path, file_name)
     key, data = mb.get_one_message(queue)
     return ready_key == key

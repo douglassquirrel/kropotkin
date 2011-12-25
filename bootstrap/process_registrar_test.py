@@ -11,7 +11,7 @@ def _register_and_get_id(mb):
     global index
     request_identifier = "%s" % index
     index = index + 1
-    queue = mb.watch_for(key='process_registered.%s' % request_identifier)
+    queue = mb.watch_for(keys=['process_registered.%s' % request_identifier])
     mb.post(key='register_process', content=request_identifier)
     key, id = mb.get_one_message(queue)
     return id
@@ -29,6 +29,6 @@ def process_registrar_test(mb, key, content):
 
 mb = messageboard.MessageBoard()
 index = 0
-queue = mb.watch_for(key='component_ready.process_registrar')
+queue = mb.watch_for(keys=['component_ready.process_registrar'])
 mb.post(key='process_ready.process_registrar_test')
 mb.start_receive_loop(queue=queue, callback=process_registrar_test)

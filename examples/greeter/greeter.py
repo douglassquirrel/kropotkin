@@ -13,6 +13,6 @@ def greet(mb, key, content):
         print "Got exception %s" % str(e)
 
 mb = messageboard.MessageBoard()
-queue = mb.watch_for(key='greet')
+queue = mb.watch_for(keys=['greet'])
 mb.post(key='process_ready.greeter')
 mb.start_receive_loop(queue, callback=greet)

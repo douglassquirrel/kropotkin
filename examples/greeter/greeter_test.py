@@ -13,6 +13,6 @@ def greeter_test(mb, key, content):
     mb.post(key='greeter_test_result', content=result)
 
 mb = messageboard.MessageBoard()
-queue = mb.watch_for(key='component_ready.greeter')
+queue = mb.watch_for(keys=['component_ready.greeter'])
 mb.post(key='process_ready.greeter_test')
 mb.start_receive_loop(queue, callback=greeter_test)

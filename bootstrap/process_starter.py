@@ -19,6 +19,6 @@ def start_process(mb, key, content):
         print "Got exception %s" % str(e)
 
 mb = messageboard.MessageBoard()
-queue = mb.watch_for(key='start_process')
+queue = mb.watch_for(keys=['start_process'])
 mb.post(key='process_ready.process_starter')
 mb.start_receive_loop(queue=queue, callback=start_process)
