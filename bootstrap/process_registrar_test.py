@@ -9,11 +9,11 @@ def _no_duplicates(alist):
 
 def _register_and_get_id(mb):
     global index
-    request_identifier = "%s.%s" % (mb.pid, index)
+    request_identifier = "%s" % index
     index = index + 1
-    mb.bind(key='process_registered.%s' % request_identifier)
-    mb.post(key='register_process', data=request_identifier)
-    key, id = mb.get_one_message()
+    queue = mb.watch_for(key='process_registered.%s' % request_identifier)
+    mb.post(key='register_process', content=request_identifier)
+    key, id = mb.get_one_message(queue)
     return id
 
 def gives_id(mb):
@@ -23,12 +23,12 @@ def gives_unique_ids(mb):
     ids = [_register_and_get_id(mb) for i in range(3)]
     return _no_duplicates(ids)
 
-def process_registrar_test(mb, key, data):
-    mb = messageboard.MessageBoard()
+def process_registrar_test(mb, key, content):
     result = gives_id(mb) and gives_unique_ids(mb)
-    mb.post(key='process_registrar_test_result', data=result)
+    mb.post(key='process_registrar_test_result', content=result)
 
 mb = messageboard.MessageBoard()
 index = 0
-mb.bind(key='component_ready.process_registrar')
-mb.start_consuming(name='process_registrar_test', callback=process_registrar_test)
+queue = mb.watch_for(key='component_ready.process_registrar')
+mb.post(key='process_ready.process_registrar_test')
+mb.start_receive_loop(queue=queue, callback=process_registrar_test)

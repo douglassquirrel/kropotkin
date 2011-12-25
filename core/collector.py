@@ -6,13 +6,13 @@ import messageboard
 
 global collections
 collections = []
-def collect(mb, key, data):
-    global collections
+def collect(mb, key, content):
+    global collections, queue
     try:
         if key == 'collect':
-            messages, response = map(str, data['messages']), data['response']
+            messages, response = map(str, content['messages']), content['response']
             for message in messages:
-                mb.bind(key=message)
+                mb.watch_for(key=message, queue=queue)
             statuses = dict(map(lambda x: (x, False), messages))
             collections.append({'statuses': statuses, 'response': response})
             mb.post(key='ready_to_collect.%s' % response)
@@ -31,7 +31,7 @@ def collect(mb, key, data):
     except StandardError as e:
         print "Got exception %s" % str(e)
 
-pid = 0
 mb = messageboard.MessageBoard()
-mb.bind(key='collect')
-mb.start_consuming(name='collector', callback=collect)
+queue = mb.watch_for(key='collect')
+mb.post(key='process_ready.collector')
+mb.start_receive_loop(queue, callback=collect)

@@ -1,67 +1,53 @@
 # Copyright Douglas Squirrel 2011
 # This program comes with ABSOLUTELY NO WARRANTY. 
 # It is free software, and you are welcome to redistribute it under certain conditions; see the GPLv3 license in the file LICENSE for details.
+# Copyright Douglas Squirrel 2011
+# This program comes with ABSOLUTELY NO WARRANTY. 
+# It is free software, and you are welcome to redistribute it under certain conditions; see the GPLv3 license in the file LICENSE for details.
 
-import datetime, json, os, pika, sys, time
+import datetime, json, os, pika, time
 
 class MessageBoard:
+    def _serialise(self, c):
+        return json.dumps(c) if c != None else None
+
     def _deserialise(self, s):
         return json.loads(s) if not (s in [None, '']) else None
 
-    def _serialise(self, x):
-        return json.dumps(x) if x != None else None
-
-    def __init__(self, pid=None):
-        self.pid = int(sys.argv[1]) if None == pid else pid
+    def __init__(self):
         connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
         self.channel = connection.channel()
-        self.channel.exchange_declare(exchange='kropotkin', type='topic')
-        self.queue_name = self.channel.queue_declare(exclusive=True).method.queue
-    
-    def bind(self, key):
-        self.channel.queue_bind(exchange='kropotkin', queue=self.queue_name, routing_key=key)
 
-    def start_consuming(self, name, callback):
-        stop_key = 'stop.%s' % name
-        def dispatch_message(channel, method, properties, body):
-            key = method.routing_key
-            data = self._deserialise(body)
-            if key == stop_key:
-                channel.stop_consuming()
-                self.post(key="process_stopped", data={'name': name, 'id': self.pid})
-            else:
-                callback(self, key=key, data=data)
-    
-        self.bind(key=stop_key)
-                
-        self.channel.basic_consume(dispatch_message, queue=self.queue_name, no_ack=True)
-        self.post(key="process_ready.%s" % name, data={'id': self.pid})
-        self.channel.start_consuming()
+    def post(self, key, content=None):
+        self.channel.basic_publish(exchange='kropotkin', routing_key=key, body=self._serialise(content))
+        print "PID=%s %s: %s %s" % (os.getpid(), datetime.datetime.now(), key, content)
 
-    def get_message(self):
-        method, properties, body = self.channel.basic_get(queue=self.queue_name, no_ack=True)
-        if method.NAME != 'Basic.GetEmpty':
-            data = self._deserialise(body)
-            return (method.routing_key, data)
-        else:
-            return (None, None)
+    def watch_for(self, key, queue=None):
+        if not queue:
+            queue = self.channel.queue_declare(exclusive=True).method.queue
+        self.channel.queue_bind(exchange='kropotkin', queue=queue, routing_key=key)
+        return queue
 
-    def get_one_message(self, seconds_to_wait=10):
-        for i in range(seconds_to_wait * 100):
-            key, data = self.get_message()
-            if key != None:
-                return (key, data)
+    def get_one_message(self, queue, seconds_to_wait=1):
+        for i in range(100 * seconds_to_wait):
+            method, properties, body = self.channel.basic_get(queue=queue, no_ack=True)
+            if method.NAME != 'Basic.GetEmpty':
+                return (method.routing_key, self._deserialise(body))
             time.sleep(0.01)
         return (None, None)
 
-    def post(self, key, data=None):
-        body = self._serialise(data)
-        self.channel.basic_publish(exchange='kropotkin', routing_key=key, body=body)
-        print "PID=%s %s: %s %s" % (os.getpid(), datetime.datetime.now(), key, body)
-        
-    def post_and_check(self, post_key, response_key, post_data=None, response_data=None):
-        self.bind(key=response_key)
-        self.post(key=post_key, data=post_data)
-        actual_response_key, actual_response_data = self.get_one_message()
-        return response_key == actual_response_key and (response_data==None or actual_response_data == response_data)
+    def start_receive_loop(self, queue, callback):
+        def dispatch_message(channel, method, properties, body):
+            callback(self, key=method.routing_key, content=self._deserialise(body))
     
+        self.channel.basic_consume(consumer_callback=dispatch_message, queue=queue, no_ack=True)
+        self.channel.start_consuming()
+
+    def stop_receive_loop(self):
+        self.channel.stop_consuming()
+
+    def post_and_check(self, post_key, response_key, post_content=None, response_content=None):
+        queue = self.watch_for(key=response_key)
+        self.post(key=post_key, content=post_content)
+        actual_response_key, actual_response_content = self.get_one_message(queue)
+        return response_key == actual_response_key and (response_content == None or response_content == actual_response_content)

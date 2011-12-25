@@ -4,11 +4,11 @@
 
 import messageboard, subprocess
     
-def register_process(mb, key, data):
+def register_process(mb, key, content):
     global pid
     try:
-        request_identifier = data
-        mb.post(key='process_registered.%s' % request_identifier, data=pid)
+        request_identifier = content
+        mb.post(key='process_registered.%s' % request_identifier, content=pid)
         pid = pid + 1
 
     except StandardError as e:
@@ -16,5 +16,6 @@ def register_process(mb, key, data):
 
 pid = 1000
 mb = messageboard.MessageBoard()
-mb.bind(key='register_process')
-mb.start_consuming(name='process_registrar', callback=register_process)
+queue = mb.watch_for(key='register_process')
+mb.post(key='process_ready.process_registrar')
+mb.start_receive_loop(queue=queue, callback=register_process)

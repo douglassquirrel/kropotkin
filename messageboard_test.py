@@ -2,7 +2,7 @@
 # This program comes with ABSOLUTELY NO WARRANTY. 
 # It is free software, and you are welcome to redistribute it under certain conditions; see the GPLv3 license in the file LICENSE for details.
 
-import json, mb2, pika, time, unittest
+import json, messageboard, pika, time, unittest
 
 class TestMessageBoard(unittest.TestCase):
     def setUp(self):
@@ -10,7 +10,7 @@ class TestMessageBoard(unittest.TestCase):
         self.channel = connection.channel()
         self.channel.exchange_declare(exchange='kropotkin', type='topic')
         self.queue_name = self.channel.queue_declare(exclusive=True).method.queue
-        self.mb = mb2.MessageBoard()
+        self.mb = messageboard.MessageBoard()
 
     def test_posts_without_content(self):
         self.channel.queue_bind(exchange='kropotkin', queue=self.queue_name, routing_key='_test_key')

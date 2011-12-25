@@ -2,17 +2,17 @@
 # This program comes with ABSOLUTELY NO WARRANTY. 
 # It is free software, and you are welcome to redistribute it under certain conditions; see the GPLv3 license in the file LICENSE for details.
 
-import messageboard, unittest
+import messageboard
 
-def greet(mb, key, data):
+def greet(mb, key, content):
     try:
-        response = "Hello, %s!" % data
-        mb.post(key="greet-response.%s" % data, data=response)
+        response = "Hello, %s!" % content
+        mb.post(key="greet-response.%s" % content, content=response)
 
     except StandardError as e:
         print "Got exception %s" % str(e)
 
-pid = 0
 mb = messageboard.MessageBoard()
-mb.bind(key='greet')
-mb.start_consuming(name='greeter', callback=greet)
+queue = mb.watch_for(key='greet')
+mb.post(key='process_ready.greeter')
+mb.start_receive_loop(queue, callback=greet)
