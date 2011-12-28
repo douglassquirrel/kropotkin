@@ -8,13 +8,17 @@ from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 class HTTPHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         incoming_key = 'http_GET%s' % urlparse.urlparse(self.path).path.replace('/','.')
+        request_id = 9999 
         mb = messageboard.MessageBoard()
-        mb.post(key=incoming_key)
+        queue = mb.watch_for(keys=["%s.%s" % (incoming_key, request_id)])
+        mb.post(key=incoming_key, content={'request_id': request_id})
+        key, content = mb.get_one_message(queue)
+        response = content['response'] if content else None
 
         self.send_response(200)
         self.send_header('Content-type', 'application/json')
         self.end_headers()
-        self.wfile.write(json.dumps(self.path))
+        self.wfile.write(json.dumps(response))
         return
 
 try:
