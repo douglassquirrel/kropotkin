@@ -5,7 +5,7 @@
 # This program comes with ABSOLUTELY NO WARRANTY. 
 # It is free software, and you are welcome to redistribute it under certain conditions; see the GPLv3 license in the file LICENSE for details.
 
-import datetime, json, os, pika, time
+import datetime, json, os, pika, sys, time
 
 class MessageBoard:
     def _serialise(self, c):
@@ -14,14 +14,18 @@ class MessageBoard:
     def _deserialise(self, s):
         return json.loads(s) if not (s in [None, '']) else None
 
-    def __init__(self):
+    def __init__(self, process_id=None, initial_index=0):
+        self.process_id = process_id if process_id else sys.argv[1] if 2<=len(sys.argv) else 'unknown'
+        self.correlation_index = initial_index
         connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
         self.channel = connection.channel()
         self.channel.exchange_declare(exchange='kropotkin', type='topic')
 
     def post(self, key, content=None):
-        self.channel.basic_publish(exchange='kropotkin', routing_key=key, body=self._serialise(content))
+        properties = pika.BasicProperties(correlation_id='%s.%s' % (self.process_id, self.correlation_index))
+        self.channel.basic_publish(exchange='kropotkin', routing_key=key, body=self._serialise(content), properties=properties)
         print "PID=%s %s: %s %s" % (os.getpid(), datetime.datetime.now(), key, content)
+        self.correlation_index += 1
 
     def watch_for(self, keys, queue=None):
         if not queue:
