@@ -56,8 +56,15 @@ def test_converts_http_path_to_message(mb):
     return send_GET_and_check(mb, GET_path='example', message_key='http_GET.example', response_text='example response') \
        and send_GET_and_check(mb, GET_path='second/example', message_key='http_GET.second.example', response_text='another example response')
 
+def test_sends_501_if_no_response(mb):
+    try:
+        response = urllib2.urlopen('http://localhost:8080/example')
+        return False
+    except urllib2.HTTPError, e:
+        return 501 == e.code
+
 def http_server_test(mb, key, content):
-    result = test_converts_http_path_to_message(mb)
+    result = test_converts_http_path_to_message(mb) and test_sends_501_if_no_response(mb)
     mb.post(key='http_server_test_result', content=result)
 
 mb = messageboard.MessageBoard()
