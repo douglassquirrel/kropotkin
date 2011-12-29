@@ -38,9 +38,8 @@ class TestMessageBoard(unittest.TestCase):
 
     def test_returns_none_if_no_message(self):
         queue = self.mb.watch_for(keys=['_test_key']) 
-        received_key, received_content = self.mb.get_one_message(queue)
-        self.assertEqual(None, received_key)
-        self.assertEqual(None, received_content)
+        message = self.mb.get_one_message(queue)
+        self.assertEqual(None, message)
 
     def test_does_not_wait_if_message_ready(self):
         time_to_run = self._time_get_one_message(send_message=True)
@@ -60,7 +59,7 @@ class TestMessageBoard(unittest.TestCase):
         for key in keys:
             self.channel.basic_publish(exchange='kropotkin', routing_key=key, body=None)
 
-        received_keys = [self.mb.get_one_message(queue)[0] for i in range(2)]
+        received_keys = [self.mb.get_one_message(queue).key for i in range(2)]
         self.assertEqual(keys, received_keys)
 
     def test_receives_until_stopped(self):
@@ -108,9 +107,9 @@ class TestMessageBoard(unittest.TestCase):
         queue = self.mb.watch_for(keys=[key]) 
         body = json.dumps(content) if None != content else None
         self.channel.basic_publish(exchange='kropotkin', routing_key=key, body=body)
-        received_key, received_content = self.mb.get_one_message(queue)
-        self.assertEqual(key, received_key)
-        self.assertEqual(content, received_content)
+        message = self.mb.get_one_message(queue)
+        self.assertEqual(key, message.key)
+        self.assertEqual(content, message.content)
 
     def _time_get_one_message(self, send_message, seconds_to_wait=None):
         queue = self.mb.watch_for(keys=['_test_key']) 

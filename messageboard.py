@@ -5,7 +5,9 @@
 # This program comes with ABSOLUTELY NO WARRANTY. 
 # It is free software, and you are welcome to redistribute it under certain conditions; see the GPLv3 license in the file LICENSE for details.
 
-import datetime, json, os, pika, sys, time
+import collections, datetime, json, os, pika, sys, time
+
+Message = collections.namedtuple('Message', ['key', 'content'])
 
 class MessageBoard:
     def _serialise(self, c):
@@ -38,9 +40,9 @@ class MessageBoard:
         for i in range(100 * seconds_to_wait):
             method, properties, body = self.channel.basic_get(queue=queue, no_ack=True)
             if method.NAME != 'Basic.GetEmpty':
-                return (method.routing_key, self._deserialise(body))
+                return Message(key=method.routing_key, content=self._deserialise(body))
             time.sleep(0.01)
-        return (None, None)
+        return None
 
     def start_receive_loop(self, queue, callback):
         def dispatch_message(channel, method, properties, body):

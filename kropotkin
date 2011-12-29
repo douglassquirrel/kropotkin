@@ -30,8 +30,8 @@ def start_and_check(mb, file_path, starter):
     ready_key = 'process_ready.%s' % file_name
     queue = mb.watch_for(keys=[ready_key])
     starter(mb, file_path, file_name)
-    key, data = mb.get_one_message(queue)
-    return ready_key == key
+    message = mb.get_one_message(queue)
+    return message and ready_key == message.key
 
 def bootstrap_start(mb, name, starter, test_key):
     file_paths = glob.glob(os.path.join('bootstrap', '%s*.py' % name))

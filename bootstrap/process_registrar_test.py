@@ -13,7 +13,7 @@ def _register_and_get_id(mb):
     index = index + 1
     queue = mb.watch_for(keys=['process_registered.%s' % request_identifier])
     mb.post(key='register_process', content=request_identifier)
-    key, id = mb.get_one_message(queue)
+    id = mb.get_one_message(queue).content
     return id
 
 def gives_id(mb):

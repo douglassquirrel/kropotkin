@@ -12,12 +12,12 @@ class HTTPHandler(BaseHTTPRequestHandler):
         mb = messageboard.MessageBoard()
         queue = mb.watch_for(keys=["%s.%s" % (incoming_key, request_id)])
         mb.post(key=incoming_key, content={'request_id': request_id})
-        key, content = mb.get_one_message(queue)
-        if content:
+        message = mb.get_one_message(queue)
+        if message:
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
             self.end_headers()
-            self.wfile.write(json.dumps(content['response']))
+            self.wfile.write(json.dumps(message.content['response']))
         else:
             self.send_response(501)
             self.send_header('Content-type', 'text/plain')

@@ -18,10 +18,10 @@ def collect_response(mb, message_key, response_key):
     queue = mb.watch_for(keys=[response_key, done_key])
     mb.post(key=message_key)
 
-    key1, data1 = mb.get_one_message(queue)
-    key2, data2 = mb.get_one_message(queue)
+    message1 = mb.get_one_message(queue)
+    message2 = mb.get_one_message(queue)
 
-    return key1==response_key and key2==done_key
+    return response_key==message1.key and done_key==message2.key
 
 def collect_one_message(mb):
     register_messages(mb, prefix='c1m', number=1)
