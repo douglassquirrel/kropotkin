@@ -33,8 +33,8 @@ class TestMessageBoard(unittest.TestCase):
         self._post_and_check_correlation_id(mb, 271828, 103)
 
     def test_watches_for_and_gets_one_message(self):
-        self._watch_for_send_and_check(key='_test_key', content={'datum': '_test_datum'})
-        self._watch_for_send_and_check(key='another_test_key', content=None)
+        self._watch_for_send_and_check(key='_test_key', content={'datum': '_test_datum'}, correlation_id='_test_correlation_id')
+        self._watch_for_send_and_check(key='another_test_key', content=None, correlation_id='_another_test_correlation_id')
 
     def test_returns_none_if_no_message(self):
         queue = self.mb.watch_for(keys=['_test_key']) 
@@ -103,13 +103,15 @@ class TestMessageBoard(unittest.TestCase):
         method, properties, body = self._wait_for_message_and_check(expected_key='_test_key', expected_body=json.dumps('_test_content'))
         self.assertEqual("%s.%s" % (process_id, initial_index), properties.correlation_id)
 
-    def _watch_for_send_and_check(self, key, content):
+    def _watch_for_send_and_check(self, key, content, correlation_id):
         queue = self.mb.watch_for(keys=[key]) 
         body = json.dumps(content) if None != content else None
-        self.channel.basic_publish(exchange='kropotkin', routing_key=key, body=body)
+        properties = pika.BasicProperties(correlation_id=correlation_id)
+        self.channel.basic_publish(exchange='kropotkin', routing_key=key, body=body, properties=properties)
         message = self.mb.get_one_message(queue)
         self.assertEqual(key, message.key)
         self.assertEqual(content, message.content)
+        self.assertEqual(correlation_id, message.correlation_id)
 
     def _time_get_one_message(self, send_message, seconds_to_wait=None):
         queue = self.mb.watch_for(keys=['_test_key']) 

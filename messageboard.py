@@ -7,7 +7,7 @@
 
 import collections, datetime, json, os, pika, sys, time
 
-Message = collections.namedtuple('Message', ['key', 'content'])
+Message = collections.namedtuple('Message', ['key', 'content', 'correlation_id'])
 
 class MessageBoard:
     def _serialise(self, c):
@@ -40,7 +40,7 @@ class MessageBoard:
         for i in range(100 * seconds_to_wait):
             method, properties, body = self.channel.basic_get(queue=queue, no_ack=True)
             if method.NAME != 'Basic.GetEmpty':
-                return Message(key=method.routing_key, content=self._deserialise(body))
+                return Message(key=method.routing_key, content=self._deserialise(body), correlation_id=properties.correlation_id)
             time.sleep(0.01)
         return None
 
@@ -57,5 +57,5 @@ class MessageBoard:
     def post_and_check(self, post_key, response_key, post_content=None, response_content=None):
         queue = self.watch_for(keys=[response_key])
         self.post(key=post_key, content=post_content)
-        actual_response_key, actual_response_content = self.get_one_message(queue)
-        return response_key == actual_response_key and (response_content == None or response_content == actual_response_content)
+        message = self.get_one_message(queue)
+        return response_key == message.key and (response_content == None or response_content == message.content)
