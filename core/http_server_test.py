@@ -7,17 +7,17 @@ import json, messageboard, urllib2
 responder_code = """
 import messageboard
 
-def respond(mb, key, content):
+def respond(mb, message):
     global queue, message_key, response_text
-    if 'http_response_test.stop' == key:
+    if 'http_response_test.stop' == message.key:
         mb.stop_receive_loop()
-    elif 'http_response_test.init' == key:
-        message_key = str(content['message_key'])
-        response_text = str(content['response_text'])
+    elif 'http_response_test.init' == message.key:
+        message_key = str(message.content['message_key'])
+        response_text = str(message.content['response_text'])
         mb.watch_for(keys=[message_key], queue=queue)
         mb.post(key='process_initialised.http_response_test')
     elif message_key and response_text:
-        mb.post(key='%s.%s' % (message_key, content['request_id']), content = {'response' : response_text})
+        mb.post(key='%s.%s' % (message_key, message.content['request_id']), content = {'response' : response_text})
 
 message_key = None
 response_text = None
@@ -63,7 +63,7 @@ def test_sends_501_if_no_response(mb):
     except urllib2.HTTPError, e:
         return 501 == e.code
 
-def http_server_test(mb, key, content):
+def http_server_test(mb, message):
     result = test_converts_http_path_to_message(mb) and test_sends_501_if_no_response(mb)
     mb.post(key='http_server_test_result', content=result)
 

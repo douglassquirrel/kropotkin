@@ -6,11 +6,11 @@ import messageboard
 
 global collections
 collections = []
-def collect(mb, key, content):
+def collect(mb, message):
     global collections, queue
     try:
-        if key == 'collect':
-            messages, response = map(str, content['messages']), content['response']
+        if message.key == 'collect':
+            messages, response = map(str, message.content['messages']), message.content['response']
             mb.watch_for(keys=messages, queue=queue)
             statuses = dict(map(lambda x: (x, False), messages))
             collections.append({'statuses': statuses, 'response': response})
@@ -18,14 +18,14 @@ def collect(mb, key, content):
         else:
             for collection in collections:
                 statuses = collection['statuses']
-                if key in statuses:
-                    statuses[key] = True
+                if message.key in statuses:
+                    statuses[message.key] = True
             for i, collection in enumerate(collections[:]):
                 statuses, response = collection['statuses'], collection['response']
                 if all(statuses.values()):
                     mb.post(key=response)
                     collections.pop(i)
-            mb.post(key='collector_done_processing.%s' % key)
+            mb.post(key='collector_done_processing.%s' % message.key)
 
     except StandardError as e:
         print "Got exception %s" % str(e)

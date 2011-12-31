@@ -46,7 +46,8 @@ class MessageBoard:
 
     def start_receive_loop(self, queue, callback):
         def dispatch_message(channel, method, properties, body):
-            callback(self, key=method.routing_key, content=self._deserialise(body))
+            message = Message(key=method.routing_key, content=self._deserialise(body), correlation_id=properties.correlation_id)
+            callback(self, message)
     
         self.channel.basic_consume(consumer_callback=dispatch_message, queue=queue, no_ack=True)
         self.channel.start_consuming()

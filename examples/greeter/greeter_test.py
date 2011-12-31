@@ -7,7 +7,7 @@ import messageboard
 def test_says_hello_when_given_a_name(mb):
     return mb.post_and_check(post_key='greet', post_content='foo', response_key='greet-response.foo', response_content='Hello, foo!')
 
-def greeter_test(mb, key, content):
+def greeter_test(mb, message):
     mb = messageboard.MessageBoard()
     result = test_says_hello_when_given_a_name(mb)
     mb.post(key='greeter_test_result', content=result)

@@ -52,7 +52,7 @@ def collect_twice(mb):
     register_messages(mb, prefix='c2x', number=1)
     return collect_response(mb, message_key='c2x_0', response_key='c2x_test_messages_received')
 
-def collector_test(mb, key, content):
+def collector_test(mb, message):
     result =   collect_one_message(mb) \
            and collect_two_messages(mb) \
            and collect_interleaved(mb) \

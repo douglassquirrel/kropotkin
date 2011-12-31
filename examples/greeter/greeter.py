@@ -4,10 +4,10 @@
 
 import messageboard
 
-def greet(mb, key, content):
+def greet(mb, message):
     try:
-        response = "Hello, %s!" % content
-        mb.post(key="greet-response.%s" % content, content=response)
+        response = "Hello, %s!" % message.content
+        mb.post(key="greet-response.%s" % message.content, content=response)
 
     except StandardError as e:
         print "Got exception %s" % str(e)

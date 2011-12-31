@@ -8,8 +8,8 @@ def start_echoer(mb):
     echo_code = """
 import messageboard, sys
 
-def echo(mb, key, content):
-    mb.post(key='__echo_response', content=content)
+def echo(mb, message):
+    mb.post(key='__echo_response', content=message.content)
 
 mb = messageboard.MessageBoard()
 queue = mb.watch_for(keys=['__echo'])
@@ -36,7 +36,7 @@ def check_echo_process_after_bad_process(mb):
     mb.post(key='start_process', content="I am not a dictionary")
     return check_echo_process(mb)
     
-def process_starter_test(mb, key, content):
+def process_starter_test(mb, message):
     result   = check_echo_process(mb) \
            and check_echo_process_after_bad_process(mb)
     mb.post(key='process_starter_test_result', content=result)

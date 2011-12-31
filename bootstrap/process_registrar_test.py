@@ -23,7 +23,7 @@ def gives_unique_ids(mb):
     ids = [_register_and_get_id(mb) for i in range(3)]
     return _no_duplicates(ids)
 
-def process_registrar_test(mb, key, content):
+def process_registrar_test(mb, message):
     result = gives_id(mb) and gives_unique_ids(mb)
     mb.post(key='process_registrar_test_result', content=result)
 

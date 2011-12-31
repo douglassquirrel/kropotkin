@@ -64,20 +64,21 @@ class TestMessageBoard(unittest.TestCase):
 
     def test_receives_until_stopped(self):
         received_messages = []
-        def callback(mb, key, content):
-            if 'stop' == key:
+        def callback(mb, message):
+            if 'stop' == message.key:
                 mb.stop_receive_loop()
             else:
-                received_messages.append((key, content))
+                received_messages.append(message)
 
         queue = self.mb.watch_for(keys=['_test_key', 'stop'])
         data = ['_datum1', '_datum2', '_datum3']
         for datum in data:
-            self.channel.basic_publish(exchange='kropotkin', routing_key='_test_key', body=json.dumps(datum))
+            properties = pika.BasicProperties(correlation_id=datum + '_correlation_id')
+            self.channel.basic_publish(exchange='kropotkin', routing_key='_test_key', body=json.dumps(datum), properties=properties)
         self.channel.basic_publish(exchange='kropotkin', routing_key='stop', body=None)
         
         self.mb.start_receive_loop(queue=queue, callback=callback)
-        self.assertEqual([('_test_key', datum) for datum in data], received_messages)
+        self.assertEqual([('_test_key', datum, datum + '_correlation_id') for datum in data], received_messages)
 
     def _wait_for_message_and_check(self, expected_key, expected_body, seconds_to_wait=1):
         for i in range(seconds_to_wait * 100):

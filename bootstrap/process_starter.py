@@ -4,9 +4,9 @@
 
 import messageboard, subprocess
     
-def start_process(mb, key, content):
+def start_process(mb, message):
     try:
-        name, code = content['name'], content['code']
+        name, code = message.content['name'], message.content['code']
 
         pid = 1000
         p = subprocess.Popen(args=["python", "-", str(pid)], stdin=subprocess.PIPE)

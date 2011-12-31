@@ -4,10 +4,10 @@
 
 import messageboard, subprocess
     
-def register_process(mb, key, content):
+def register_process(mb, message):
     global pid
     try:
-        request_identifier = content
+        request_identifier = message.content
         mb.post(key='process_registered.%s' % request_identifier, content=pid)
         pid = pid + 1
 
