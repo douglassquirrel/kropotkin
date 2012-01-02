@@ -8,18 +8,20 @@ responder_code = """
 import messageboard
 
 def respond(mb, message):
-    global queue, message_key, response_text
+    global queue, message_key, response_key, response_text
     if 'http_response_test.stop' == message.key:
         mb.stop_receive_loop()
     elif 'http_response_test.init' == message.key:
         message_key = str(message.content['message_key'])
+        response_key = str(message.content['response_key'])
         response_text = str(message.content['response_text'])
         mb.watch_for(keys=[message_key], queue=queue)
         mb.post(key='process_initialised.http_response_test')
-    elif message_key and response_text:
-        mb.post(key='%s.%s' % (message_key, message.content['request_id']), content = {'response' : response_text})
+    elif response_key and response_text:
+        mb.post(key=response_key, content={'response' : response_text}, correlation_id=message.correlation_id)
 
 message_key = None
+response_key = None
 response_text = None
 mb = messageboard.MessageBoard()
 queue = mb.watch_for(keys=['http_response_test.init', 'http_response_test.stop'])
@@ -27,12 +29,13 @@ mb.post(key='process_ready.http_response_test')
 mb.start_receive_loop(queue=queue, callback=respond)
 """
 
-def send_GET_and_check(mb, GET_path, message_key, response_text):
+def send_GET_and_check(mb, GET_path, message_key, response_key, response_text):
     if not mb.post_and_check(post_key='start_process', post_content={'name': 'http_response_test', 'code': responder_code}, 
                              response_key='process_ready.http_response_test'):
         print "Failed to start http_response_test process"
         return False
-    if not mb.post_and_check(post_key='http_response_test.init', post_content={'message_key': message_key, 'response_text': response_text},
+    if not mb.post_and_check(post_key='http_response_test.init', 
+                             post_content={'message_key': message_key, 'response_key': response_key, 'response_text': response_text},
                              response_key='process_initialised.http_response_test'):
         print "Failed to initialise http_response_test process"
         return False
@@ -58,8 +61,10 @@ def send_GET_and_check(mb, GET_path, message_key, response_text):
     return result
 
 def test_converts_http_path_to_message(mb):
-    return send_GET_and_check(mb, GET_path='example', message_key='http_GET.example', response_text='example response') \
-       and send_GET_and_check(mb, GET_path='second/example', message_key='http_GET.second.example', response_text='another example response')
+    return send_GET_and_check(mb, GET_path='example', message_key='http_GET_request.example', response_key='http_GET_response.example', 
+                                  response_text='example response') \
+       and send_GET_and_check(mb, GET_path='second/example', message_key='http_GET_request.second.example', response_key='http_GET_response.second.example',
+                                  response_text='another example response')
 
 def test_sends_501_if_no_response(mb):
     try:

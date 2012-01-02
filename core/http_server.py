@@ -7,11 +7,12 @@ from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 
 class HTTPHandler(BaseHTTPRequestHandler):
     def do_GET(self):
-        incoming_key = 'http_GET%s' % urlparse.urlparse(self.path).path.replace('/','.')
-        request_id = 9999 
+        path = urlparse.urlparse(self.path).path.replace('/','.')
+        outgoing_key = 'http_GET_request%s' % path
+        incoming_key = 'http_GET_response%s' % path 
         mb = messageboard.MessageBoard()
-        queue = mb.watch_for(keys=["%s.%s" % (incoming_key, request_id)])
-        mb.post(key=incoming_key, content={'request_id': request_id})
+        queue = mb.watch_for(keys=[incoming_key])
+        mb.post(key=outgoing_key)
         message = mb.get_one_message(queue)
         if message:
             self.send_response(200)
