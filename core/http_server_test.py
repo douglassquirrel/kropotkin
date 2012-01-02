@@ -37,8 +37,13 @@ def send_GET_and_check(mb, GET_path, message_key, response_text):
         print "Failed to initialise http_response_test process"
         return False
 
-    response = urllib2.urlopen('http://localhost:8080/%s' % GET_path)
-    mb.post(key='http_response_test.stop')
+    try:
+        response = urllib2.urlopen('http://localhost:8080/%s' % GET_path)
+    except urllib2.HTTPError, e:
+        mb.post("Unexpected HTTP error code %s" % e.code)
+        return False
+    finally:
+        mb.post(key='http_response_test.stop')
 
     content_type = response.info().gettype()
     if 'application/json' != content_type:
