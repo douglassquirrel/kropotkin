@@ -33,14 +33,13 @@ class TestMessageBoard(unittest.TestCase):
         self._post_and_check_auto_correlation_id(mb, 271828, 103)
 
     def test_posts_with_specified_correlation_id(self):
-        process_id = 314159
-        request_id = 1234
-        mb = messageboard.MessageBoard(process_id, 0)
+        expected_correlation_id = 'test specified correlation id'
+        mb = messageboard.MessageBoard(314159, 0)
         self.channel.queue_bind(exchange='kropotkin', queue=self.queue_name, routing_key='_test_key')
-        returned_correlation_id = mb.post(key='_test_key', content='_test_content', request_id=request_id)
+        returned_correlation_id = mb.post(key='_test_key', content='_test_content', correlation_id=expected_correlation_id)
         method, properties, body = self._wait_for_message_and_check(expected_key='_test_key', expected_body=json.dumps('_test_content'))
-        self.assertEqual("%s.%s" % (process_id, request_id), properties.correlation_id)
-        self.assertEqual(returned_correlation_id, properties.correlation_id)
+        self.assertEqual(expected_correlation_id, properties.correlation_id)
+        self.assertEqual(expected_correlation_id, returned_correlation_id)
 
     def test_watches_for_and_gets_one_message(self):
         self._watch_for_send_and_check(key='_test_key', content={'datum': '_test_datum'}, correlation_id='_test_correlation_id')

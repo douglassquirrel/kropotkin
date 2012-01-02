@@ -23,12 +23,11 @@ class MessageBoard:
         self.channel = connection.channel()
         self.channel.exchange_declare(exchange='kropotkin', type='topic')
 
-    def post(self, key, content=None, request_id=None):
-        if not request_id:
-            request_id = self.correlation_index
+    def post(self, key, content=None, correlation_id=None):
+        if not correlation_id:
+            correlation_id = '%s.%s' % (self.process_id, self.correlation_index)
             self.correlation_index += 1
-          
-        correlation_id = '%s.%s' % (self.process_id, request_id)
+
         properties = pika.BasicProperties(correlation_id=correlation_id)
         self.channel.basic_publish(exchange='kropotkin', routing_key=key, body=self._serialise(content), properties=properties)
         print "PID=%s %s: %s %s" % (os.getpid(), datetime.datetime.now(), key, content)  
