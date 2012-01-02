@@ -62,6 +62,17 @@ class TestMessageBoard(unittest.TestCase):
         time_to_run = self._time_get_one_message(send_message=False, seconds_to_wait=2)
         self.assertTrue(1.8 < time_to_run < 2.2, 'Time to run of %s was not about 2 seconds' % time_to_run)
 
+    def test_ignores_messages_with_wrong_correlation_id(self):
+        key = '_test_id'
+        queue = self.mb.watch_for(keys=[key]) 
+        properties_with_wrong_id = pika.BasicProperties(correlation_id='wrong.id')
+        properties_with_right_id = pika.BasicProperties(correlation_id='right.id')
+        self.channel.basic_publish(exchange='kropotkin', routing_key=key, body=json.dumps('wrong message'), properties=properties_with_wrong_id)
+        self.channel.basic_publish(exchange='kropotkin', routing_key=key, body=json.dumps('right message'), properties=properties_with_right_id)
+        message = self.mb.get_one_message(queue=queue, correlation_id='right.id')
+        self.assertNotEqual(None, message)
+        self.assertEqual('right message', message.content)
+
     def test_adds_a_key_to_watch_for(self):
         keys = ['_test_key', '_test_key_two']
         queue = self.mb.watch_for(keys) 
@@ -130,7 +141,7 @@ class TestMessageBoard(unittest.TestCase):
             self.channel.basic_publish(exchange='kropotkin', routing_key='_test_key', body=json.dumps('test_content'))
         time_before = time.time()
         if seconds_to_wait:
-            self.mb.get_one_message(queue, seconds_to_wait)
+            self.mb.get_one_message(queue=queue, seconds_to_wait=seconds_to_wait)
         else:
             self.mb.get_one_message(queue)
         time_to_run = time.time() - time_before

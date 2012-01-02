@@ -30,7 +30,7 @@ class MessageBoard:
 
         properties = pika.BasicProperties(correlation_id=correlation_id)
         self.channel.basic_publish(exchange='kropotkin', routing_key=key, body=self._serialise(content), properties=properties)
-        print "PID=%s %s: %s %s" % (os.getpid(), datetime.datetime.now(), key, content)  
+        print "PID=%s %s: %s %s %s" % (os.getpid(), datetime.datetime.now(), key, content, correlation_id)  
         return correlation_id
 
     def watch_for(self, keys, queue=None):
@@ -40,10 +40,10 @@ class MessageBoard:
             self.channel.queue_bind(exchange='kropotkin', queue=queue, routing_key=key)
         return queue
 
-    def get_one_message(self, queue, seconds_to_wait=1):
+    def get_one_message(self, queue, correlation_id = None, seconds_to_wait=1):
         for i in range(100 * seconds_to_wait):
             method, properties, body = self.channel.basic_get(queue=queue, no_ack=True)
-            if method.NAME != 'Basic.GetEmpty':
+            if method.NAME != 'Basic.GetEmpty' and (correlation_id is None or properties.correlation_id == correlation_id):
                 return Message(key=method.routing_key, content=self._deserialise(body), correlation_id=properties.correlation_id)
             time.sleep(0.01)
         return None

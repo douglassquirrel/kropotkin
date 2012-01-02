@@ -12,8 +12,8 @@ class HTTPHandler(BaseHTTPRequestHandler):
         incoming_key = 'http_GET_response%s' % path 
         mb = messageboard.MessageBoard()
         queue = mb.watch_for(keys=[incoming_key])
-        mb.post(key=outgoing_key)
-        message = mb.get_one_message(queue)
+        correlation_id = mb.post(key=outgoing_key)
+        message = mb.get_one_message(queue=queue, correlation_id=correlation_id)
         if message:
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
