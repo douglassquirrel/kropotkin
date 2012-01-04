@@ -29,8 +29,8 @@ class MessageBoard:
             self.correlation_index += 1
 
         properties = pika.BasicProperties(correlation_id=correlation_id)
-        self.channel.basic_publish(exchange='kropotkin', routing_key=key, body=self._serialise(content), properties=properties)
         print "PID=%s %s: %s %s %s" % (os.getpid(), datetime.datetime.now(), key, content, correlation_id)  
+        self.channel.basic_publish(exchange='kropotkin', routing_key=key, body=self._serialise(content), properties=properties)
         return correlation_id
 
     def watch_for(self, keys, queue=None):
