@@ -7,7 +7,11 @@ import messageboard
 def http_greet(mb, message):
     try:
         name = message.key.split('.')[-1]
-        mb.post(key='greet', content=name, correlation_id=message.correlation_id)
+        correlation_id = message.correlation_id
+        queue = mb.watch_for(keys=['greet-response.%s' % name])
+        mb.post(key='greet', content=name, correlation_id=correlation_id)
+        response_message = mb.get_one_message(queue)
+        mb.post(key='http_GET_response.greet.%s' % name, content = {'response': response_message.content}, correlation_id=correlation_id)
 
     except StandardError as e:
         print "Got exception %s" % str(e)
