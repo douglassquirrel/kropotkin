@@ -6,12 +6,13 @@ import messageboard
 
 def http_greet(mb, message):
     try:
-        mb.post(key='greet', content='albert')
+        name = message.key.split('.')[-1]
+        mb.post(key='greet', content=name, correlation_id=message.correlation_id)
 
     except StandardError as e:
         print "Got exception %s" % str(e)
 
 mb = messageboard.MessageBoard()
-queue = mb.watch_for(keys=['http_GET_request.greet.albert'])
+queue = mb.watch_for(keys=['http_GET_request.greet.*'])
 mb.post(key='process_ready.http_greeter')
 mb.start_receive_loop(queue, callback=http_greet)

@@ -5,7 +5,11 @@
 import messageboard
 
 def test_converts_greet_request(mb):
-    return mb.post_and_check(post_key='http_GET_request.greet.albert', response_key='greet', response_content='albert') 
+    return _send_and_check_greet(mb, 'albert') and _send_and_check_greet(mb, 'betty')
+
+def _send_and_check_greet(mb, name):
+    return mb.post_and_check(post_key='http_GET_request.greet.%s' % name, response_key='greet', response_content=name, 
+                             correlation_id='http_greeter_test.%s' % name) 
 
 def http_greeter_test(mb, message):
     result = test_converts_greet_request(mb)

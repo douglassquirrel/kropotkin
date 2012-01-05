@@ -59,8 +59,8 @@ class MessageBoard:
     def stop_receive_loop(self):
         self.channel.stop_consuming()
 
-    def post_and_check(self, post_key, response_key, post_content=None, response_content=None):
+    def post_and_check(self, post_key, response_key, post_content=None, response_content=None, correlation_id=None):
         queue = self.watch_for(keys=[response_key])
-        self.post(key=post_key, content=post_content)
-        message = self.get_one_message(queue)
-        return response_key == message.key and (response_content == None or response_content == message.content)
+        self.post(key=post_key, content=post_content, correlation_id=correlation_id)
+        message = self.get_one_message(queue, correlation_id)
+        return (message is not None) and (response_key == message.key) and (response_content == None or response_content == message.content)
