@@ -5,7 +5,7 @@
 # This program comes with ABSOLUTELY NO WARRANTY. 
 # It is free software, and you are welcome to redistribute it under certain conditions; see the GPLv3 license in the file LICENSE for details.
 
-import collections, datetime, json, os, pika, sys, time
+import collections, datetime, json, os, pika, time
 
 Message = collections.namedtuple('Message', ['key', 'content', 'correlation_id'])
 
@@ -17,7 +17,7 @@ class MessageBoard:
         return json.loads(s) if not (s in [None, '']) else None
 
     def __init__(self, process_id=None, initial_index=0):
-        self.process_id = process_id if process_id else sys.argv[1] if 2<=len(sys.argv) else 'unknown'
+        self.process_id = process_id if process_id else os.getpid()
         self.correlation_index = initial_index
         connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
         self.channel = connection.channel()

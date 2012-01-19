@@ -2,7 +2,7 @@
 # This program comes with ABSOLUTELY NO WARRANTY. 
 # It is free software, and you are welcome to redistribute it under certain conditions; see the GPLv3 license in the file LICENSE for details.
 
-import json, messageboard, pika, time, unittest
+import json, messageboard, os, pika, time, unittest
 
 class TestMessageBoard(unittest.TestCase):
     def setUp(self):
@@ -31,6 +31,8 @@ class TestMessageBoard(unittest.TestCase):
         self._post_and_check_auto_correlation_id(mb, 314159, 2)
         mb = messageboard.MessageBoard(271828, 103)
         self._post_and_check_auto_correlation_id(mb, 271828, 103)
+        mb = messageboard.MessageBoard()
+        self._post_and_check_auto_correlation_id(mb, os.getpid(), 0)
 
     def test_posts_with_specified_correlation_id(self):
         expected_correlation_id = 'test specified correlation id'

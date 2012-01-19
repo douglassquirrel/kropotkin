@@ -8,13 +8,11 @@ def _set_up_mock(mb, message_key, response_key, response_text, use_right_correla
     mock_data = {'message_key': message_key, 'response_key': response_key, 'response_content': {'response': response_text}}
     if not use_right_correlation_id:
         mock_data['correlation_id'] = 'wrong_id'
-    result = mb.post_and_check(post_key='mock', post_content=mock_data, response_key='ready_to_mock.%s' % message_key)
-    if not result:
-        mb.post('Failed to initialise mock')
-    return result
+    return mb.post_and_check(post_key='mock', post_content=mock_data, response_key='ready_to_mock.%s' % message_key)
 
 def _send_GET_and_check(mb, GET_path, message_key, response_key, response_text):
     if not _set_up_mock(mb, message_key, response_key, response_text):
+        mb.post('Failed to initialise mock')
         return False
 
     try:
