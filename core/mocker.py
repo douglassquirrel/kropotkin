@@ -12,7 +12,7 @@ def mock(mb, message):
         mocks[message_key] = {'key': response_key}
 
         if 'response_content' in message.content:
-            mocks[message_key]['content'] = str(message.content['response_content'])
+            mocks[message_key]['content'] = message.content['response_content']
         else:
             mocks[message_key]['content'] = None
 
@@ -24,7 +24,9 @@ def mock(mb, message):
         mb.watch_for(keys=[message_key], queue=queue)
         mb.post(key='ready_to_mock.%s' % message_key)
     elif message.key in mocks:
-        mb.post(key=mocks[message.key]['key'], content=mocks[message.key]['content'], correlation_id=mocks[message.key]['correlation_id'])
+        correlation_id = message.correlation_id if (mocks[message.key]['correlation_id'] is None) else mocks[message.key]['correlation_id']
+        mb.post(key=mocks[message.key]['key'], content=mocks[message.key]['content'], correlation_id=correlation_id)
+        del mocks[message.key]
 
 mocks = {}
 mb = messageboard.MessageBoard()

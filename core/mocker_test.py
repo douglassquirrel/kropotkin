@@ -18,6 +18,15 @@ def mock_one_message_without_content(mb):
 
     return mb.post_and_check(post_key='mock_test_message', response_key='mock_test_response')
     
+def mock_response_matches_correlation_id_if_not_specified(mb):
+    if not _register_mock(message_key='mock_test_message', response_key='mock_test_response'):
+        return False
+
+    queue = mb.watch_for(keys=['mock_test_response'])
+    mb.post(key='mock_test_message', correlation_id='test_id')
+    message = mb.get_one_message(queue, 'test_id')
+    return (message is not None) and ('mock_test_response' == message.key)
+
 def mock_one_message_with_correlation_id(mb):
     if not _register_mock(message_key='mock_test_message_cid', response_key='mock_test_response_cid', correlation_id='mock_id'):
         return False
@@ -25,18 +34,32 @@ def mock_one_message_with_correlation_id(mb):
     return mb.post_and_check(post_key='mock_test_message_cid', response_key='mock_test_response_cid', correlation_id='mock_id')
 
 def mock_two_messages_with_content(mb):
-    if not    _register_mock(message_key='first_mock_test_message',  response_key='first_mock_test_response', response_content='first_mock_content') \
-       or not _register_mock(message_key='second_mock_test_message', response_key='second_mock_test_response', response_content='second_mock_content'):
+    if not    _register_mock(message_key='first_mock_test_message',  response_key='first_mock_test_response', 
+                             response_content={'datum': '1+1=2'}) \
+       or not _register_mock(message_key='second_mock_test_message', response_key='second_mock_test_response', 
+                             response_content={'datum': '2+2=4'}):
         return False
 
-    result = mb.post_and_check(post_key='first_mock_test_message', response_key='first_mock_test_response', response_content='first_mock_content') and \
-             mb.post_and_check(post_key='second_mock_test_message', response_key='second_mock_test_response', response_content='second_mock_content')
+    result = mb.post_and_check(post_key='first_mock_test_message', response_key='first_mock_test_response', 
+                               response_content={'datum': '1+1=2'}) and \
+             mb.post_and_check(post_key='second_mock_test_message', response_key='second_mock_test_response', 
+                               response_content={'datum': '2+2=4'})
     return result
+
+def stops_mocking_after_response(mb):
+    if (not _register_mock(message_key='mock_test_message', response_key='mock_test_response')) or \
+       (not mb.post_and_check(post_key='mock_test_message', response_key='mock_test_response')):
+        return False
+
+    return not mb.post_and_check(post_key='mock_test_message', response_key='mock_test_response')
 
 def mocker_test(mb, message):
     result = mock_one_message_without_content(mb) and \
              mock_one_message_with_correlation_id(mb) and \
-             mock_two_messages_with_content(mb)
+             mock_two_messages_with_content(mb) and \
+             mock_response_matches_correlation_id_if_not_specified(mb) and \
+             stops_mocking_after_response(mb)
+
     mb.post(key='mocker_test_result', content=result)
 
 mb = messageboard.MessageBoard()

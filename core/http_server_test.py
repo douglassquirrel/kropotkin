@@ -32,28 +32,24 @@ mb.post(key='process_ready.http_response_test')
 mb.start_receive_loop(queue=queue, callback=respond)
 """
 
-def _set_up_response_test_process(mb, message_key, response_key, response_text, use_right_correlation_id=True):
-    if not mb.post_and_check(post_key='start_process', post_content={'name': 'http_response_test', 'code': responder_code}, 
-                             response_key='process_ready.http_response_test'):
-        print "Failed to start http_response_test process"
-        return False
-    if not mb.post_and_check(post_key='http_response_test.init', 
-                             post_content={'message_key': message_key, 'response_key': response_key, 
-                                           'response_text': response_text, 'use_right_correlation_id': use_right_correlation_id},
-                             response_key='process_initialised.http_response_test'):
-        print "Failed to initialise http_response_test process"
-        return False
+def _set_up_mock(mb, message_key, response_key, response_text, use_right_correlation_id=True):
+    mock_data = {'message_key': message_key, 'response_key': response_key, 'response_content': {'response': response_text}}
+    if not use_right_correlation_id:
+        mock_data['correlation_id'] = 'wrong_id'
+    result = mb.post_and_check(post_key='mock', post_content=mock_data, response_key='ready_to_mock.%s' % message_key)
+    if not result:
+        mb.post('Failed to initialise mock')
+    return result
 
 def _send_GET_and_check(mb, GET_path, message_key, response_key, response_text):
-    _set_up_response_test_process(mb, message_key, response_key, response_text)
+    if not _set_up_mock(mb, message_key, response_key, response_text):
+        return False
 
     try:
         response = urllib2.urlopen('http://localhost:8080/%s' % GET_path)
     except urllib2.HTTPError, e:
         mb.post("Unexpected HTTP error code %s" % e.code)
         return False
-    finally:
-        mb.post(key='http_response_test.stop')
 
     content_type = response.info().gettype()
     if 'application/json' != content_type:
@@ -81,8 +77,8 @@ def test_sends_501_if_no_response(mb):
         return 501 == e.code
 
 def test_ignores_response_with_wrong_correlation_id(mb):
-    _set_up_response_test_process(mb=mb, message_key='http_GET_request.wrong.id', response_key='http_GET_response.wrong.id', 
-                                  response_text='example.response', use_right_correlation_id=False)
+    _set_up_mock(mb=mb, message_key='http_GET_request.wrong.id', response_key='http_GET_response.wrong.id', 
+                 response_text='example.response', use_right_correlation_id=False)
 
     try:
         response = urllib2.urlopen('http://localhost:8080/wrong/id')
