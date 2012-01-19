@@ -4,34 +4,6 @@
 
 import json, messageboard, urllib2
 
-responder_code = """
-import messageboard
-
-def respond(mb, message):
-    global queue, message_key, response_key, response_text, use_right_correlation_id
-    if 'http_response_test.stop' == message.key:
-        mb.stop_receive_loop()
-    elif 'http_response_test.init' == message.key:
-        message_key = str(message.content['message_key'])
-        response_key = str(message.content['response_key'])
-        response_text = str(message.content['response_text'])
-        use_right_correlation_id = message.content['use_right_correlation_id']
-        mb.watch_for(keys=[message_key], queue=queue)
-        mb.post(key='process_initialised.http_response_test')
-    elif (response_key is not None) and (response_text is not None) and (use_right_correlation_id is not None):
-        correlation_id = message.correlation_id if use_right_correlation_id else 'wrong_id'
-        mb.post(key=response_key, content={'response' : response_text}, correlation_id=correlation_id)
-
-message_key = None
-response_key = None
-response_text = None
-use_right_correlation_id = True
-mb = messageboard.MessageBoard()
-queue = mb.watch_for(keys=['http_response_test.init', 'http_response_test.stop'])
-mb.post(key='process_ready.http_response_test')
-mb.start_receive_loop(queue=queue, callback=respond)
-"""
-
 def _set_up_mock(mb, message_key, response_key, response_text, use_right_correlation_id=True):
     mock_data = {'message_key': message_key, 'response_key': response_key, 'response_content': {'response': response_text}}
     if not use_right_correlation_id:
