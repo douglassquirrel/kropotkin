@@ -8,12 +8,11 @@ def start_process(mb, message):
     try:
         name, code = message.content['name'], message.content['code']
 
-        pid = 1000
-        p = subprocess.Popen(args=["python", "-", str(pid)], stdin=subprocess.PIPE)
+        p = subprocess.Popen(args=["python", "-"], stdin=subprocess.PIPE)
         p.stdin.write(code)
         p.stdin.close()
     
-        mb.post(key='process_started.%s' % name, content={'id': pid})
+        mb.post(key='process_started.%s' % name)
 
     except StandardError as e:
         print "Got exception %s" % str(e)

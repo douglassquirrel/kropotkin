@@ -12,13 +12,11 @@ def python_files(directory):
     return glob.glob(os.path.join(directory, "*.py"))
 
 def manual_start(mb, file_path, file_name):
-    global current_pid
     with open(file_path, "r") as f:
         code = f.read()
-    p = subprocess.Popen(args=["python", "-", str(current_pid)], stdin=subprocess.PIPE)
+    p = subprocess.Popen(args=["python", "-"], stdin=subprocess.PIPE)
     p.stdin.write(code)
     p.stdin.close()
-    current_pid = current_pid + 1
 
 def start(mb, file_path, file_name):
     with open(file_path, "r") as f:
@@ -57,7 +55,6 @@ def start_components(mb, directories):
 
 component_directories = sys.argv[1:]
 mb = messageboard.MessageBoard()
-current_pid = 1
 
 if not bootstrap_start(mb, name='process_starter', starter=manual_start, test_key='process_starter_test_result'):
     mb.post(key="bootstrap_failed")
