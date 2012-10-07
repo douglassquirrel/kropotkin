@@ -10,7 +10,7 @@
       new-state)))
 
 (define (mainspring wheel monitor [state 'init])
-  (printf "Tick, state ~a\n" state)
+  (printf "Engine entering state ~a\n" state)
   (cond ((not (eq? state 'exit))
 	 (monitor 'tick)
 	 (mainspring wheel monitor (wheel state)))))
