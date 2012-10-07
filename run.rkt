@@ -6,12 +6,13 @@
 (define (check-server) (displayln "Checking server") #t)  
 
 (define (state-machine state)
-  (cond ((eq? state 'init)                            (values 'unit    empty))
-	((eq? state 'unit)    (cond ((run-unit-tests) (values 'deploy  empty))
-				    (else             (values 'exit    empty))))
-	((eq? state 'deploy)                          (values 'monitor deploy))
-	((eq? state 'monitor) (cond ((check-server)   (values 'monitor (make-wait-side-effect 5)))
-				    (else             (values 'exit    empty))))))
+  (cond ((eq? state 'init)                                    (values 'unit            empty))
+	((eq? state 'unit)            (cond ((run-unit-tests) (values 'deploy          empty))
+				      (else                   (values 'exit            empty))))
+	((eq? state 'deploy)                                  (values 'wait-for-deploy deploy))
+	((eq? state 'wait-for-deploy) (sleep 5)               (values 'monitor         empty))
+	((eq? state 'monitor)         (cond ((check-server)   (values 'monitor         (make-wait-side-effect 5)))
+				      (else                   (values 'exit            empty))))))
 
 (define engine (make-engine state-machine))
 
