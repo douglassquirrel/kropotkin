@@ -2,7 +2,7 @@
 #lang racket
 (require "lib/engine.rkt" "src/unit-tests.rkt" "lib/resource-server.rkt")
 
-(define deploy (make-thread-side-effect (lambda () (deploy-resource-server "hailstone.rkt"))))
+(define deploy (make-thread-side-effect (lambda () (deploy-resource-server "src/hailstone.rkt" 8080))))
 (define (check-server) (displayln "Checking server") #t)  
 
 (define (state-machine state)
