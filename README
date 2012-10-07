@@ -1,12 +1,2 @@
-Requires RabbitMQ. On Ubuntu, install:
+Requires RabbitMQ and Racket. Installation instructions to follow.
 
-1. add 
-      deb http://www.rabbitmq.com/debian/ testing main
-   to /etc/apt/sources.list, then execute
-      wget http://www.rabbitmq.com/rabbitmq-signing-key-public.asc
-      sudo apt-key add rabbitmq-signing-key-public.asc
-      sudo apt-get update
-2. sudo apt-get install rabbitmq-server
-3. sudo apt-get install python-pip git-core
-4. sudo pip install pika==0.9.5
-5. sudo pip install cheetah
