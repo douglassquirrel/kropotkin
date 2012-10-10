@@ -1,7 +1,7 @@
 #lang racket
 (require "thread-monitor.rkt" "complications.rkt")
 (provide (except-out (all-from-out "complications.rkt") apply-complications))
-(provide make-engine make-functional-engine start)
+(provide make-engine start)
 
 (define (make-wheel gearing)
   (lambda (state) 
@@ -19,10 +19,6 @@
   (define wheel (make-wheel gearing))
   (define monitor (make-thread-monitor (current-thread) monitor-seconds))
   (list gearing wheel monitor))
-
-(define (make-functional-engine functional-gearing [monitor-seconds 60])
-  (define (gearing state) (values (functional-gearing state) empty))
-  (make-engine gearing monitor-seconds))
 
 (define (start engine) 
   (let-values (((gearing wheel monitor)
