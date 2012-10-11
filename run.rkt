@@ -2,14 +2,15 @@
 #lang racket
 (require file/md5 net/url)
 (require "lib/engine.rkt" "lib/resource-server.rkt" 
-	 "test/engine-tests.rkt" "test/complications-tests.rkt")
+	 "test/engine-tests.rkt" "test/complications-tests.rkt" "test/thread-monitor-tests.rkt")
 
 (define TARGET (getenv "TARGET"))
 (cond ((not TARGET) (error "Need to specify target using the TARGET environment variable")))
 (printf "Running with target ~a\n" TARGET)
 (define target-file (format "lib/~a.rkt" TARGET))
-(define execute-tests (cond ((equal? TARGET "engine")        execute-engine-tests)
-			    ((equal? TARGET "complications") execute-complications-tests)
+(define execute-tests (cond ((equal? TARGET "engine")         execute-engine-tests)
+			    ((equal? TARGET "complications")  execute-complications-tests)
+			    ((equal? TARGET "thread-monitor") execute-thread-monitor-tests)
 			    (else                            (error "Unrecognised target" TARGET))))
 
 (define deploy (make-thread-side-effect (lambda () (deploy-resource-server target-file 8080))))
