@@ -13,11 +13,16 @@
 			    ((equal? TARGET "thread-monitor") execute-thread-monitor-tests)
 			    (else                            (error "Unrecognised target" TARGET))))
 
-(define deploy (make-thread-side-effect (lambda () (deploy-resource-server target-file 8080))))
+(define PORT (string->number (getenv "PORT")))
+(cond ((not PORT) (error "Need to specify HTTP port using the PORT environment variable")))
+(printf "Running with port ~a\n" PORT)
+(define URL (string->url (format "http://localhost:~a" PORT)))
+
+(define deploy (make-thread-side-effect (lambda () (deploy-resource-server target-file PORT))))
 
 (define file-bytes (call-with-input-file target-file port->bytes))
 (define (check-server) 
-  (define http-bytes (call/input-url (string->url "http://localhost:8080") get-pure-port port->bytes))
+  (define http-bytes (call/input-url URL get-pure-port port->bytes))
   (cond ((equal? file-bytes http-bytes) (displayln "Serving file correctly")     #t)
 	(else                           (displayln "Not serving file correctly") #f)))
 
