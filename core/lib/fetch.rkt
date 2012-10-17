@@ -2,8 +2,6 @@
 (require net/url)
 (provide fetch-files)
 
-;use content-dispositon header to deduce file name
-
 (define (lookup-url-for file)
   (cond ((equal? file "thread-monitor.rkt") (string->url "http://localhost:8081"))
 	((equal? file "engine.rkt")         (string->url "http://localhost:8082"))
