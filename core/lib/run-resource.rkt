@@ -17,11 +17,11 @@
   (define (state-machine state)
     (cond ((eq? state 'init)                                   (values 'unit            empty))
 	  ((eq? state 'unit)            (cond ((execute-tests) (values 'deploy          empty))
-					      (else                  (values 'exit            empty))))
+					      (else            (values 'exit            empty))))
 	  ((eq? state 'deploy)                                 (values 'wait-for-deploy deploy))
 	  ((eq? state 'wait-for-deploy) (sleep 5)              (values 'monitor         empty))
 	  ((eq? state 'monitor)         (cond ((check-server)  (values 'monitor         (make-wait-side-effect 30)))
-					      (else                  (values 'exit            empty))))))
+					      (else            (values 'exit            empty))))))
 
   (define engine (make-engine state-machine))
   (start engine))

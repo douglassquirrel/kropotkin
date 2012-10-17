@@ -9,10 +9,11 @@
 (cond ((not TARGET) (error "Need to specify target using the TARGET environment variable")))
 (printf "Running with target ~a\n" TARGET)
 (define target-file (format "lib/~a.rkt" TARGET))
-(define execute-tests (cond ((equal? TARGET "engine")         execute-engine-tests)
+(define execute-tests (cond ((equal? TARGET "run-resource")   execute-run-resource-tests)
+			    ((equal? TARGET "engine")         execute-engine-tests)
 			    ((equal? TARGET "complications")  execute-complications-tests)
 			    ((equal? TARGET "thread-monitor") execute-thread-monitor-tests)
-			    (else                            (error "Unrecognised target" TARGET))))
+			    (else                             (error "Unrecognised target" TARGET))))
 
 (define PORT (string->number (getenv "PORT")))
 (cond ((not PORT) (error "Need to specify HTTP port using the PORT environment variable")))
