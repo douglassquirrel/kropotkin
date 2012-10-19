@@ -1,7 +1,7 @@
 #!/usr/bin/racket
 #lang racket
 (require "lib/run-resource.rkt" 
-	 "test/engine-tests.rkt" "test/complications-tests.rkt" "test/thread-monitor-tests.rkt")
+	 "test/engine-tests.rkt" "test/complications-tests.rkt" "test/thread-monitor-tests.rkt" "test/run-resource-tests.rkt")
 
 (file-stream-buffer-mode (current-output-port) 'line)
 
