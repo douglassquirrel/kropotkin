@@ -3,9 +3,12 @@
 (provide fetch-files)
 
 (define (lookup-url-for file)
-  (cond ((equal? file "thread-monitor.rkt") (string->url "http://localhost:8081"))
-	((equal? file "engine.rkt")         (string->url "http://localhost:8082"))
-	((equal? file "complications.rkt")  (string->url "http://localhost:8083"))
+  (cond ((equal? file "run-resource.rkt")    (string->url "http://localhost:8080"))
+	((equal? file "thread-monitor.rkt")  (string->url "http://localhost:8081"))
+	((equal? file "engine.rkt")          (string->url "http://localhost:8082"))
+	((equal? file "complications.rkt")   (string->url "http://localhost:8083"))
+	((equal? file "resource-server.rkt") (string->url "http://localhost:8084"))
+	((equal? file "fetch.rkt")           (string->url "http://localhost:8085"))
 	(else (error "lookup failed for file" file))))
 
 (define (slurp-to-file url file-path)
