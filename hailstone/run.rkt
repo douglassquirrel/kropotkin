@@ -1,6 +1,6 @@
 #!/usr/bin/racket
 #lang racket
-(require "../core/lib/run-resource.rkt" "hailstone-tests.rkt")
+(require "lib/run-resource.rkt" "hailstone-tests.rkt")
 
 (file-stream-buffer-mode (current-output-port) 'line)
 
