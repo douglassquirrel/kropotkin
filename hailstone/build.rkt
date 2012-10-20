@@ -1,14 +1,11 @@
 #!/usr/bin/racket
 #lang racket
-(require "bootstrap/fetch.rkt" 
-	 "bootstrap/file-permissions.rkt")
+(require "bootstrap.rkt")
 
 (fetch-files (list "run-resource.rkt"
 		   "thread-monitor.rkt" 
 		   "engine.rkt" 
 		   "complications.rkt"
-		   "resource-server.rkt")
-	     "lib")
+		   "resource-server.rkt"))
 
-(make-user-non-executable "build.rkt")
-(make-user-executable "run.rkt")
+(switch-executables)
