@@ -21,7 +21,7 @@ if [ $ACTION = "build" ]; then
 elif [ $ACTION = "run" ]; then
     BUILD_DIR="/tmp/$TARGET/build"
     if [ ! -d "$BUILD_DIR" ]; then echo "Could not locate target directory $BUILD_DIR"; exit 1; fi
-    RUN_DIR="/tmp/$TARGET-run-"`date +%Y-%B-%d-%H-%M-%S`
+    RUN_DIR="/tmp/$TARGET/run-"`date +%Y-%B-%d-%H-%M-%S`
     rm -rf $RUN_DIR
     mkdir -p $RUN_DIR
     cp -R $BUILD_DIR/* $RUN_DIR

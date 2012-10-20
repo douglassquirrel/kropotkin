@@ -11,13 +11,17 @@
 	((equal? file "fetch.rkt")           (string->url "http://localhost:8085"))
 	(else (error "lookup failed for file" file))))
 
+;(define FETCH_PORT (string->number (getenv "FETCH_PORT")))
+;(cond ((not FETCH_PORT) (error "Need to specify local port for fetching resources using the FETCH_PORT environment variable")))
+;(printf "Running with fetch port ~a\n" FETCH_PORT)
+;(define (url-builder file) (string->url (format "http://localhost:~a/~a" FETCH_PORT file)))
+
 (define (slurp-to-file url file-path)
   (define file-bytes (call/input-url url get-pure-port port->bytes))
   (call-with-output-file file-path (lambda (out) (write-bytes file-bytes out)))
   (void))
 
-(define (fetch-file file-name dir) 
-  (define file-path (build-path dir file-name))
-  (slurp-to-file (lookup-url-for file-name) file-path))
-(define (fetch-files list-of-files dir) (for-each (lambda (file) (fetch-file file dir)) list-of-files))
+(define (file-fetcher make-url dir) (lambda (file) (slurp-to-file (make-url file) (build-path dir file))))
+
+(define (fetch-files list-of-files dir [make-url lookup-url-for]) (for-each (file-fetcher make-url dir) list-of-files))
 
