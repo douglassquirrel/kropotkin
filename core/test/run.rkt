@@ -2,7 +2,7 @@
 #lang racket
 (require "lib/run-resource.rkt" 
 	 "test/engine-tests.rkt" "test/complications-tests.rkt" "test/thread-monitor-tests.rkt" 
-	 "test/run-resource-tests.rkt" "test/resource-server-tests.rkt")
+	 "test/run-resource-tests.rkt" "test/resource-server-tests.rkt" "test/fetch-tests.rkt")
 
 (file-stream-buffer-mode (current-output-port) 'line)
 
@@ -15,6 +15,7 @@
 			    ((equal? TARGET "complications")   execute-complications-tests)
 			    ((equal? TARGET "thread-monitor")  execute-thread-monitor-tests)
 			    ((equal? TARGET "resource-server") execute-resource-server-tests)
+			    ((equal? TARGET "fetch")           execute-fetch-tests)
 			    (else                             (error "Unrecognised target" TARGET))))
 
 (define PORT (string->number (getenv "PORT")))
