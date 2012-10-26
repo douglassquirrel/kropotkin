@@ -1,11 +1,11 @@
 #!/usr/bin/racket
 #lang racket
-(require "lib/run-resource.rkt" "hailstone-tests.rkt")
+(require "hailstone-tests.rkt")
 
 (file-stream-buffer-mode (current-output-port) 'line)
+(define OUTPUT_DIR (getenv "OUTPUT_DIR"))
 
-(define PORT (string->number (getenv "PORT")))
-(cond ((not PORT) (error "Need to specify HTTP port using the PORT environment variable")))
-(printf "Running with port ~a\n" PORT)
+(cond ((execute-tests) (copy-file "hailstone.rkt" (build-path OUTPUT_DIR "hailstone.rkt")))
+      (else            (displayln "Tests failed, not deploying")))
 
-(run-resource "hailstone.rkt" execute-tests PORT)
+
