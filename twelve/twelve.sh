@@ -3,12 +3,13 @@
 TARGET=$1
 echo $TARGET
 if [ $TARGET = "hailstone" ]; then
-    SOURCE="../examples/hailstone/hailstone"
-    PORT=9090
+    export SOURCE="../examples/hailstone/hailstone"\
+           PORT=9090
 elif [ $TARGET = "test-harness" ]; then
-    SOURCE="../core"
-    PORT=8080
-    TEST_PORT=3141
+    export TARGET="test-harness"\
+           SOURCE="../core"\
+           PORT=8080\
+           TEST_PORT=3141
 else
     echo "Unknown service"
     exit 1
