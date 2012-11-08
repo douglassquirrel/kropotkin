@@ -1,5 +1,5 @@
 #lang racket
-(require rackunit rackunit/text-ui "../lib/test-harness.rkt")
+(require rackunit rackunit/text-ui "test-harness.rkt")
 (provide execute-test-harness-tests)
 
 (define tests (test-suite "test-harness unit tests"
