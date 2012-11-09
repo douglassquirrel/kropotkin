@@ -7,7 +7,12 @@ if [ $TARGET = "hailstone" ]; then
            PORT=9090
 elif [ $TARGET = "test-harness" ]; then
     export SOURCE="../core/test-harness"\
-           PORT=8080
+           PORT=9091
+elif [ $TARGET = "secretary" ]; then
+    export SOURCE="publisher/secretary"\
+           PORT=8080\
+           INPUT_DIR=`mktemp -d`\
+           PUBLISH_DIR=`mktemp -d`
 else
     echo "Unknown service"
     exit 1
