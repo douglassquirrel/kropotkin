@@ -1,11 +1,10 @@
 #!/usr/bin/racket
 #lang racket
-(require "hailstone-tests.rkt")
+(require "../catalog/catalog-tests.rkt")
 
 (file-stream-buffer-mode (current-output-port) 'line)
-(define OUTPUT_DIR (getenv "OUTPUT_DIR"))
 
-(cond ((execute-tests) (copy-file "hailstone.rkt" (build-path OUTPUT_DIR "hailstone.rkt")))
+(cond ((execute-tests) (displayln "Tests succeeded"))
       (else            (displayln "Tests failed, not deploying")))
 
 

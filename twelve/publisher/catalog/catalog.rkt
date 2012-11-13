@@ -1,8 +1,9 @@
 #lang racket
 (require "../vendor/planet/jaymccarthy/sqlite.rkt")
-(provide add-to-catalog)
+(provide add-to-catalog get-latest-with-name)
 
-(define (add-to-catalog) #t)
+(define (add-to-catalog #:name name #:creation-datetime creation-datetime #:contents contents) #t)
+(define (get-latest-with-name name) #t)
 
 ; (define db (open (string->path "test.s3")))
 ; (exec/ignore db "create table tbl4(one varchar(10), two smallint)")
