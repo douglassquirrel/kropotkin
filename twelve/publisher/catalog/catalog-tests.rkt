@@ -4,7 +4,7 @@
 
 (random-seed 314159265)
 (define (add-test-data-to-catalog name [creation-datetime "2012-01-01 00:00:00"])
-  (let ((random-data (format "~a" (random 1000000))))
+  (let ((random-data (string->bytes/utf-8 (format "~a" (random 1000000)))))
     (add-to-catalog #:name name #:creation-datetime creation-datetime #:contents random-data)
     random-data))
 
@@ -17,7 +17,13 @@
 				     (let ((data-1 (add-test-data-to-catalog "test-two-add-1"))
 				           (data-2 (add-test-data-to-catalog "test-two-add-2")))
 				       (check-equal? (get-latest-with-name "test-two-add-1") data-1)
-				       (check-equal? (get-latest-with-name "test-two-add-2") data-2)))))
+				       (check-equal? (get-latest-with-name "test-two-add-2") data-2)))
+			  (test-case "add multiple items with same name in any order, always retrieve latest"
+				     (add-test-data-to-catalog "test-multiple-same" "2012-01-01 01:01:01")
+				     (let ((most-recent-data (add-test-data-to-catalog "test-multiple-same" "2012-02-02 02:02:02")))
+				       (check-equal? (get-latest-with-name "test-multiple-same") most-recent-data)
+				       (add-test-data-to-catalog "test-multiple-same" "2012-01-03 03:03:03")
+				       (check-equal? (get-latest-with-name "test-multiple-same") most-recent-data)))))
 
 (define (execute-catalog-tests)
   (let ((number-of-failures (run-tests tests 'verbose)))

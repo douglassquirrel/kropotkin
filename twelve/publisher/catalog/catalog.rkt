@@ -1,6 +1,10 @@
 #lang racket
 (require "../vendor/planet/jaymccarthy/sqlite.rkt")
-(provide add-to-catalog get-latest-with-name)
+(define DATETIME_REGEX #rx".*")
+
+(provide/contract
+ (add-to-catalog (#:name string? #:creation-datetime (and/c string? DATETIME_REGEX) #:contents bytes? . -> . void?))
+ (get-latest-with-name (string? . -> . (or/c bytes? #f))))
 
 (define CREATE-SQL   "create table catalog(name text, creation_datetime int, contents blob)")
 (define STORE-SQL    "insert into catalog (name, creation_datetime, contents) values (?, ?, ?)")
