@@ -1,5 +1,7 @@
 #!/bin/bash
 
+CATALOG_DIR=`mktemp -d`
+
 TARGET=$1
 echo $TARGET
 if [ $TARGET = "hailstone" ]; then
@@ -8,14 +10,10 @@ if [ $TARGET = "hailstone" ]; then
 elif [ $TARGET = "test-harness" ]; then
     export SOURCE="../core/test-harness"\
            PORT=9091
-elif [ $TARGET = "secretary" ]; then
-    CATALOG_DIR=`mktemp -d`
-    export SOURCE="publisher"\
-           TARGET="secretary"\
-           PORT=8080\
-           CATALOG_FILE="$CATALOG_DIR/catalog.s3"\
-           INPUT_DIR=`mktemp -d`\
-           PUBLISH_DIR=`mktemp -d`
+elif [ $TARGET = "catalog" ]; then
+    export SOURCE="publisher/catalog"\
+           PORT=8000 \
+           CATALOG_FILE="$CATALOG_DIR/catalog.s3"
 else
     echo "Unknown service"
     exit 1
