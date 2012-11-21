@@ -14,6 +14,10 @@ elif [ $TARGET = "catalog" ]; then
     export SOURCE="publisher/catalog"\
            PORT=8000 \
            CATALOG_FILE="$CATALOG_DIR/catalog.s3"
+elif [ $TARGET = "secretary" ]; then
+    export SOURCE="publisher/secretary"\
+           PORT=8001\
+           CATALOG_URL="http://localhost:8000/catalog.tar"
 else
     echo "Unknown service"
     exit 1
