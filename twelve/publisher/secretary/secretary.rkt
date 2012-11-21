@@ -2,8 +2,6 @@
 (require racket/date "library/catalog.rkt")
 (provide run-secretary)
 
-;add contract
-
 (define INPUT_DIR (getenv "INPUT_DIR"))
 (printf "Secretary monitoring ~a\n" INPUT_DIR)
 

@@ -1,6 +1,6 @@
 #lang racket
 (require "vendor/planet/jaymccarthy/sqlite.rkt")
-(define DATETIME_REGEX #rx".*")
+(define DATETIME_REGEX #px"\\d\\d\\d\\d-\\d\\d-\\d\\d \\d\\d:\\d\\d:\\d\\d")
 
 (provide/contract
  (add-to-catalog (#:name string? #:creation-datetime (and/c string? DATETIME_REGEX) #:contents bytes? . -> . void?))
