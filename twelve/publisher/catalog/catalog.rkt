@@ -6,7 +6,7 @@
  (add-to-catalog (#:name string? #:creation-datetime (and/c string? DATETIME_REGEX) #:contents bytes? . -> . void?))
  (get-latest-with-name (string? . -> . (or/c bytes? #f))))
 
-(define CREATE-SQL   "create table if not exists catalog(name text, creation_datetime int, contents blob)")
+(define CREATE-SQL   "create table if not exists catalog(name text, creation_datetime text, contents blob)")
 (define STORE-SQL    "insert into catalog (name, creation_datetime, contents) values (?, ?, ?)")
 (define RETRIEVE-SQL "select contents from catalog where name = ? order by creation_datetime desc")
 

@@ -1,9 +1,8 @@
 #lang racket
-;(require "secretary.rkt")
+(require rackunit rackunit/text-ui "secretary.rkt")
 (provide execute-tests)
 
 (define (execute-tests)
-  (displayln "Executing secretary tests")
-  #f)
-
+  (displayln "No tests implemented at this time")
+  #t)
 
