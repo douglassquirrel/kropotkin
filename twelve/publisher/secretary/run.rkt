@@ -4,7 +4,9 @@
 
 (file-stream-buffer-mode (current-output-port) 'line)
 
-(cond ((execute-secretary-tests) (displayln "Tests succeeded"))
-      (else                    (displayln "Tests failed, not deploying")))
+(cond ((execute-tests) ((displayln "Tests succeeded, deploying")
+			 ;(start-secretary)
+			))
+      (else            (displayln "Tests failed, not deploying")))
 
 

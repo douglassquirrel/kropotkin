@@ -18,6 +18,8 @@ elif [ $TARGET = "secretary-build" ]; then
     export SOURCE="publisher/secretary"\
            PORT=8001\
            CATALOG_URL="http://localhost:8000/catalog.tar"
+elif [ $TARGET = "secretary-run" ]; then
+    export SOURCE="http://localhost:8001/secretary.tar"
 else
     echo "Unknown service"
     exit 1
