@@ -22,6 +22,13 @@ elif [ $TARGET = "secretary-run" ]; then
     export SOURCE="http://localhost:8001/secretary.tar"\
            INPUT_DIR=`mktemp -d`\
            CATALOG_FILE="$CATALOG_DIR/catalog.s3"
+elif [ $TARGET = "publisher-build" ]; then
+    export SOURCE="publisher/publisher"\
+           PORT=8002\
+           CATALOG_URL="http://localhost:8000/catalog.tar"
+elif [ $TARGET = "publisher-run" ]; then
+    export SOURCE="http://localhost:8002/publisher.tar"\
+           CATALOG_FILE="$CATALOG_DIR/catalog.s3"
 else
     echo "Unknown service"
     exit 1
