@@ -6,13 +6,13 @@ TARGET=$1
 echo $TARGET
 if [ $TARGET = "hailstone" ]; then
     export SOURCE="../examples/hailstone/hailstone"\
-           PORT=9090
+           PORT=9000
 elif [ $TARGET = "test-harness" ]; then
     export SOURCE="../core/test-harness"\
-           PORT=9091
+           PORT=9001
 elif [ $TARGET = "catalog" ]; then
     export SOURCE="publisher/catalog"\
-           PORT=8000 \
+           PORT=8000\
            CATALOG_FILE="$CATALOG_DIR/catalog.s3"
 elif [ $TARGET = "secretary-build" ]; then
     export SOURCE="publisher/secretary"\
@@ -28,6 +28,8 @@ elif [ $TARGET = "publisher-build" ]; then
            CATALOG_URL="http://localhost:8000/catalog.tar"
 elif [ $TARGET = "publisher-run" ]; then
     export SOURCE="http://localhost:8002/publisher.tar"\
+           TEST_PORT=60000\
+           PORT=9002\
            CATALOG_FILE="$CATALOG_DIR/catalog.s3"
 else
     echo "Unknown service"

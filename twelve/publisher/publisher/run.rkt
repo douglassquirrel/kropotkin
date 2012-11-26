@@ -4,8 +4,12 @@
 
 (file-stream-buffer-mode (current-output-port) 'line)
 
+(cond ((not (getenv "PORT")) (error "Environment variable PORT not set")))
+(define PORT (string->number (getenv "PORT")))
+
+
 (cond ((execute-tests) ((displayln "Tests succeeded, deploying")
-			(run-publisher)))
+			(start-server PORT)))
       (else            (displayln "Tests failed, not deploying")))
 
 
