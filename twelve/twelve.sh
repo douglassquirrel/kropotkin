@@ -3,7 +3,13 @@
 CATALOG_DIR=`mktemp -d`
 
 TARGET=$1
-echo $TARGET
+if [[ $# -ge 2 && $2 = "stop" ]]; then
+    echo "Stopping $TARGET"
+    pkill -9 -g `pgrep -of "twelve.sh $TARGET"`
+    exit 0
+fi
+
+echo "Starting $TARGET"
 if [ $TARGET = "hailstone" ]; then
     export SOURCE="../examples/hailstone/hailstone"\
            PORT=9000
