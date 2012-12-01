@@ -8,6 +8,6 @@
    (list #"File not found")))
 
 (define (start-server port)
-  (printf "Starting publisher on port ~a\n" port)
+  (printf "Starting tycoon on port ~a\n" port)
   (serve/servlet fetch-file-from-catalog #:port port #:servlet-regexp #rx"" #:command-line? #t)
-  (displayln "Publisher started"))
+  (displayln "Tycoon started"))

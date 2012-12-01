@@ -1,5 +1,5 @@
 #lang racket
-(require rackunit rackunit/text-ui net/url "publisher.rkt")
+(require rackunit rackunit/text-ui net/url "tycoon.rkt")
 (provide execute-tests)
 
 (cond ((not (getenv "TEST_PORT")) (error "Environment variable TEST_PORT not set")))
@@ -22,7 +22,7 @@
 	  (else                                      (sleep 0.1)
 				                     (test-http-response #:from port #:within-milliseconds (- within-milliseconds 100))))))
 
-(define tests (test-suite "Publisher publisher tests"
+(define tests (test-suite "Publisher tycoon tests"
 			  (test-case "404 response for nonexistent entry" 
 				     (check-eq? (response-code NONEXISTENT_ENTRY_URL) 404))))
 
