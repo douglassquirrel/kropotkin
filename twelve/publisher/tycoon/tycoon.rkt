@@ -14,9 +14,10 @@
 (define (path-of-request request) (url-path (request-uri request)))
 
 (define (serve-request cat request)
-  (let ((path (path/param-path (first (path-of-request request)))))
-    (cond ((get-latest-with-name cat path) (make-response OK        #"foo"))
-	  (else                            (make-response NOT_FOUND #"File not found")))))
+  (let* ((path (path/param-path (first (path-of-request request))))
+	 (content-bytes (get-latest-with-name cat path)))
+    (cond (content-bytes (make-response OK        content-bytes))
+	  (else          (make-response NOT_FOUND #"File not found")))))
 
 (define (start-server port cat)
   (printf "Starting tycoon on port ~a\n" port)
