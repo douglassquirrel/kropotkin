@@ -26,7 +26,12 @@
 				     (let ((most-recent-data (add-test-data-to-catalog "test-multiple-same" "2012-02-02 02:02:02")))
 				       (check-equal? (get-latest-with-name cat "test-multiple-same") most-recent-data)
 				       (add-test-data-to-catalog "test-multiple-same" "2012-01-03 03:03:03")
-				       (check-equal? (get-latest-with-name cat "test-multiple-same") most-recent-data)))))
+				       (check-equal? (get-latest-with-name cat "test-multiple-same") most-recent-data)))
+			  (test-case "add and retrieve from in-memory catalog"
+				     (let ((memory-cat (make-memory-catalog)))
+				       (add-to-catalog #:catalog memory-cat #:name "test-memory-add" #:creation-datetime "2012-03-03 03:03:03"
+						       #:contents #"memory")
+				       (check-equal? (get-latest-with-name memory-cat "test-memory-add") #"memory")))))
 
 (define (execute-catalog-tests)
   (let ((number-of-failures (run-tests tests 'verbose)))

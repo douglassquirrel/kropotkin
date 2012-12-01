@@ -5,7 +5,7 @@
 (file-stream-buffer-mode (current-output-port) 'line)
 (define OUTPUT_DIR (getenv "OUTPUT_DIR"))
 
-(cond ((execute-catalog-tests) (tar (build-path OUTPUT_DIR "catalog.tar") "catalog.rkt" "vendor"))
+(cond ((execute-catalog-tests) (tar (build-path OUTPUT_DIR "catalog.tar") "catalog.rkt" "vendor") (void))
       (else                    (displayln "Tests failed, not deploying")))
 
 
