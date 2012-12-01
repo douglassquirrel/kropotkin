@@ -16,6 +16,8 @@
 			  (test-case "add and retrieve one item" 
 				     (let ((data (add-test-data-to-catalog "test-one-add")))
 				       (check-equal? (get-latest-with-name cat "test-one-add") data)))
+			  (test-case "retrieve nonexistent item"
+				     (check-false (get-latest-with-name cat "does not exist")))
 			  (test-case "add and retrieve two items" 
 				     (let ((data-1 (add-test-data-to-catalog "test-two-add-1"))
 				           (data-2 (add-test-data-to-catalog "test-two-add-2")))
