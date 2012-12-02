@@ -2,7 +2,8 @@
 (require rackunit rackunit/text-ui "catalog.rkt")
 (provide execute-catalog-tests)
 
-(define CATALOG_FILE (getenv "CATALOG_FILE"))
+(define CATALOG_DIR (make-temporary-file "twelve-tmp-~a" 'directory))
+(define CATALOG_FILE (path->string (build-path CATALOG_DIR "test-catalog.s3")))
 (define cat (make-catalog CATALOG_FILE))
 
 (random-seed 314159265)
