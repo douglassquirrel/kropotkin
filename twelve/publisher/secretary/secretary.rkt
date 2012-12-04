@@ -2,7 +2,9 @@
 (require racket/date "library/catalog.rkt")
 (provide run-secretary)
 
-(define INPUT_DIR (getenv "INPUT_DIR"))
+(define INPUT_DIR (getenv "SECRETARY_INPUT_DIR"))
+(cond ((false? INPUT_DIR) (error "Need to set SECRETARY_INPUT_DIR"))
+      ((not (directory-exists? INPUT_DIR)) (make-directory INPUT_DIR)))
 (printf "Secretary monitoring ~a\n" INPUT_DIR)
 
 (define (creation-datetime file)

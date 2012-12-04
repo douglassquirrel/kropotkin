@@ -1,7 +1,5 @@
 #!/bin/bash
 
-CATALOG_DIR=`mktemp -d`
-
 TARGET=$1
 if [[ $# -ge 2 && $2 = "stop" ]]; then
     echo "Stopping $TARGET"
@@ -9,33 +7,37 @@ if [[ $# -ge 2 && $2 = "stop" ]]; then
     exit 0
 fi
 
+export HAILSTONE_BUILD_PORT=9000\
+       TEST_HARNESS_BUILD_PORT=9001\
+       CATALOG_BUILD_PORT=8000\
+       CATALOG_URL="http://localhost:8000/catalog.tar"\
+       CATALOG_FILE=`mktemp -d`"catalog.s3"\
+       SECRETARY_BUILD_PORT=8001\
+       SECRETARY_INPUT_DIR="/tmp/secretary-input"\
+       TYCOON_BUILD_PORT=8002\
+       TYCOON_TEST_PORT=60000\
+       TYCOON_PORT=9002
+
 echo "Starting $TARGET"
 if [ $TARGET = "hailstone" ]; then
     export SOURCE="../examples/hailstone/hailstone"\
-           PORT=9000
+           PORT=$HAILSTONE_BUILD_PORT
 elif [ $TARGET = "test-harness" ]; then
     export SOURCE="../core/test-harness"\
-           PORT=9001
+           PORT=$TEST_HARNESS_BUILD_PORT
 elif [ $TARGET = "catalog" ]; then
     export SOURCE="publisher/catalog"\
-           PORT=8000
+           PORT=$CATALOG_BUILD_PORT
 elif [ $TARGET = "secretary-build" ]; then
     export SOURCE="publisher/secretary"\
-           PORT=8001\
-           CATALOG_URL="http://localhost:8000/catalog.tar"
+           PORT=$SECRETARY_BUILD_PORT
 elif [ $TARGET = "secretary-run" ]; then
-    export SOURCE="http://localhost:8001/secretary.tar"\
-           INPUT_DIR=`mktemp -d`\
-           CATALOG_FILE="$CATALOG_DIR/catalog.s3"
+    export SOURCE="http://localhost:8001/secretary.tar"
 elif [ $TARGET = "tycoon-build" ]; then
     export SOURCE="publisher/tycoon"\
-           PORT=8002\
-           CATALOG_URL="http://localhost:8000/catalog.tar"
+           PORT=$TYCOON_BUILD_PORT
 elif [ $TARGET = "tycoon-run" ]; then
-    export SOURCE="http://localhost:8002/tycoon.tar"\
-           TEST_PORT=60000\
-           PORT=9002\
-           CATALOG_FILE="$CATALOG_DIR/catalog.s3"
+    export SOURCE="http://localhost:8002/tycoon.tar"
 else
     echo "Unknown service"
     exit 1
@@ -56,6 +58,7 @@ fi
 EXECUTABLE=`find $TARGET_DIR -maxdepth 1 -executable -type f ! -name '*~'`
 if [ -z "$EXECUTABLE" -o `echo "$EXECUTABLE" | wc -l` -ne 1 ]; then echo "Could not locate unique executable"; exit 1; fi
 EXECUTABLE=`basename $EXECUTABLE`
+
 
 echo "Running executable $EXECUTABLE in $TARGET_DIR"
 (cd $TARGET_DIR; ./$EXECUTABLE)

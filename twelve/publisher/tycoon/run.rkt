@@ -4,8 +4,8 @@
 
 (file-stream-buffer-mode (current-output-port) 'line)
 
-(cond ((not (getenv "PORT")) (error "Environment variable PORT not set")))
-(define PORT (string->number (getenv "PORT")))
+(cond ((not (getenv "TYCOON_PORT")) (error "Environment variable TYCOON_PORT not set")))
+(define PORT (string->number (getenv "TYCOON_PORT")))
 (cond ((not (getenv "CATALOG_FILE")) (error "Environment variable CATALOG_FILE not set")))
 (define CATALOG_FILE (getenv "CATALOG_FILE"))
 

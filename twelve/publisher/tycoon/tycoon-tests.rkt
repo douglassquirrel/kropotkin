@@ -3,8 +3,8 @@
 (require "tycoon.rkt" "library/catalog.rkt" "http-checks.rkt")
 (provide execute-tests)
 
-(cond ((not (getenv "TEST_PORT")) (error "Environment variable TEST_PORT not set")))
-(define TEST_PORT (string->number (getenv "TEST_PORT")))
+(cond ((not (getenv "TYCOON_TEST_PORT")) (error "Environment variable TYCOON_TEST_PORT not set")))
+(define TEST_PORT (string->number (getenv "TYCOON_TEST_PORT")))
 (define ROOT_URL              (string->url (format "http://localhost:~a"                    TEST_PORT)))
 (define NONEXISTENT_ENTRY_URL (string->url (format "http://localhost:~a/doesnotexist.tar"   TEST_PORT)))
 (define VALID_ENTRY_URL       (string->url (format "http://localhost:~a/test-component.tar" TEST_PORT)))
