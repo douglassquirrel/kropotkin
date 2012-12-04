@@ -1,0 +1,10 @@
+export HAILSTONE_BUILD_PORT=9000\
+       TEST_HARNESS_BUILD_PORT=9001\
+       CATALOG_BUILD_PORT=8000\
+       CATALOG_URL="http://localhost:8000/catalog.tar"\
+       CATALOG_FILE=`mktemp -d`"catalog.s3"\
+       SECRETARY_BUILD_PORT=8001\
+       SECRETARY_INPUT_DIR="/tmp/secretary-input"\
+       TYCOON_BUILD_PORT=8002\
+       TYCOON_TEST_PORT=60000\
+       TYCOON_PORT=9002
