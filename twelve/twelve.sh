@@ -15,13 +15,13 @@ if [ $TARGET = "hailstone" ]; then
 elif [ $TARGET = "test-harness" ]; then
     ./deploy.sh "../core/test-harness" $TEST_HARNESS_BUILD_PORT
 elif [ $TARGET = "catalog" ]; then
-    ./deploy.sh "publisher/catalog" $CATALOG_BUILD_PORT
+    ./deploy.sh "../publisher/catalog" $CATALOG_BUILD_PORT
 elif [ $TARGET = "secretary-build" ]; then
-    ./deploy.sh "publisher/secretary" $SECRETARY_BUILD_PORT
+    ./deploy.sh "../publisher/secretary" $SECRETARY_BUILD_PORT
 elif [ $TARGET = "secretary-run" ]; then
     ./deploy.sh "http://localhost:8001/secretary.tar"
 elif [ $TARGET = "tycoon-build" ]; then
-    ./deploy.sh "publisher/tycoon" $TYCOON_BUILD_PORT
+    ./deploy.sh "../publisher/tycoon" $TYCOON_BUILD_PORT
 elif [ $TARGET = "tycoon-run" ]; then
     ./deploy.sh "http://localhost:8002/tycoon.tar"
 elif [ $TARGET = "courier" ]; then
