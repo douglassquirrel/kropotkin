@@ -24,6 +24,8 @@ elif [ $TARGET = "tycoon-build" ]; then
     ./deploy.sh "publisher/tycoon" $TYCOON_BUILD_PORT
 elif [ $TARGET = "tycoon-run" ]; then
     ./deploy.sh "http://localhost:8002/tycoon.tar"
+elif [ $TARGET = "courier" ]; then
+    ./deploy.sh "../courier"
 else
     echo "Unknown service"
     exit 1
