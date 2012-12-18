@@ -1,3 +1,4 @@
+set -e
 SOURCE=$1
 if [[ $# -ge 2 ]]; then
     PORT=$2

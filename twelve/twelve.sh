@@ -1,5 +1,6 @@
 #!/bin/bash
 
+set -e
 source env.sh
 
 TARGET=$1

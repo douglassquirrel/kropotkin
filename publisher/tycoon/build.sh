@@ -1,3 +1,4 @@
+set -e
 mkdir library
 wget -O library/catalog.tar $CATALOG_URL
 tar xv -C library -f library/catalog.tar
