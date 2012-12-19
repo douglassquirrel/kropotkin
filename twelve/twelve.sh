@@ -27,6 +27,8 @@ elif [ $TARGET = "tycoon-run" ]; then
     ./deploy.sh "http://localhost:8002/tycoon.tar"
 elif [ $TARGET = "courier" ]; then
     ./deploy.sh "../courier"
+elif [ $TARGET = "http-server-tools" ]; then
+    ./deploy.sh "../core/http-server-tools" 
 else
     echo "Unknown service"
     exit 1
