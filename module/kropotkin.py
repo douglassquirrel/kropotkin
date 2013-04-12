@@ -68,7 +68,7 @@ def start_factspace(name, port, components_directory, kropotkin_url):
                 self.wfile.write(text)
 
     content = dumps({'name':name, 'port':port})
-    if (name == 'kropotkin'):
+    if (name == 'Kropotkin'):
         save_fact('service-started', content)
     else:
         store_fact(kropotkin_url, content)
