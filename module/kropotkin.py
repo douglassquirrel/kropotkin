@@ -7,8 +7,8 @@ from tempfile import mkdtemp
 from time import time
 from urlparse import urlparse, parse_qsl
 
-def store_fact(factspace_url, content):
-    url = factspace_url + '/service-started'
+def store_fact(factspace_url, name, content):
+    url = factspace_url + '/' + name
     headers = {'content-type':'application/x-www-form-urlencoded'}
     Http().request(url, "POST", content, headers)
 
@@ -71,7 +71,7 @@ def start_factspace(name, port, components_directory, kropotkin_url):
     if (name == 'Kropotkin'):
         save_fact('service-started', content)
     else:
-        store_fact(kropotkin_url, content)
+        store_fact(kropotkin_url, 'service-started', content)
 
     server = HTTPServer(('', port), handler)
     server.serve_forever()
