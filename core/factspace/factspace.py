@@ -10,19 +10,14 @@ from tempfile import mkdtemp
 from time import time
 from urlparse import urlparse, parse_qsl
 
-class facts_handler(BaseHTTPRequestHandler):
-    def __init__(self, request, client_address, server):
-        self.facts_dir = mkdtemp()
-        print "Storing facts in %s" % self.facts_dir
-        BaseHTTPRequestHandler.__init__(self, request, client_address, server)
-
+class base_factspace_handler(BaseHTTPRequestHandler):
     def do_GET(self):
         parsed_url = urlparse(self.path)
         url_path = parsed_url.path
         query_params = set(parse_qsl(parsed_url.query))
 
         if url_path == '/':
-            self.give_response(200, '%s Factspace\n' % name)
+            self.give_response(200, '%s Factspace\n' % self.server_name)
         else:
             fact_type = url_path.split('/')[1]
             fact_files = glob(join(self.facts_dir, fact_type + ".*"))
@@ -67,7 +62,12 @@ def start_factspace(name, port, kropotkin_url):
     print "Starting factspace %s on port %d; kropotkin at %s"\
         % (name, port, kropotkin_url)
 
-    server = HTTPServer(('', port), facts_handler)
+    class factspace_handler(base_factspace_handler):
+        facts_dir = mkdtemp()
+        server_name = name
+    print "Storing facts in %s" % factspace_handler.facts_dir
+
+    server = HTTPServer(('', port), factspace_handler)
     process = Process(target=server.serve_forever)
     process.start()
 
