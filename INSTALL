@@ -1,4 +1,6 @@
-cd module
+PYTHON
+
+cd python
 python setup.py sdist
 cd dist
 tar xzvf kropotkin-0.0.1.tar.gz
