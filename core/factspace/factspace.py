@@ -8,7 +8,7 @@ from multiprocessing import Process
 from os.path import join
 from tempfile import mkdtemp
 from time import time
-from urlparse import urlparse, parse_qs, parse_qsl
+from urlparse import urlparse, parse_qs
 
 class base_factspace_handler(BaseHTTPRequestHandler):
     def do_GET(self):
