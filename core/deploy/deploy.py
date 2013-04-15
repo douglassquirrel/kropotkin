@@ -7,13 +7,13 @@ from os.path import isdir, join
 from subprocess import Popen
 from time import sleep
 
-def start_component(directory, kropotkin_url):
+def deploy(directory, kropotkin_url):
     nodes = set(glob(join(directory, "*")))
     dirs = set([f for f in nodes if isdir(f)])
     files = nodes - dirs
 
     for d in dirs:
-        start_component(join(directory, d), kropotkin_url)
+        deploy(join(directory, d), kropotkin_url)
 
     executables = [f for f in files if access(join(directory, f), X_OK)]
     if (len(executables) != 1):
@@ -28,7 +28,7 @@ if __name__=="__main__":
     max_time = 0
     while True:
         sleep(1)
-        resp, content = Http().request(KROPOTKIN_URL + '/start-component')
+        resp, content = Http().request(KROPOTKIN_URL + '/deploy')
         if resp.status != 200:
             raise Exception('Unable to check %s' % KROPOTKIN_URL)
         requests = loads(content)
@@ -37,4 +37,4 @@ if __name__=="__main__":
         latest_request = max(requests, key=lambda r: r['time'])
         if latest_request['time'] > max_time:
             max_time = latest_request['time']
-            start_component(latest_request['directory'], KROPOTKIN_URL)
+            deploy(latest_request['directory'], KROPOTKIN_URL)
