@@ -8,13 +8,23 @@ from multiprocessing import Process
 from os.path import join
 from tempfile import mkdtemp
 from time import time
-from urlparse import urlparse, parse_qsl
+from urlparse import urlparse, parse_qs, parse_qsl
 
 class base_factspace_handler(BaseHTTPRequestHandler):
     def do_GET(self):
         parsed_url = urlparse(self.path)
         url_path = parsed_url.path
-        query_params = set(parse_qsl(parsed_url.query))
+        query_params = parse_qs(parsed_url.query)
+        for key, value in query_params.items():
+            query_params[key] = value[0]
+
+        try:
+            criteria = query_params['kropotkin_criteria']
+            # extract stamp and result from criteria
+            query_params.pop('kropotkin_criteria', None)
+        except KeyError:
+            stamp = False
+            result = 'all'
 
         if url_path == '/':
             self.give_response(200, '%s Factspace\n' % self.server_name)
@@ -22,7 +32,8 @@ class base_factspace_handler(BaseHTTPRequestHandler):
             fact_type = url_path.split('/')[1]
             fact_files = glob(join(self.facts_dir, fact_type + ".*"))
             facts = [self.load_fact(f) for f in fact_files]
-            facts = [f for f in facts if query_params < set(f.viewitems())]
+            query_params_set = set(query_params.items())
+            facts = [f for f in facts if query_params_set < set(f.viewitems())]
             self.give_response(200, dumps(facts), 'application/json')
 
     def do_POST(self):
