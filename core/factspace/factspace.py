@@ -34,7 +34,7 @@ class base_factspace_handler(BaseHTTPRequestHandler):
 
             if stamp:
                 fact_files = [f for f in fact_files if not stamp in f]
-            fact_files.sort(key=lambda f: f.split('.')[1])
+            fact_files.sort(key=lambda f: int(f.split('.')[1]))
             if fact_files and result == 'oldest':
                 fact_files = [fact_files[0]]
             elif fact_files and result == 'newest':
