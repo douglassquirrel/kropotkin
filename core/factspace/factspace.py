@@ -5,6 +5,7 @@ from httplib2 import Http
 from json import dumps, load
 from kropotkin import store_fact
 from multiprocessing import Process
+from os import rename
 from os.path import join
 from tempfile import mkdtemp
 from time import time
@@ -16,33 +17,42 @@ class base_factspace_handler(BaseHTTPRequestHandler):
         url_path = parsed_url.path
         query_params = dict(parse_qsl(parsed_url.query))
 
-        stamp = False
-        result = 'all'
-        try:
-            criteria_str = query_params['kropotkin_criteria']
-            criteria_str = criteria_str.replace('-', '=').replace(',', '&')
-            criteria = dict(parse_qsl(criteria_str))
-            try:
-                stamp  = criteria['stamp']
-            except KeyError:
-                pass
-            try:
-                result = criteria['result']
-            except KeyError:
-                pass
-            query_params.pop('kropotkin_criteria', None)
-        except KeyError:
-            pass
-
         if url_path == '/':
             self.give_response(200, '%s Factspace\n' % self.server_name)
         else:
             fact_type = url_path.split('/')[1]
-            fact_files = glob(join(self.facts_dir, fact_type + ".*"))
-            facts = [self.load_fact(f) for f in fact_files]
-            query_params_set = set(query_params.items())
-            facts = [f for f in facts if query_params_set < set(f.viewitems())]
+            facts = self.fetch_facts(fact_type, query_params)
             self.give_response(200, dumps(facts), 'application/json')
+
+    def fetch_facts(self, fact_type, query_params):
+        query_params = query_params.copy()
+        stamp, result = self.extract_kropotkin_criteria(query_params)
+        query_params.pop('kropotkin_criteria', None)
+
+        fact_files = glob(join(self.facts_dir, fact_type + ".*"))
+        fact_files.sort(key=lambda f: int(f.split('.')[1]))
+
+        if stamp:
+            root = stamp.split('.')[0]
+            fact_files = [f for f in fact_files if not root in f]
+
+        query_params_set = set(query_params.items())
+        def query_filter(f):
+            return query_params_set < set(self.load_fact(f).viewitems())
+        fact_files = [f for f in fact_files if query_filter(f)]
+
+        if result == 'oldest':
+            fact_files = fact_files[0:1]
+        elif result == 'newest':
+            fact_files = fact_files[-1:]
+
+        if stamp:
+            for i, f in enumerate(fact_files):
+                new_name = '.'.join([f, stamp])
+                rename(f, new_name)
+                fact_files[i] = new_name
+        
+        return [self.load_fact(f) for f in fact_files]
 
     def do_POST(self):
         fact_type = (urlparse(self.path).path)[1:]
@@ -66,6 +76,25 @@ class base_factspace_handler(BaseHTTPRequestHandler):
         self.end_headers()
         if text:
             self.wfile.write(text)
+
+    def extract_kropotkin_criteria(self, query_params):
+        stamp = False
+        result = 'all'
+        try:
+            criteria_str = query_params['kropotkin_criteria']
+            criteria_str = criteria_str.replace('-', '=').replace(',', '&')
+            criteria = dict(parse_qsl(criteria_str))
+            try:
+                stamp  = criteria['stamp']
+            except KeyError:
+                pass
+            try:
+                result = criteria['result']
+            except KeyError:
+                pass
+        except KeyError:
+            pass
+        return stamp, result
 
     def save_fact(self, fact_type, content):
         tstamp = int(time())
