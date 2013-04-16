@@ -31,6 +31,15 @@ class base_factspace_handler(BaseHTTPRequestHandler):
         else:
             fact_type = url_path.split('/')[1]
             fact_files = glob(join(self.facts_dir, fact_type + ".*"))
+
+            if stamp:
+                fact_files = [f for f in fact_files if not stamp in f]
+            fact_files.sort(key=lambda f: f.split('.')[1])
+            if fact_files and result == 'oldest':
+                fact_files = [fact_files[0]]
+            elif fact_files and result == 'newest':
+                fact_files = [fact_files[-1]]
+
             facts = [self.load_fact(f) for f in fact_files]
             query_params_set = set(query_params.items())
             facts = [f for f in facts if query_params_set < set(f.viewitems())]
