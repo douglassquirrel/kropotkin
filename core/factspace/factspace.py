@@ -7,6 +7,7 @@ from kropotkin import store_fact
 from multiprocessing import Process
 from os import rename
 from os.path import join
+from SocketServer import ThreadingMixIn
 from tempfile import mkdtemp
 from time import time
 from urlparse import urlparse, parse_qsl
@@ -28,7 +29,7 @@ class base_factspace_handler(BaseHTTPRequestHandler):
         query_params = query_params.copy()
         stamp, result = self.extract_kropotkin_criteria(query_params)
         query_params.pop('kropotkin_criteria', None)
-        timeout = 1000 if (result == 'oldest' or result == 'newest') else 0
+        timeout = 2000 if (result == 'oldest' or result == 'newest') else 0
 
         fact_files = []
         finish = self.__now_millis() + timeout
@@ -126,7 +127,9 @@ def start_factspace(name, port, kropotkin_url):
         server_name = name
     print "Storing facts in %s" % factspace_handler.facts_dir
 
-    server = HTTPServer(('', port), factspace_handler)
+    class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
+        pass
+    server = ThreadedHTTPServer(('', port), factspace_handler)
     process = Process(target=server.serve_forever)
     process.start()
 

@@ -19,7 +19,7 @@ def deploy(directory, kropotkin_url):
     if (len(executables) != 1):
         print "%d executables in %s" % (len(executables), directory)
     else:
-        print "Executing: %s" % executables[0]
+        print "Deploying: %s" % executables[0]
         Popen(executables[0], cwd=directory, \
                   env={'KROPOTKIN_URL': kropotkin_url})
 
