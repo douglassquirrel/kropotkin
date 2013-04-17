@@ -108,8 +108,12 @@ class base_factspace_handler(BaseHTTPRequestHandler):
     def save_fact(self, fact_type, content):
         tstamp = int(time())
         name = '.'.join([fact_type, str(tstamp), str(hash(content)), 'fact'])
-        with open(join(self.facts_dir, name), 'w') as fact_file:
+        temp_path = join(self.temp_facts_dir, name)
+        real_path = join(self.facts_dir,      name)
+
+        with open(temp_path, 'w') as fact_file:
             fact_file.write(content)
+        rename(temp_path, real_path)
 
     def load_fact(self, fact_filename):
         with open(fact_filename, 'r') as fact_file:
@@ -123,6 +127,7 @@ def start_factspace(name, port, kropotkin_url):
         % (name, port, kropotkin_url)
 
     class factspace_handler(base_factspace_handler):
+        temp_facts_dir = mkdtemp()
         facts_dir = mkdtemp()
         server_name = name
     print "Storing facts in %s" % factspace_handler.facts_dir
