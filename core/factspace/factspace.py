@@ -51,7 +51,7 @@ class base_factspace_handler(BaseHTTPRequestHandler):
                 new_name = '.'.join([f, stamp])
                 rename(f, new_name)
                 fact_files[i] = new_name
-        
+
         return [self.load_fact(f) for f in fact_files]
 
     def do_POST(self):
@@ -119,8 +119,7 @@ def start_factspace(name, port, kropotkin_url):
     process = Process(target=server.serve_forever)
     process.start()
 
-    content = dumps({'name':name, 'port':port})
-    store_fact(kropotkin_url, 'service-started', content)
+    store_fact(kropotkin_url, 'service-started', {'name':name, 'port':port})
 
 if __name__=="__main__":
     print "Running factspace component"
