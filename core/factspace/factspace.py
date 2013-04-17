@@ -28,18 +28,14 @@ class base_factspace_handler(BaseHTTPRequestHandler):
         query_params = query_params.copy()
         stamp, result = self.extract_kropotkin_criteria(query_params)
         query_params.pop('kropotkin_criteria', None)
+        timeout = 1000 if (result == 'oldest' or result == 'newest') else 0
 
-        fact_files = glob(join(self.facts_dir, fact_type + ".*"))
-        fact_files.sort(key=lambda f: int(f.split('.')[1]))
-
-        if stamp:
-            root = stamp.split('.')[0]
-            fact_files = [f for f in fact_files if not root in f]
-
-        query_params_set = set(query_params.items())
-        def query_filter(f):
-            return query_params_set < set(self.load_fact(f).viewitems())
-        fact_files = [f for f in fact_files if query_filter(f)]
+        fact_files = []
+        finish = self.__now_millis() + timeout
+        while True:
+            fact_files = self.get_fact_files(fact_type, query_params, stamp)
+            if fact_files or self.__now_millis() > finish:
+                break
 
         if result == 'oldest':
             fact_files = fact_files[0:1]
@@ -53,6 +49,18 @@ class base_factspace_handler(BaseHTTPRequestHandler):
                 fact_files[i] = new_name
 
         return [self.load_fact(f) for f in fact_files]
+
+    def get_fact_files(self, fact_type, query_params, stamp):
+        fact_files = glob(join(self.facts_dir, fact_type + ".*"))
+        fact_files.sort(key=lambda f: int(f.split('.')[1]))
+
+        if stamp:
+            root = stamp.split('.')[0]
+            fact_files = [f for f in fact_files if not root in f]
+
+        query_params_set = set(query_params.items())
+        match = lambda f: query_params_set < set(self.load_fact(f).viewitems())
+        return [f for f in fact_files if match(f)]
 
     def do_POST(self):
         fact_type = (urlparse(self.path).path)[1:]
@@ -105,6 +113,9 @@ class base_factspace_handler(BaseHTTPRequestHandler):
     def load_fact(self, fact_filename):
         with open(fact_filename, 'r') as fact_file:
             return load(fact_file)
+
+    def __now_millis(self):
+        return int(round(time() * 1000))
 
 def start_factspace(name, port, kropotkin_url):
     print "Starting factspace %s on port %d; kropotkin at %s"\
