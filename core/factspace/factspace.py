@@ -25,11 +25,18 @@ class base_factspace_handler(BaseHTTPRequestHandler):
             facts = self.fetch_facts(fact_type, query_params)
             self.give_response(200, dumps(facts), 'application/json')
 
+    def should_record_query(self, fact_type):
+        return fact_type == 'component-code' # fix with constitution
+
     def fetch_facts(self, fact_type, query_params):
         query_params = query_params.copy()
         stamp, result = self.extract_kropotkin_criteria(query_params)
         query_params.pop('kropotkin_criteria', None)
         timeout = 2000 if (result == 'oldest' or result == 'newest') else 0
+
+        if (self.should_record_query(fact_type)):
+            content = {'fact_type': fact_type, 'query_params': query_params}
+            self.save_fact('query', dumps(content))
 
         fact_files = []
         finish = self.__now_millis() + timeout
