@@ -26,7 +26,7 @@ class base_factspace_handler(BaseHTTPRequestHandler):
             self.give_response(200, dumps(facts), 'application/json')
 
     def should_record_query(self, fact_type):
-        return fact_type == 'component-code' # fix with constitution
+        return False # fix with constitution
 
     def fetch_facts(self, fact_type, query_params):
         query_params = query_params.copy()
