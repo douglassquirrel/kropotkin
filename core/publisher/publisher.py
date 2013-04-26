@@ -1,8 +1,12 @@
 #!/usr/bin/python
+from base64 import b64encode
+from contextlib import closing
 from glob import glob
 from kropotkin import get_oldest_fact_and_stamp, store_fact
 from os import access, environ, path, X_OK
 from os.path import isdir, join, basename
+import tarfile
+from StringIO import StringIO
 
 def deploy(directory, kropotkin_url):
     nodes = set(glob(join(directory, "*")))
@@ -14,9 +18,16 @@ def deploy(directory, kropotkin_url):
 
     name = basename(directory)
     language = determine_language(directory, files)
-    tar = ''
+    tar = tar_files(directory, files)
     content = {'name': name, 'language': language, 'tar': tar}
     store_fact(kropotkin_url, 'component', content)
+
+def tar_files(directory, files):
+    with closing(StringIO()) as buffer:
+        with tarfile.open(mode='w', fileobj=buffer) as tar:
+            for f in files:
+                tar.add(join(directory, f), arcname=f)
+        return b64encode(buffer.getvalue())
 
 def determine_language(directory, files):
     executable = get_unique_executable(directory, files)

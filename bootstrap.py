@@ -2,9 +2,9 @@
 from os.path import abspath
 import sys
 sys.path.append(abspath("core/factspace"))
-sys.path.append(abspath("core/deploy"))
+sys.path.append(abspath("core/deployer"))
 from factspace import start_factspace
-from deploy import deploy
+from deployer import deploy
 
 PORT=2001
 KROPOTKIN_URL="http://localhost:%s" % PORT
