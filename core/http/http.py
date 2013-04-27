@@ -1,5 +1,7 @@
 #!/usr/bin/python
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
+from factspace.get_facts import get_facts
+from factspace.store_fact import store_fact
 from httplib2 import Http
 from SocketServer import ThreadingMixIn
 from urlparse import urlparse, parse_qsl
@@ -8,11 +10,12 @@ def base(path, params):
     return 'Kropotkin HTTP\n', 'text/plain'
 
 PORT=2002
-ROUTING = {('', 'GET'): base}
-#           ('factspace', 'GET'): get_facts
-#           ('factspace', 'POST'): store_fact}
 
 class handler(BaseHTTPRequestHandler):
+    routing = {('', 'GET'):           base,
+               ('factspace', 'GET'):  get_facts,
+               ('factspace', 'POST'): store_fact}
+
     def do_GET(self):
         self.route_request('GET')
 
@@ -21,11 +24,15 @@ class handler(BaseHTTPRequestHandler):
 
     def route_request(self, verb):
         parsed_url = urlparse(self.path)
-        url_path = parsed_url.path
-        query_params = dict(parse_qsl(parsed_url.query))
-        route = url_path.split('/')[1]
+        path = parsed_url.path
+        params = dict(parse_qsl(parsed_url.query))
+        length = int(self.headers.getheader('Content-Length') or 0)
+        incoming_content = self.rfile.read(length)
+        route = path.split('/')[1]
+
         try:
-            content, mime_type = ROUTING[(route, verb)](url_path, query_params)
+            responder = handler.routing[(route, verb)]
+            content, mime_type = responder(path, params, incoming_content)
             status = 200
         except KeyError:
             content = 'No route for %s with verb %s\n' % (route, verb)

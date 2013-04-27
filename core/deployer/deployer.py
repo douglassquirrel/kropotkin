@@ -16,10 +16,11 @@ def unpack(name, tar_data):
             tar.extractall(path=directory)
     return directory
 
-def deploy(name, directory, kropotkin_url):
+def deploy(name, directory, kropotkin_url, env={}):
     executable = get_unique_executable(directory)
     if executable:
-        env = {'KROPOTKIN_URL': kropotkin_url}
+        env = env.copy()
+        env.update({'KROPOTKIN_URL': kropotkin_url})
         process = Popen(executable, cwd=directory, env=env)
         print "Deployed %s to %s with pid %d" % (name, directory, process.pid)
     else:
