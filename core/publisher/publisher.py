@@ -5,28 +5,15 @@ from kropotkin import get_oldest_fact_and_stamp, store_fact
 from os import access, environ, listdir, path, X_OK
 from os.path import isdir, join, basename
 from StringIO import StringIO
-import tarfile
+from tarfile import open as taropen
 
 def publish(directory, kropotkin_url):
-    nodes = set([join(directory, f) for f in listdir(directory)])
-    dirs = set([f for f in nodes if isdir(f)])
-    files = nodes - dirs
-
-    for d in dirs:
-        publish(d, kropotkin_url)
-
+    files = [join(directory, f) for f in listdir(directory) if not isdir(f)]
     name = basename(directory)
     language = determine_language(files)
-    tar = tar_files(files)
+    tar = archive(files)
     content = {'name': name, 'language': language, 'tar': tar}
     store_fact(kropotkin_url, 'component', content)
-
-def tar_files(files):
-    with closing(StringIO()) as buffer:
-        with tarfile.open(mode='w', fileobj=buffer) as tar:
-            for f in files:
-                tar.add(f, arcname=basename(f))
-        return b64encode(buffer.getvalue())
 
 def determine_language(files):
     executable = get_unique_executable(files)
@@ -42,11 +29,18 @@ def language_type(executable):
         hashbang = e.readline()[:-1]
         return TYPE.get(hashbang)
 
+def archive(files):
+    with closing(StringIO()) as buffer:
+        with taropen(mode='w', fileobj=buffer) as tar:
+            for f in files:
+                tar.add(f, arcname=basename(f))
+        return b64encode(buffer.getvalue())
+
 if __name__=="__main__":
     KROPOTKIN_URL = environ['KROPOTKIN_URL']
     while True:
         fact = get_oldest_fact_and_stamp(KROPOTKIN_URL, \
-                                         'component_available',
+                                         'component_available', \
                                          {}, \
                                          'publisher.2718')
         if fact:

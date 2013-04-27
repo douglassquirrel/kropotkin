@@ -1,25 +1,27 @@
 #!/usr/bin/python
 from base64 import b64decode
 from contextlib import closing
-from kropotkin import get_oldest_fact_and_stamp
+from kropotkin import get_oldest_fact_and_stamp, store_fact
 from os import access, environ, listdir, path, X_OK
 from os.path import isdir, join
 from subprocess import Popen
 from StringIO import StringIO
-import tarfile
+from tarfile import open as taropen
 from tempfile import mkdtemp
 
 def unpack(name, tar_data):
     directory = mkdtemp(prefix=name)
     with closing(StringIO(b64decode(tar_data))) as buffer:
-        with tarfile.open(mode='r', fileobj=buffer) as tar:
+        with taropen(mode='r', fileobj=buffer) as tar:
             tar.extractall(path=directory)
     return directory
 
-def deploy(directory, kropotkin_url):
+def deploy(name, directory, kropotkin_url):
     executable = get_unique_executable(directory)
     if executable:
-        Popen(executable, cwd=directory, env={'KROPOTKIN_URL': kropotkin_url})
+        env = {'KROPOTKIN_URL': kropotkin_url}
+        process = Popen(executable, cwd=directory, env=env)
+        print "Deployed %s to %s with pid %d" % (name, directory, process.pid)
     else:
         print "Cannot locate unique executable in %s" % directory
 
@@ -39,5 +41,6 @@ if __name__=="__main__":
                                                    {'language': 'python'}, \
                                                    'deployer.1414')
         if component_fact:
-            directory = unpack(component_fact['name'], component_fact['tar'])
-            deploy(directory, KROPOTKIN_URL)
+            name = component_fact['name']
+            directory = unpack(name, component_fact['tar'])
+            deploy(name, directory, KROPOTKIN_URL)
