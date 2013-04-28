@@ -6,10 +6,10 @@ from httplib2 import Http
 from SocketServer import ThreadingMixIn
 from urlparse import urlparse, parse_qsl
 
-def base(path, params):
+def base(path, params, content):
     return 'Kropotkin HTTP\n', 'text/plain'
 
-PORT=2002
+PORT=2001
 
 class handler(BaseHTTPRequestHandler):
     routing = {('', 'GET'):           base,

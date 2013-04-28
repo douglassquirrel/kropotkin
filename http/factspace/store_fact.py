@@ -8,7 +8,7 @@ def store_fact(path, params, content):
     if (factspace == 'kropotkin'):
         facts_dir = environ['KROPOTKIN_DIR']
     else:
-        facts_dir = get_newest_fact(environ['KROPOTKIN_URL'],
+        facts_dir = get_newest_fact('kropotkin',
                                     'factspace',
                                     {'name': factspace})['directory']
 

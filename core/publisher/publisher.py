@@ -2,18 +2,18 @@
 from base64 import b64encode
 from contextlib import closing
 from kropotkin import get_oldest_fact_and_stamp, store_fact
-from os import access, environ, listdir, path, X_OK
+from os import access, listdir, path, X_OK
 from os.path import isdir, join, basename
 from StringIO import StringIO
 from tarfile import open as taropen
 
-def publish(directory, kropotkin_url):
+def publish(directory):
     files = [join(directory, f) for f in listdir(directory) if not isdir(f)]
     name = basename(directory)
     language = determine_language(files)
     tar = archive(files)
     content = {'name': name, 'language': language, 'tar': tar}
-    store_fact(kropotkin_url, 'component', content)
+    store_fact('kropotkin', 'component', content)
 
 def determine_language(files):
     executable = get_unique_executable(files)
@@ -37,11 +37,10 @@ def archive(files):
         return b64encode(buffer.getvalue())
 
 if __name__=="__main__":
-    KROPOTKIN_URL = environ['KROPOTKIN_URL']
     while True:
-        fact = get_oldest_fact_and_stamp(KROPOTKIN_URL, \
+        fact = get_oldest_fact_and_stamp('kropotkin', \
                                          'component_available', \
                                          {}, \
                                          'publisher.2718')
         if fact:
-            publish(fact['directory'], KROPOTKIN_URL)
+            publish(fact['directory'])
