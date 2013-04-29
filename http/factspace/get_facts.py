@@ -15,7 +15,7 @@ def get_facts(path, params, content):
                                     'factspace',
                                     {'name': factspace})['directory']
     facts = _fetch_facts(facts_dir, fact_type, params)
-    return dumps(facts), 'application/json'
+    return 200, dumps(facts), 'application/json'
 
 def _fetch_facts(facts_dir, fact_type, params):
     params = params.copy()

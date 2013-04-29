@@ -2,19 +2,21 @@
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 from factspace.get_facts import get_facts
 from factspace.store_fact import store_fact
+from component.get_component import get_component 
 from httplib2 import Http
 from SocketServer import ThreadingMixIn
 from urlparse import urlparse, parse_qsl
 
 def base(path, params, content):
-    return 'Kropotkin HTTP\n', 'text/plain'
+    return 200, 'Kropotkin HTTP\n', 'text/plain'
 
 PORT=2001
 
 class handler(BaseHTTPRequestHandler):
     routing = {('', 'GET'):           base,
                ('factspace', 'GET'):  get_facts,
-               ('factspace', 'POST'): store_fact}
+               ('factspace', 'POST'): store_fact,
+               ('component', 'GET'):  get_component}
 
     def do_GET(self):
         self.route_request('GET')
@@ -32,13 +34,12 @@ class handler(BaseHTTPRequestHandler):
 
         try:
             responder = handler.routing[(route, verb)]
-            content, mime_type = responder(path, params, incoming_content)
-            status = 200
+            code, content, mime_type = responder(path, params, incoming_content)
         except KeyError:
+            code = 404
             content = 'No route for %s with verb %s\n' % (route, verb)
             mime_type = 'text/plain'
-            status = 404
-        self.give_response(status, content, mime_type)
+        self.give_response(code, content, mime_type)
 
     def log_message(self, format, *args):
         return

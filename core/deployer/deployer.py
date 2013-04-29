@@ -19,8 +19,9 @@ def unpack(name, tar_data):
 def deploy(name, directory, env={}):
     executable = get_unique_executable(directory)
     if executable:
-        env = env.copy()
-        env['KROPOTKIN_URL'] = environ['KROPOTKIN_URL']
+        if 'KROPOTKIN_URL' not in env:
+            env = env.copy()
+            env['KROPOTKIN_URL'] = environ['KROPOTKIN_URL']
         process = Popen(executable, cwd=directory, env=env)
         print "Deployed %s to %s with pid %d" % (name, directory, process.pid)
     else:

@@ -13,7 +13,7 @@ def store_fact(path, params, content):
                                     {'name': factspace})['directory']
 
     save_fact(facts_dir, fact_type, content)
-    return '', 'text/plain'
+    return 200, '', 'text/plain'
 
 def save_fact(facts_dir, fact_type, content):
     temp_facts_dir = join(facts_dir, 'tmp')
