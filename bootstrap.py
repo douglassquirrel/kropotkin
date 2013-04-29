@@ -1,8 +1,9 @@
 #!/usr/bin/python
 from tempfile import mkdtemp
 from httplib2 import Http
-from os import listdir
-from os.path import isdir, join
+from kropotkin import store_fact
+from os import listdir, walk
+from os.path import abspath, isdir, join
 from core.deployer.deployer import deploy
 from sys import exit
 from time import time
@@ -36,3 +37,8 @@ if not wait_for_http(10):
 core_components = [d for d in listdir('core') if isdir(join('core', d))]
 for c in core_components:
     deploy(c, join('core', c), env)
+
+for root, dirs, files in walk('components'):
+    for d in dirs:
+        content = {'directory': abspath(join(root, d))}
+        store_fact('kropotkin', 'component_available', content)
