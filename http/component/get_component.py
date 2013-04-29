@@ -4,6 +4,9 @@ from kropotkin import get_newest_fact
 from StringIO import StringIO
 from tarfile import open as taropen
 
+MIME_TYPES = {'html': 'text/html',
+              'js':   'application/javascript'}
+
 def get_component(path, params, content):
     name = path.split('/')[2]
     component = get_newest_fact('kropotkin', 'component', {'name': name})
@@ -15,7 +18,8 @@ def get_component(path, params, content):
             if len(tar.getnames()) == 1:
                 only_file = tar.getnames()[0]
                 content = tar.extractfile(only_file).read()
-                mime_type = 'text/plain' # FIX!!
+                file_type = only_file.split('.')[1]
+                mime_type = MIME_TYPES[file_type]
             else:
                 content = tar_data
                 mime_type = 'application/x-tar'
