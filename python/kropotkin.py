@@ -11,7 +11,7 @@ def store_fact(factspace, type_, content):
 def get_oldest_fact_and_stamp(factspace, type_, criteria, stamp):
     criteria = criteria.copy()
     criteria['kropotkin_criteria'] = 'stamp-%s,result-oldest' % stamp
-    facts = __get_facts(factspace, type_, criteria)
+    facts = get_all_facts(factspace, type_, criteria)
     if facts:
         return facts[0]
     else:
@@ -20,16 +20,13 @@ def get_oldest_fact_and_stamp(factspace, type_, criteria, stamp):
 def get_newest_fact(factspace, type_, criteria):
     criteria = criteria.copy()
     criteria['kropotkin_criteria'] = 'result-newest'
-    facts = __get_facts(factspace, type_, criteria)
+    facts = get_all_facts(factspace, type_, criteria)
     if facts:
         return facts[0]
     else:
         return None
 
 def get_all_facts(factspace, type_, criteria):
-    return __get_facts(factspace, type_, criteria)
-
-def __get_facts(factspace, type_, criteria):
     url = '%s/factspace/%s/%s?%s' \
         % (environ['KROPOTKIN_URL'], factspace, type_, urlencode(criteria))
     resp, content = Http().request(url)

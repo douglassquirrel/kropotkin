@@ -2,7 +2,7 @@
 from tempfile import mkdtemp
 from httplib2 import Http
 from kropotkin import store_fact
-from os import listdir, walk
+from os import environ, listdir, walk
 from os.path import abspath, isdir, join
 from core.deployer.deployer import deploy
 from sys import exit
@@ -38,6 +38,7 @@ core_components = [d for d in listdir('core') if isdir(join('core', d))]
 for c in core_components:
     deploy(c, join('core', c), env)
 
+environ['KROPOTKIN_URL'] = KROPOTKIN_URL
 for root, dirs, files in walk('components'):
     for d in dirs:
         content = {'directory': abspath(join(root, d))}
