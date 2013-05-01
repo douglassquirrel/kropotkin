@@ -13,9 +13,9 @@ def create_factspace(name):
 if __name__=="__main__":
     while True:
         factspace_fact = get_oldest_fact_and_stamp('kropotkin',
-                                                   'factspace-wanted',
+                                                   'factspace_wanted',
                                                    {},
-                                                   'factspace.1728')
+                                                   'factspace_stamp.1728')
         if factspace_fact:
             name = factspace_fact['name']
             create_factspace(name)
