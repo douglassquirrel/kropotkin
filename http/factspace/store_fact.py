@@ -1,4 +1,5 @@
 from errno import EEXIST
+from kropotkin import get_newest_fact
 from os import environ, makedirs, rename
 from os.path import join
 from time import time
