@@ -1,17 +1,17 @@
 #!/usr/bin/python
-from tempfile import mkdtemp
+from core.deployer.deployer import deploy
+from core.factspace.factspace import create_factspace
 from httplib2 import Http
 from kropotkin import store_fact
 from os import environ, listdir, walk
 from os.path import abspath, isdir, join
-from core.deployer.deployer import deploy
 from sys import exit
+from tempfile import mkdtemp
 from time import time
 
 PORT=2001
 KROPOTKIN_URL="http://localhost:%s" % PORT
-KROPOTKIN_DIR=mkdtemp()
-print "Storing Kropotkin facts in %s" % KROPOTKIN_DIR
+KROPOTKIN_DIR=create_factspace('kropotkin')
 
 def wait_for_http(timeout):
     finish = now() + timeout
