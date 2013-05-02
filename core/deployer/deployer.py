@@ -1,7 +1,7 @@
 #!/usr/bin/python
 from base64 import b64decode
 from contextlib import closing
-from kropotkin import get_oldest_fact_and_stamp, store_fact
+from kropotkin import get_oldest_fact_and_stamp
 from os import access, environ, listdir, path, X_OK
 from os.path import isdir, join
 from subprocess import Popen

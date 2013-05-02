@@ -7,7 +7,9 @@ from time import time
 def store_fact(factspace, type_, content):
     url = '%s/factspace/%s/%s' % (environ['KROPOTKIN_URL'], factspace, type_)
     headers = {'content-type': 'application/x-www-form-urlencoded'}
-    Http().request(url, "POST", dumps(content), headers)
+    resp, content = Http().request(url, "POST", dumps(content), headers)
+    if resp.status != 200:
+        raise Exception('Fact storage failed: %s' % content)
 
 def get_oldest_fact_and_stamp(factspace, type_, criteria, stamp):
     criteria = criteria.copy()

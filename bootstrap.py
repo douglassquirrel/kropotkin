@@ -39,6 +39,21 @@ for c in core_components:
     deploy(c, join('core', c), env)
 
 environ['KROPOTKIN_URL'] = KROPOTKIN_URL
+elements = [{'type': 'component_available',
+              'keys': ['directory'],
+              'translation': 'Component available in %(directory)s'},
+            {'type': 'component',
+             'keys': ['name', 'tar', 'language'],
+             'translation': 'Component %(name)s, language %(language)s'},
+            {'type': 'factspace_wanted',
+              'keys': ['name'],
+              'translation': 'Factspace %(name)s requested'},
+            {'type': 'factspace',
+              'keys': ['name', 'directory'],
+              'translation': 'Factspace %(name)s created in %(directory)s'}]
+for e in elements:
+    store_fact('kropotkin', 'constitution_element', e)
+
 for root, dirs, files in walk('components'):
     for d in dirs:
         content = {'directory': abspath(join(root, d))}

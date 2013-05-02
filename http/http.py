@@ -2,7 +2,7 @@
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 from factspace.get_facts import get_facts
 from factspace.store_fact import store_fact
-from component.get_component import get_component 
+from component.get_component import get_component
 from httplib2 import Http
 from SocketServer import ThreadingMixIn
 from urlparse import urlparse, parse_qsl

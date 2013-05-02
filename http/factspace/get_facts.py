@@ -62,6 +62,13 @@ def _extract_kropotkin_criteria(params):
         pass
     return stamp, result
 
+def _dict_match(d1, d2):
+    d2 = d2.copy()
+    for k in d2.keys():
+        if k not in d1:
+            d2.pop(k)
+    return set(d1.items()) <= set(d2.items())
+
 def _get_fact_files(facts_dir, fact_type, params, stamp):
     files = glob(join(facts_dir, fact_type + ".*"))
     files.sort(key=lambda f: int(f.split('.')[1]))
@@ -70,9 +77,8 @@ def _get_fact_files(facts_dir, fact_type, params, stamp):
         root = stamp.split('.')[0]
         files = [f for f in files if not root in f]
 
-    params_set = set(params.items())
-    match = lambda f: params_set < set(_load_fact(f).viewitems())
-    return [f for f in files if match(f)]
+    matches = lambda f: _dict_match(params, _load_fact(f))
+    return [f for f in files if matches(f)]
 
 def _load_fact(fact_filename):
     with open(fact_filename, 'r') as fact_file:
