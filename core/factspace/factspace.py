@@ -6,7 +6,8 @@ def create_factspace(name):
     directory = mkdtemp()
     if name != 'kropotkin':
         content = {'name': name, 'directory': directory}
-        store_fact('kropotkin', 'factspace', content)
+        if not store_fact('kropotkin', 'factspace', content):
+            raise Exception("Cannot store factspace fact")
     print 'Storing facts for %s in %s' % (name, directory)
     return directory
 

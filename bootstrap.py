@@ -54,11 +54,11 @@ elements = [{'type': 'component_available',
 for e in elements:
     if not store_fact('kropotkin', 'constitution_element', e):
         print 'Could not store %s' % e
-        exit 1
+        exit(1)
 
 for root, dirs, files in walk('components'):
     for d in dirs:
         content = {'directory': abspath(join(root, d))}
         if not store_fact('kropotkin', 'component_available', content):
             print 'Could not store %s' % content
-            exit 1
+            exit(1)

@@ -13,7 +13,8 @@ def publish(directory):
     language = determine_language(files)
     tar = archive(files)
     content = {'name': name, 'language': language, 'tar': tar}
-    store_fact('kropotkin', 'component', content)
+    if not store_fact('kropotkin', 'component', content):
+        raise Exception("Cannot store component fact")
 
 def determine_language(files):
     executable = get_unique_executable(files)
