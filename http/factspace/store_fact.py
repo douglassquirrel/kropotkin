@@ -9,8 +9,8 @@ def store_fact(path, params, content):
     factspace, fact_type = path.split('/')[2:4]
 
     if not check_fact(factspace, fact_type, content):
-        print "Disallowing %s, %s" % (fact_type, content)
-        return (400, 'Fact of type %s not allowed by constitution' % fact_type,
+        print "Fact disallowed"
+        return (400, 'Fact of type %s blocked by constitution\n' % fact_type,
                 'text/plain')
 
     if (factspace == 'kropotkin'):
@@ -29,11 +29,8 @@ def check_fact(factspace, fact_type, content):
 
     if fact_type == 'constitution_element':
         expected_keys = ['keys', 'translation', 'type']
-        translation = '''Constitution amended:
-  type = %(type)s
-  keys = %(keys)s
-  translation = %(translation)s
-'''
+        translation = "Constitution amended: type = %(type)s, " \
+            + "keys = %(keys)s, translation = %(translation)s"
     else:
         constitution_element = get_newest_fact(factspace,
             'constitution_element',
@@ -43,11 +40,7 @@ def check_fact(factspace, fact_type, content):
         expected_keys = sorted(constitution_element['keys'])
         translation = constitution_element['translation']
 
-    if expected_keys != actual_keys:
-        return False
-    else:
-        print ('Storing: ' + translation) % content_dict
-        return True
+    return expected_keys == actual_keys
 
 def save_fact(facts_dir, fact_type, content):
     temp_facts_dir = join(facts_dir, 'tmp')
