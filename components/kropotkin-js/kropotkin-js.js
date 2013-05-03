@@ -1,3 +1,7 @@
+if (!("console" in window) || !("log" in window.console)) {
+    window.console = {"log": function(){}};
+}
+
 function store_fact(factspace, type, content) {
     var url = '/factspace/' + factspace + '/' + type;
     http_request(url, 'POST', JSON.stringify(content));
@@ -48,7 +52,15 @@ function http_request(url, verb, content, onresponse) {
     var xmlhttp = new XMLHttpRequest();
     if (onresponse !== null) {
         xmlhttp.onreadystatechange = function() {
-            if (xmlhttp.readyState != 4 || xmlhttp.responseText.length == 0) {
+            if (xmlhttp.readyState != 4) { return; }
+
+            var status       = xmlhttp.status;
+            var responseText = xmlhttp.responseText;
+
+            if (status != 200 || responseText.length == 0) {
+                console.log("Request to " + url + " failed: "
+                            + "status = " + status + ", "
+                            + "response = '" + responseText + "'");
                 return;
             }
             onresponse(xmlhttp.responseText);
