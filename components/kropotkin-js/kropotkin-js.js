@@ -57,7 +57,7 @@ function http_request(url, verb, content, onresponse) {
             var status       = xmlhttp.status;
             var responseText = xmlhttp.responseText;
 
-            if (status != 200 || responseText.length == 0) {
+            if (status != 200) {
                 console.log("Request to " + url + " failed: "
                             + "status = " + status + ", "
                             + "response = '" + responseText + "'");

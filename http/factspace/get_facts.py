@@ -11,9 +11,13 @@ def get_facts(path, params, content):
     if (factspace == 'kropotkin'):
         facts_dir = environ['KROPOTKIN_DIR']
     else:
-        facts_dir = get_newest_fact('kropotkin',
-                                    'factspace',
-                                    {'name': factspace})['directory']
+        factspace_info = get_newest_fact('kropotkin',
+                                         'factspace',
+                                         {'name': factspace})
+        if not factspace_info:
+            return (404, 'Could not locate factspace %s' % factspace,
+                    'text/plain')
+        facts_dir = factspace_info['directory']
     facts = _fetch_facts(facts_dir, fact_type, params)
     return 200, dumps(facts), 'application/json'
 
