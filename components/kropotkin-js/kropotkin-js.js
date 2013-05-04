@@ -3,8 +3,8 @@ if (!("console" in window) || !("log" in window.console)) {
 }
 
 function store_fact(factspace, type, content) {
-    var url = '/factspace/' + factspace + '/' + type;
-    http_request(url, 'POST', JSON.stringify(content));
+    var url = '/factspace/' + factspace + '/fact/' + type;
+    http_request(url, 'POST', JSON.stringify(content), null);
 }
 
 function get_oldest_fact_and_stamp(factspace, type, criteria,
@@ -30,7 +30,7 @@ function get_first_fact(factspace, type, criteria, onresponse) {
 
 function get_all_facts(factspace, type, criteria, onresponse) {
     var query_string = to_query_string(criteria);
-    url = '/factspace/' + factspace + '/' + type
+    url = '/factspace/' + factspace + '/fact/' + type
         + '?' + to_query_string(criteria);
     http_request(url, 'GET', null, function(responseText) {
         onresponse(JSON.parse(responseText));

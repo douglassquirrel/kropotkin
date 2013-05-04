@@ -1,7 +1,7 @@
 #!/usr/bin/python
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
-from factspace.get_facts import get_facts
-from factspace.store_fact import store_fact
+from factspace.get_statements import get_statements
+from factspace.store_statement import store_statement
 from component.get_component import get_component
 from httplib2 import Http
 from SocketServer import ThreadingMixIn
@@ -14,8 +14,8 @@ PORT=2001
 
 class handler(BaseHTTPRequestHandler):
     routing = {('', 'GET'):           base,
-               ('factspace', 'GET'):  get_facts,
-               ('factspace', 'POST'): store_fact,
+               ('factspace', 'GET'):  get_statements,
+               ('factspace', 'POST'): store_statement,
                ('component', 'GET'):  get_component}
 
     def do_GET(self):

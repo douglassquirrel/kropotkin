@@ -7,7 +7,7 @@ from time import time
 def store_fact(factspace, type_, content):
     return store_statement('fact', factspace, type_, content)
 
-def store_opinion(factspace, type_ content):
+def store_opinion(factspace, type_, content):
     return store_statement('opinion', factspace, type_, content)
 
 def get_oldest_fact_and_stamp(factspace, type_, criteria, stamp):
