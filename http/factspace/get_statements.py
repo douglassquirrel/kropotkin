@@ -76,7 +76,7 @@ def _dict_match(d1, d2):
     return set(d1.items()) <= set(d2.items())
 
 def _get_statement_files(statements_dir, confidence, fact_type, params, stamp):
-    files = glob(join(statements_dir, fact_type + ".*." + confidence))
+    files = glob(join(statements_dir, fact_type + ".*." + confidence + "*"))
     files.sort(key=lambda f: int(f.split('.')[1]))
 
     if stamp:
