@@ -1,0 +1,278 @@
+What would happen if your team rewrote every line of code in your application
+every six months?
+
+What if rewriting was a normal part of development for every programmer, like
+holding standups or writing unit tests?
+
+What if you could deploy newly rewritten code as soon as you finished it,
+safe in the knowledge that even if it's wrong, no user will be affected?
+
+What if no one ever said, "None of us know how Feature X works", or "The API for
+Module Y could be so much simpler if only we had the time to fix it", or
+"This giant Java class could be just ten lines of Haskell?"
+
+**Here Be Dragons**
+
+If your software is typical of those I've worked with, it has many tightly
+shut closets and dark corners where developers fear to tread. Maybe a class
+that started small and understandable has ballooned into an incomprehensible
+ball of mud, or someone who is no longer on the team read about the Singleton
+pattern and tried using it for every object in a subsystem. Over and over again,
+I've seen screens crammed full of fossilised buttons, fields, and options that
+no one uses - added in the early days in the forlorn hope they would be useful,
+and now left to confuse users because no one is sure how to remove them safely.
+
+The inevitable cry from the developers is, "Let us rewrite this!" They are sure
+that the code, once reborn in the light of greater domain knowledge and
+coding skill, and perhaps in a language with better features or simpler syntax,
+will be infinitely faster, easier to maintain, and free of all those weird bugs
+users have had to get used to. They may not say it out loud, but in addition to
+these explicit reasons, they are certain that if they no longer have to stare
+all day at code that makes them want to stab themselves in the eyes with a
+rusty fork, they are sure to be happier, harder working, and more likely to
+stay with the team - and to help recruit that smart friend grumbling down the
+pub about the terrible code base at her own job.
+
+But the wise team manager will heed Joel Spolsky's advice
+[http://www.joelonsoftware.com/articles/fog0000000069.html]
+and avoid the dreaded Big Rewrite From Scratch (BRFS). Even if she manages to
+convince the customers to put most - maybe all - new feature requests on hold,
+and even if the developers defy all the odds and deliver the rewrite bang on
+time, and even if the users are patient with the inevitable bugs and changes and
+retraining needed to adjust to the "new" system that is never exactly like the
+old one - even if all the stars align in this very unlikely way and the BRFS
+is declared a success - experience suggests that in six or twelve or eighteen
+months, someone will again be saying "Who wrote this crap? Why aren't we taking
+advantage of first-class functions? This report hasn't been run for six months
+and it's full of errors!" The reason is simple: our understanding and skill
+is increasing quickly as we get more experience with our domain, and we have
+no way to modify our code at anything like the same pace.
+
+In summary:
+* We know instinctively that rewriting code brings us loads of benefits,
+including happier team members, more maintainable code, and faster progress on
+future changes. (For a representative argument in favour of rewriting for
+understanding and other benefits, see
+[http://www.codinghorror.com/blog/2006/09/when-understanding-means-rewriting.html].) 
+* Ideally we should rewrite whenever we get a significant boost in
+understanding and skill, which could mean changing some or all of our code
+every few months.
+* But the only way we know to do a rewrite is to attack the whole code base,
+or a big chunk of it, all at once - in "batch mode", so to speak. And we know
+that this carries terrifying, seemingly insurmountable costs and risks.
+* So we soldier on, trying little refactorings here or there [1], or instituting
+a programme of gradual change and improvement [2], while all the time wishing
+we could just start over.
+
+**Precedents**
+
+This is a story we've heard before - which means there's hope for something
+better.
+
+First, integration. "Best practise" at the turn of the century was integrating
+your code every few weeks or months. I can remember running the build process
+at my first employer in 1999; it was fairly advanced for the time with a wide
+array of automated tests running on many supported platforms, but still took
+days of concerted, whole-company effort to produce a working release.
+
+This "batch mode" integration was replaced by a radical new idea: continuously
+and automatically building and testing the whole code base with a dedicated
+server, thus spreading the pain of integration over many small, incremental
+steps. Use of CruiseControl and its descendants became _de rigueur_ in advanced
+teams, then at average teams; now it's rare I encounter a dev shop that isn't
+at least trying to continuously integrate, and many developers have never
+experienced the "integration hell" that I endured at my first job.
+
+Next, deployment. I remember being shocked when I read the first few paragraphs
+of the 2009 breakthrough post on continuous deployment
+[http://timothyfitz.com/2009/02/10/continuous-deployment-at-imvu-doing-the-impossible-fifty-times-a-day/]
+- it had literally never occurred to me that deployment, however scripted it
+might be, could ever be something you _automated_ on every checkin. Surely
+deployment had to be, as it always had been for me, a batch-mode activity,
+a pain you endured at the end of every iteration as you frantically checked the
+site post-release to ensure every one of a hundred changes had gone through
+successfully.
+
+But a few years on, again we have advanced teams adopting continuous deployment
+as a normal, unremarkable part of developing software, and I expect to see it
+become a standard practise throughout most of the industry in the next few
+years [3].
+
+In both cases, we have a painful, necessary development activity occurring in
+batch mode, and the solution is to break it up into a lot of little instances
+of the same activity, each one vastly simpler and much less painful than the
+original method, and an integrated, unremarkable part of the development team's
+daily activity.
+
+Could we possibly do the same for rewriting our code?
+
+**Case Studies**
+
+There is some promising initial evidence that we can. Space doesn't allow me
+to present a full view of the two teams I know of where code rewrites appear to
+be, by design, a normal part of the daily life of the developers, and the jury
+is definitely still out on whether either is a clear success. But I can
+describe what I know about each and refer the reader to more comprehensive
+descriptions of the teams and their practises.
+
+***DRW***
+
+DRW Trading Group is a high-frequency trading firm whose business and trading
+strategy changes very rapidly. Dan North [http://dannorth.net/] has described
+his experiences there in a talk [http://vimeo.com/43659070] and slides
+[http://qconlondon.com/dl/qcon-london-2012/slides/DanNorth_DecisionsDecisions.pdf]
+Briefly, as I understand it, the developers create small, expendable components
+that co-operate via messaging (he says they have a "hard shell but a soft
+centre"). This gives each component identifiable boundaries for experiment -
+in particular, it's very cheap to replace one component with another, perhaps
+using a different algorithm or programming language, and replacements like this
+appear to be a normal part of coding at DRW. The result is very fast evolution
+of the system's behaviour and great response times for requests from the trading
+floor.
+
+***Forward***
+
+Forward Internet Group is a company that runs a number of retail web sites,
+such as the UK's leading energy-tariff comparison service, uSwitch. Like DRW,
+they find that their business is changing very fast and they have evolved a
+development method that permits very speedy changes. Fred George
+[http://processpeoplepods.blogspot.co.uk/] describes their process as
+"Developer Anarchy" - see his talk
+[http://forwardtechnology.co.uk/videos/32447325] and slides
+[http://www.slideshare.net/fredgeorge/programmer-anarchy-chinese].
+
+The Developer Anarchy philosophy has many aspects, but what's relevant to us
+here is Forward's use of techniques that are very similar to those at DRW: an
+architecture made up of many small, short-lived applications, co-operating via
+a messaging layer; developers not only change these apps at will, they rewrite
+them multiple times to wring the best out of each. In one case George cites
+[slide 94], the energy calculation code was rewritten three times: once in Ruby,
+then twice in Clojure. Again, this appears to be normal practise at Forward, and
+so pervasive a philosophy that they eliminated local management since they
+surmised that managers would never let them do this much rewriting! Forward's
+very positive financial results (at the time of this writing) seem to
+suggest that this strategy is working, at least in their fast-moving domain.
+
+**Systematising Continuous Rewriting**
+
+What seems to be emerging here is a pattern for structuring a team and its
+software so that rewriting is continuous rather than batch-mode (or
+nonexistent):
+
+1. Split your software into a number of very small components.
+2. Wire these components together using some form of messaging, and define
+APIs between them for communication.
+3. Make it easy to deploy components individually, including replacement of one
+component with another.
+4. Encourage developers to rewrite and replace components regularly. (I could
+imagine scheduling each component for a periodic review - "it's been six months,
+so it's time to attack the payroll computation code".)
+5. Embrace polyglot programming, so developers can adopt languages or frameworks
+that work best for them or for the domain (or discard those that no longer fit).
+
+A team could certainly adopt this set of practises immediately, without further
+help - and I'd be very interested in finding out about any that do. I have also
+been thinking very hard about what kind of framework might make adoption easier,
+and have begun to experiment with one I call Kropotkin
+[https://github.com/douglassquirrel/kropotkin].
+
+Three particular features of Kropotkin may be worth mentioning, as they may
+shed light on the five principles listed above.
+
+* Kropotkin enforces principle 1 by setting a 10K limit on the size of the
+_source code_ of each component - forcing the team to adopt a Unix-like
+micro-services[4] architecture.
+* Kropotkin uses a co-ordination mechanism similar to that of the Linda
+language [http://en.wikipedia.org/wiki/Linda_%28coordination_language%29] or
+JavaSpaces [http://en.wikipedia.org/wiki/JavaSpaces#JavaSpaces] to allow
+communication among components that may be running on different computers and
+in very different programming languages (principles 2 and 5). A "constitution"
+provides the ubiquitous language (a la Domain Driven Design
+[http://en.wikipedia.org/wiki/Domain-driven_design]) that keeps the components
+co-operating effectively[5].
+* Kropotkin makes component replacement (principle 3) a core feature; for
+instance, you can deploy new component X alongside old component Y, and a
+"judge" will compare results from each. At first, the judge will allow only
+results from Y to be communicated to others, and differences are logged; once
+you are more confident in X, you can adjust this for a 50/50 split of X's and
+Y's results (A-B testing for any component) or a more complex "voting"
+mechanism. Later, you can swap over so Y is running as a check only, and
+X's results are the definitive ones, and then drop Y once you have full
+confidence in X[6].
+
+**The Future of Continuous Rewriting: Problems and Prospects**
+
+Such a new idea as continuous rewriting must overcome many problems and
+challenges if it is to be widely adopted. Some that I have heard in discussing
+the idea initially:
+
+* Are there types of application where this approach won't work?
+* What about infrequent events like annual audits or quarterly reports? They
+may not be naturally exercised enough to flush out problems with rewrites.
+* Will increased readability for the re-writer mean better code, or will it mean
+less comprehension for others on the team?
+* Will CR-using teams have tacit code ownership or will CR eliminate that
+ownership?
+* What about infrastructure and ops teams? Retrofitting to existing software?
+Organisational acceptance?
+
+I don't have good answers to any of these questions yet but am hopeful that
+the early experiments conducted by the two teams cited above, and others who
+follow them, will help us shed light on these difficulties and possible
+solutions.
+
+In a few years, will continuous rewriting be as common a practise as
+continuous integration and deployment are now? Only time will tell. I have
+set up http://continuousrewriting.com as a forum for discussion on these topics;
+please visit to see what has developed since the printing of this book, and
+add your own contributions and ideas![7]
+
+-----------------
+
+[1] In the interest of space, I'm saying little in this essay about the
+tremendously valuable practise of refactoring ([http://refactoring.com] or
+Fowler's book _Refactoring_ are great places to start learning if you don't
+already know about this method). I have to imagine that teams who practise
+continuous rewriting will also be vigorous users of refactoring; making
+safe, incremental improvements to a class or function is clearly superior to
+a code replacement if you can manage it. But refactoring alone may not take you
+to a new system architecture, or let you use a new library that provides
+half your features automatically, and it certainly won't help you switch to a
+more expressive language - so I'm arguing that we need additional tools that
+make more fundamental changes equally safe and low-cost.
+
+[2] For instance, as of this writing, at my current job we are engaged in a
+slow and careful process of "Symfonisation", our own name for switching, one
+screen at a time, from ball-of-mud PHP+HTMl+Javascript to well-factored,
+unit-tested Symfony 2 code. This type of change, often achieved with tools like
+the Strangler pattern
+[http://www.martinfowler.com/bliki/StranglerApplication.html], can be very
+valuable - but as we've seen at Secretsales, can be painfully slow.
+
+[3] If you're not familiar with continuous deployment, just read the excellent
+introductory text by Jez Humble and David Farley
+[http://www.amazon.com/dp/0321601912/?tag=hydra0b-21&hvadid=9556644669&ref=asc_df_0321601912].
+Or ask someone who's been using it - at Secretsales, we've had it running
+smoothly for years, and I don't think any of us would consider a switch back to
+batch-mode deployments.
+
+[4] James Lewis's talk [http://www.infoq.com/presentations/Micro-Services] on
+microservices says that each app should be about 1000 lines long, but
+doesn't suggest that this be enforced other than by agreement; I prefer to
+be certain no monster services make it into my applications!
+
+[5] The attentive reader will note similarities to Event Sourcing
+[http://martinfowler.com/eaaDev/EventSourcing.html] and CQRS
+[http://martinfowler.com/bliki/CQRS.html]. These mechanisms are likely to be
+very useful to teams adopting continuous rewriting.
+
+[6] The inspiration for the "judge" is the design of computers on the Space
+Shuttle, which "vote" throughout flight on results and actions; among other
+things, this helps protect against catastrophic failures due to bits flipped
+by cosmic ray strikes. See [http://history.nasa.gov/sts1/pages/computer.html].
+
+[7] I'd like to acknowledge the contributions to the ideas in this essay of the
+participants at the 2012 CITCON Budapest session on Continuous Rewriting,
+especially that of Peter Zsoldos; and those of many others - too many to name -
+whom I have buttonholed for feedback on continuous rewriting and Kropotkin.
+Any errors or omissions are of course my own!
