@@ -1,13 +1,26 @@
 #!/usr/bin/python
-from core.deployer.deployer import deploy
-from core.factspace.factspace import create_factspace
 from httplib2 import Http
-from kropotkin import store_fact
+from inspect import getsource
 from os import environ, listdir, walk
 from os.path import abspath, isdir, join
 from sys import exit
 from tempfile import mkdtemp
 from time import time
+try:
+    import kropotkin
+    with open('libraries/python/kropotkin.py', 'r') as f:
+        expected_lib_src = f.read()
+    actual_lib_src = getsource(kropotkin)
+    kropotkin_imported = actual_lib_src == expected_lib_src
+except ImportError:
+    kropotkin_imported = False
+if not kropotkin_imported:
+    print "Kropotkin module not installed or out of date."
+    print "See libraries/python/README.txt for installation steps."
+    exit(1)
+
+from core.deployer.deployer import deploy
+from core.factspace.factspace import create_factspace
 
 PORT=2001
 KROPOTKIN_URL="http://localhost:%s" % PORT
@@ -52,13 +65,13 @@ elements = [{'type': 'component_available',
               'keys': ['name', 'directory'],
               'translation': 'Factspace %(name)s created in %(directory)s'}]
 for e in elements:
-    if not store_fact('kropotkin', 'constitution_element', e):
+    if not kropotkin.store_fact('kropotkin', 'constitution_element', e):
         print 'Could not store %s' % e
         exit(1)
 
 for root, dirs, files in walk('components'):
     for d in dirs:
-        content = {'directory': abspath(join(root, d))}
-        if not store_fact('kropotkin', 'component_available', content):
+        if not kropotkin.store_fact('kropotkin', 'component_available',
+                                    {'directory': abspath(join(root, d))}):
             print 'Could not store %s' % content
             exit(1)
