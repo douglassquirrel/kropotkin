@@ -1,4 +1,4 @@
-dist/*
-MANIFEST
+setup.py
 *.pyc
 build/*
+dist/*

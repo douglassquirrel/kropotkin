@@ -1,0 +1,3 @@
+tar xf kropotkin-{version}.tar
+cd kropotkin-{version}/
+sudo python setup.py install
