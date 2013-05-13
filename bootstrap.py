@@ -1,7 +1,7 @@
 #!/usr/bin/python
 from httplib2 import Http
 from inspect import getsource
-from os import environ, listdir, walk
+from os import environ, listdir
 from os.path import abspath, isdir, join
 from sys import exit
 from tempfile import mkdtemp
@@ -41,14 +41,17 @@ def wait_for_http(timeout):
 def now():
     return int(round(time()))
 
+def dirs_in(parent):
+    parent = abspath(parent)
+    return [d for d in listdir(parent) if isdir(join(parent, d))] 
+
 env = {'KROPOTKIN_URL': KROPOTKIN_URL, 'KROPOTKIN_DIR': KROPOTKIN_DIR}
 deploy('http', 'http', env)
 if not wait_for_http(10):
     print "Http not starting"
     exit(1)
 
-core_components = [d for d in listdir('core') if isdir(join('core', d))]
-for c in core_components:
+for c in dirs_in('core'):
     deploy(c, join('core', c), env)
 
 environ['KROPOTKIN_URL'] = KROPOTKIN_URL
@@ -69,9 +72,9 @@ for e in elements:
         print 'Could not store %s' % e
         exit(1)
 
-for root, dirs, files in walk('components'):
-    for d in dirs:
-        if not kropotkin.store_fact('kropotkin', 'component_available',
-                                    {'directory': abspath(join(root, d))}):
-            print 'Could not store %s' % content
-            exit(1)
+for c in dirs_in('components'):
+    component_location = abspath(join('components', c))
+    if not kropotkin.store_fact('kropotkin', 'component_available',
+                                {'directory': component_location}):
+        print 'Could not store component_available for %s' % c
+        exit(1)
