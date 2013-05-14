@@ -25,7 +25,8 @@ def is_executable_file(f):
     return (not isdir(f)) and access(f, X_OK)
 
 MODULE_TYPES = {'python':     'python-module',
-                'javascript': 'javascript-library'}
+                'javascript': 'javascript-library',
+                'ruby':       'ruby-gem'}
 
 while True:
     fact = get_oldest_fact_and_stamp('kropotkin', 'library_available',

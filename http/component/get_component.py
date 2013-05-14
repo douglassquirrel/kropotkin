@@ -5,7 +5,8 @@ MIME_TYPES = {'component-tar':      'application/x-tar',
               'python-module':      'application/x-tar',
               'html':               'text/html',
               'javascript':         'application/javascript',
-              'javascript-library': 'application/javascript'}
+              'javascript-library': 'application/javascript',
+              'ruby-gem':           'binary/octet-stream'}
 
 def get_component(path, params, content):
     name = path.split('/')[2]
