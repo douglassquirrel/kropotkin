@@ -8,17 +8,20 @@ from StringIO import StringIO
 from tarfile import open as taropen
 
 def publish(location):
-    if not isdir(location):
-        with open(location) as f:
-            name = basename(location)
-            language = None
-            bytes = b64encode(f.read())
-    else:
+    if isdir(location):
         files = [join(location, f) for f in listdir(location) if not isdir(f)]
         name = basename(location)
         language = determine_language(files)
         bytes = archive(files)
-    content = {'name': name, 'language': language, 'bytes': bytes}
+        content_type = 'component-tar'
+    else:
+        name = basename(location)
+        language = language_type(location)
+        with open(location) as f:
+            bytes = b64encode(f.read())
+        content_type = language
+    content = {'name': name, 'language': language,
+               'content_type': content_type, 'bytes': bytes}
     if not store_fact('kropotkin', 'component', content):
         raise Exception("Cannot store component fact")
 
@@ -30,11 +33,18 @@ def get_unique_executable(files):
     executables = [f for f in files if access(f, X_OK)]
     return executables[0] if len(executables) == 1 else None
 
-TYPE = {'#!/usr/bin/python': 'python'}
-def language_type(executable):
-    with open(executable, 'r') as e:
-        hashbang = e.readline()[:-1]
-        return TYPE.get(hashbang)
+HASHBANG_TYPE = {'#!/usr/bin/python': 'python'}
+EXTENSION_TYPE = {'py':   'python',
+                  'js':   'javascript',
+                  'html': 'html'}
+def language_type(filename):
+    if access(filename, X_OK):
+        with open(filename, 'r') as e:
+            hashbang = e.readline()[:-1]
+            return HASHBANG_TYPE.get(hashbang)
+    else:
+        extension = filename.split('.')[-1]
+        return EXTENSION_TYPE[extension]
 
 def archive(files):
     with closing(StringIO()) as buffer:

@@ -1,4 +1,5 @@
 #!/usr/bin/python
+from base64 import b64encode
 from kropotkin import get_oldest_fact_and_stamp, store_fact
 from os import access, listdir, X_OK
 from os.path import basename, isdir, join
@@ -23,6 +24,9 @@ def get_unique_executable(directory):
 def is_executable_file(f):
     return (not isdir(f)) and access(f, X_OK)
 
+MODULE_TYPES = {'python':     'python-module',
+                'javascript': 'javascript-library'}
+
 while True:
     fact = get_oldest_fact_and_stamp('kropotkin', 'library_available',
                                      {}, 'librarian.223')
@@ -30,6 +34,8 @@ while True:
         continue
 
     original_dir = fact['directory']
+    language = fact['language']
+
     build_dir = mkdtemp(prefix='library-build-%s' % basename(original_dir))
     output_dir = mkdtemp(prefix='library-%s' % basename(original_dir))
     copy_all(original_dir, build_dir)
@@ -45,8 +51,13 @@ while True:
     if len(files) != 1:
         print 'No single file output for library %s' % basename(original_dir)
         continue
-    file_location = join(output_dir, files[0])
+    output_file = join(output_dir, files[0])
 
-    if not store_fact('kropotkin', 'component_available',
-                      {'location': file_location}):
-        print 'Could not store component_available for %s' % output_dir
+    with open(output_file) as f:
+        bytes = b64encode(f.read())
+    content = {'name': basename(output_file),
+               'language': language,
+               'content_type': MODULE_TYPES[language],
+               'bytes': bytes}
+    if not store_fact('kropotkin', 'component', content):
+        print 'Could not store component for %s' % name

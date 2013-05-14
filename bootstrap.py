@@ -58,8 +58,9 @@ elements = [{'type': 'component_available',
               'keys': ['location'],
               'translation': 'Component available in %(directory)s'},
             {'type': 'component',
-             'keys': ['name', 'bytes', 'language'],
-             'translation': 'Component %(name)s, language %(language)s'},
+             'keys': ['name', 'bytes', 'language', 'content_type'],
+             'translation': 'Component %(name)s, language %(language)s, '\
+                          + 'type %(content_type)s'},
             {'type': 'factspace_wanted',
               'keys': ['name'],
               'translation': 'Factspace %(name)s requested'},
@@ -67,8 +68,9 @@ elements = [{'type': 'component_available',
               'keys': ['name', 'directory'],
               'translation': 'Factspace %(name)s created in %(directory)s'},
             {'type': 'library_available',
-             'keys': ['directory'],
-             'translation': 'Library available in %(directory)s'}]
+             'keys': ['directory', 'language'],
+             'translation': 'Library available in %(directory)s,' \
+                          + 'language %(language)s'}]
 for e in elements:
     if not kropotkin.store_fact('kropotkin', 'constitution_element', e):
         print 'Could not store %s' % e
@@ -84,6 +86,7 @@ for c in dirs_in('components'):
 for lib in dirs_in('libraries'):
     library_location = abspath(join('libraries', lib))
     if not kropotkin.store_fact('kropotkin', 'library_available',
-                                {'directory': library_location}):
+                                {'directory': library_location,
+                                 'language': lib}):
         print 'Could not store library_available for %s' % lib
         exit(1)

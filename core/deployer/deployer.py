@@ -37,10 +37,12 @@ def is_executable_file(f):
 
 if __name__=="__main__":
     while True:
-        component_fact = get_oldest_fact_and_stamp('kropotkin',
-                                                   'component', \
-                                                   {'language': 'python'}, \
-                                                   'deployer.1414')
+        component_fact \
+            = get_oldest_fact_and_stamp('kropotkin',
+                                        'component',
+                                        {'language': 'python',
+                                         'content_type': 'component-tar'},
+                                        'deployer.1414')
         if component_fact:
             name = component_fact['name']
             directory = unpack(name, component_fact['bytes'])
