@@ -4,7 +4,6 @@ from inspect import getsource
 from os import environ, listdir
 from os.path import abspath, isdir, join
 from sys import exit
-from tempfile import mkdtemp
 from time import time
 try:
     import kropotkin
@@ -43,7 +42,7 @@ def now():
 
 def dirs_in(parent):
     parent = abspath(parent)
-    return [d for d in listdir(parent) if isdir(join(parent, d))] 
+    return [d for d in listdir(parent) if isdir(join(parent, d))]
 
 env = {'KROPOTKIN_URL': KROPOTKIN_URL, 'KROPOTKIN_DIR': KROPOTKIN_DIR}
 deploy('http', 'http', env)
@@ -83,8 +82,8 @@ for c in dirs_in('components'):
         exit(1)
 
 for lib in dirs_in('libraries'):
-    library_location = abspath(join('libraries', c))
+    library_location = abspath(join('libraries', lib))
     if not kropotkin.store_fact('kropotkin', 'library_available',
                                 {'directory': library_location}):
-        print 'Could not store library_available for %s' % c
+        print 'Could not store library_available for %s' % lib
         exit(1)

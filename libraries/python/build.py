@@ -47,6 +47,7 @@ setup(name='kropotkin',
       author='Douglas Squirrel',
       author_email='ds@douglassquirrel.com')
 
-copied_install_file = join(output_dir, 'install.sh')
-copy_with_version('install.sh.template', copied_install_file, version)
-make_executable(copied_install_file)
+if output_dir == 'dist':
+    copied_install_file = join(output_dir, 'install.sh')
+    copy_with_version('install.sh.template', copied_install_file, version)
+    make_executable(copied_install_file)
