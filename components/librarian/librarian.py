@@ -41,7 +41,12 @@ while True:
 
     process = Popen([executable, output_dir], cwd=build_dir)
     process.wait()
+    files = listdir(output_dir)
+    if len(files) != 1:
+        print 'No single file output for library %s' % basename(original_dir)
+        continue
+    file_location = join(output_dir, files[0])
 
     if not store_fact('kropotkin', 'component_available',
-                      {'directory': output_dir}):
+                      {'location': file_location}):
         print 'Could not store component_available for %s' % output_dir

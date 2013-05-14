@@ -55,10 +55,10 @@ for c in dirs_in('core'):
 
 environ['KROPOTKIN_URL'] = KROPOTKIN_URL
 elements = [{'type': 'component_available',
-              'keys': ['directory'],
+              'keys': ['location'],
               'translation': 'Component available in %(directory)s'},
             {'type': 'component',
-             'keys': ['name', 'tar', 'language'],
+             'keys': ['name', 'bytes', 'language'],
              'translation': 'Component %(name)s, language %(language)s'},
             {'type': 'factspace_wanted',
               'keys': ['name'],
@@ -77,7 +77,7 @@ for e in elements:
 for c in dirs_in('components'):
     component_location = abspath(join('components', c))
     if not kropotkin.store_fact('kropotkin', 'component_available',
-                                {'directory': component_location}):
+                                {'location': component_location}):
         print 'Could not store component_available for %s' % c
         exit(1)
 

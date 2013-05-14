@@ -43,5 +43,5 @@ if __name__=="__main__":
                                                    'deployer.1414')
         if component_fact:
             name = component_fact['name']
-            directory = unpack(name, component_fact['tar'])
+            directory = unpack(name, component_fact['bytes'])
             deploy(name, directory)

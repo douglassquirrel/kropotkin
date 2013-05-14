@@ -7,12 +7,18 @@ from os.path import isdir, join, basename
 from StringIO import StringIO
 from tarfile import open as taropen
 
-def publish(directory):
-    files = [join(directory, f) for f in listdir(directory) if not isdir(f)]
-    name = basename(directory)
-    language = determine_language(files)
-    tar = archive(files)
-    content = {'name': name, 'language': language, 'tar': tar}
+def publish(location):
+    if not isdir(location):
+        with open(location) as f:
+            name = basename(location)
+            language = None
+            bytes = b64encode(f.read())
+    else:
+        files = [join(location, f) for f in listdir(location) if not isdir(f)]
+        name = basename(location)
+        language = determine_language(files)
+        bytes = archive(files)
+    content = {'name': name, 'language': language, 'bytes': bytes}
     if not store_fact('kropotkin', 'component', content):
         raise Exception("Cannot store component fact")
 
@@ -44,4 +50,4 @@ if __name__=="__main__":
                                          {}, \
                                          'publisher.2718')
         if fact:
-            publish(fact['directory'])
+            publish(fact['location'])
