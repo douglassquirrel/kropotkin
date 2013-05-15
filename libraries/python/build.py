@@ -41,7 +41,7 @@ print "Version: %s" % version
 setup(name='kropotkin',
       version=version,
       py_modules=['kropotkin'],
-      script_args=['sdist', '--dist-dir', output_dir, '--formats', 'tar'],
+      script_args=['-q', 'sdist', '--dist-dir', output_dir, '--formats', 'tar'],
       script_name='setup.py',
       url='https://github.com/douglassquirrel/kropotkin',
       author='Douglas Squirrel',
