@@ -53,9 +53,9 @@ def _get_statements(confidence, which, stamp, factspace, type_, criteria):
 
 def _get_all_statements(confidence, factspace, type_, criteria):
     kropotkin_url = environ['KROPOTKIN_URL']
-    criteria = urlencode(criteria)
+    params = urlencode(criteria)
     url = '%s/factspace/%s/%s/%s?%s' \
-        % (kropotkin_url, factspace, confidence, type_, criteria)
+        % (kropotkin_url, factspace, confidence, type_, params)
     resp, content = Http().request(url)
     if resp.status == 200:
         return loads(content)
