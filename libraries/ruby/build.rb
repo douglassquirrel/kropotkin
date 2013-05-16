@@ -9,7 +9,7 @@ gemspec = Gem::Specification.new do |s|
   s.summary = 'Client for the Kropotkin framework'
   s.description = 'Provides methods for creating Kropotkin factspaces, ' \
                 + 'storing facts in them, and querying facts from them.'
-  s.files = ["kropotkin-ruby.rb"]
+  s.files = ["lib/kropotkin.rb"]
   s.homepage = 'https://github.com/douglassquirrel/kropotkin'
   s.author = 'Douglas Squirrel'
   s.email = 'ds@douglassquirrel.com'
