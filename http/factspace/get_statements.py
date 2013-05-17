@@ -1,8 +1,9 @@
 from glob import glob
 from json import dumps, load
 from kropotkin import get_newest_fact
-from os import environ, rename
-from os.path import join
+from os import close, environ, mkdir, O_CREAT, O_EXCL, \
+               open as osopen, rename, write
+from os.path import exists, join, split
 from time import time
 from urlparse import parse_qsl
 
@@ -42,10 +43,24 @@ def _fetch_statements(statements_dir, confidence, fact_type, params):
         files = files[-1:]
 
     if stamp:
-        for i, f in enumerate(files):
-            new_name = '.'.join([f, stamp])
-            rename(f, new_name)
-            files[i] = new_name
+        filtered_files = []
+        try:
+            mkdir(join(statements_dir, 'stamps'))
+        except OSError:
+            pass
+        for f in files:
+            stamped_file = _stamped_filename(f, stamp)
+            fd = False
+            try:
+                fd = osopen(stamped_file, O_CREAT | O_EXCL)
+                write(fd, 'x')
+                filtered_files.append(f)
+            except OSError: #verify errno 17
+                pass
+            finally:
+                if fd:
+                    close(fd)
+        files = filtered_files
 
     return [_load_statement(f) for f in files]
 
@@ -75,13 +90,15 @@ def _dict_match(d1, d2):
             d2.pop(k)
     return set(d1.items()) <= set(d2.items())
 
+def _stamped_filename(f, stamp):
+    return join(split(f)[0], 'stamps', '.'.join([split(f)[1], stamp]))
+
 def _get_statement_files(statements_dir, confidence, fact_type, params, stamp):
     files = glob(join(statements_dir, fact_type + ".*." + confidence + "*"))
     files.sort(key=lambda f: int(f.split('.')[1]))
 
     if stamp:
-        root = stamp.split('.')[0]
-        files = [f for f in files if not root in f]
+        files = [f for f in files if not exists(_stamped_filename(f, stamp))]
 
     matches = lambda f: _dict_match(params, _load_statement(f))
     return [f for f in files if matches(f)]
