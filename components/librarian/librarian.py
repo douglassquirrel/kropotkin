@@ -30,7 +30,7 @@ MODULE_TYPES = {'python':     'python-module',
 
 while True:
     fact = get_oldest_fact_and_stamp('kropotkin', 'library_available',
-                                     {}, 'librarian.223')
+                                     {}, 'librarian')
     if not fact:
         continue
 

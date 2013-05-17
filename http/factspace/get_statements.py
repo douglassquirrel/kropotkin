@@ -29,13 +29,13 @@ def _fetch_statements(statements_dir, confidence, fact_type, params):
     params.pop('kropotkin_criteria', None)
     timeout = 2000 if (result == 'oldest' or result == 'newest') else 0
 
-    statement_files = []
     finish = __now_millis() + timeout
-    while True:
+    files = []
+    while len(files) == 0:
         files = _get_statement_files(statements_dir, confidence, fact_type,
                                      params, stamp)
-        if files or __now_millis() > finish:
-            break
+        if len(files) == 0 and __now_millis() > finish:
+            return []
 
     if result == 'oldest':
         files = files[0:1]
@@ -43,17 +43,17 @@ def _fetch_statements(statements_dir, confidence, fact_type, params):
         files = files[-1:]
 
     if stamp:
-        filtered_files = []
         try:
             mkdir(join(statements_dir, 'stamps'))
         except OSError:
             pass
+
+        filtered_files = []
         for f in files:
             stamped_file = _stamped_filename(f, stamp)
             fd = False
             try:
                 fd = osopen(stamped_file, O_CREAT | O_EXCL)
-                write(fd, 'x')
                 filtered_files.append(f)
             except OSError: #verify errno 17
                 pass

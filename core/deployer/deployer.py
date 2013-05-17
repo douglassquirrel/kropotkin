@@ -40,9 +40,8 @@ if __name__=="__main__":
         component_fact \
             = get_oldest_fact_and_stamp('kropotkin',
                                         'component',
-                                        {'language': 'python',
-                                         'content_type': 'component-tar'},
-                                        'deployer.1414')
+                                        {'content_type': 'component-tar'},
+                                        'deployer')
         if component_fact:
             name = component_fact['name']
             directory = unpack(name, component_fact['bytes'])

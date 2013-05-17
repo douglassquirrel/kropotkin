@@ -58,6 +58,6 @@ if __name__=="__main__":
         fact = get_oldest_fact_and_stamp('kropotkin', \
                                          'component_available', \
                                          {}, \
-                                         'publisher.2718')
+                                         'publisher')
         if fact:
             publish(fact['location'])

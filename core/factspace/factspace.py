@@ -16,7 +16,7 @@ if __name__=="__main__":
         factspace_fact = get_oldest_fact_and_stamp('kropotkin',
                                                    'factspace_wanted',
                                                    {},
-                                                   'factspace_stamp.1728')
+                                                   'factspace_stamp')
         if factspace_fact:
             name = factspace_fact['name']
             create_factspace(name)
