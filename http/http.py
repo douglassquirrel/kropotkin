@@ -4,10 +4,11 @@ from factspace.get_statements import get_statements
 from factspace.store_statement import store_statement
 from component.get_component import get_component
 from httplib2 import Http
+from itertools import count
 from SocketServer import ThreadingMixIn
 from urlparse import urlparse, parse_qsl
 
-def base(path, params, content):
+def base(path, params, content, id_generator):
     return 200, 'Kropotkin HTTP\n', 'text/plain'
 
 PORT=2001
@@ -30,11 +31,13 @@ class handler(BaseHTTPRequestHandler):
         params = dict(parse_qsl(parsed_url.query))
         length = int(self.headers.getheader('Content-Length') or 0)
         incoming_content = self.rfile.read(length)
+        id_generator = self.server.id_generator
         route = path.split('/')[1]
 
         try:
             responder = handler.routing[(route, verb)]
-            code, content, mime_type = responder(path, params, incoming_content)
+            code, content, mime_type = \
+                responder(path, params, incoming_content, id_generator)
         except KeyError:
             code = 404
             content = 'No route for %s with verb %s\n' % (route, verb)
@@ -57,4 +60,5 @@ class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
     pass
 
 server = ThreadedHTTPServer(('', PORT), handler)
+server.id_generator = count(start=1)
 server.serve_forever()

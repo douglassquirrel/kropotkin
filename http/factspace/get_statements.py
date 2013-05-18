@@ -7,7 +7,7 @@ from os.path import exists, join, split
 from time import time
 from urlparse import parse_qsl
 
-def get_statements(path, params, content):
+def get_statements(path, params, content, id_generator):
     factspace, confidence, fact_type = path.split('/')[2:5]
     if (factspace == 'kropotkin'):
         statements_dir = environ['KROPOTKIN_DIR']

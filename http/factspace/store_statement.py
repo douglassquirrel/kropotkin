@@ -1,14 +1,19 @@
 from errno import EEXIST
-from json import loads
+from json import loads, dumps
 from kropotkin import get_newest_fact
 from os import environ, makedirs, rename
 from os.path import join
 from time import time
 
-def store_statement(path, params, content):
+def store_statement(path, params, content, id_generator):
     factspace, confidence, fact_type = path.split('/')[2:5]
 
-    if not check_statement(factspace, fact_type, content):
+    content_dict = loads(content)
+    if 'kropotkin_id' in content_dict:
+        content_dict['kropotkin_id'] = id_generator.next()
+        content = dumps(content_dict)
+
+    if not check_statement(factspace, fact_type, content_dict):
         print "Fact disallowed"
         return (400, 'Fact of type %s blocked by constitution\n' % fact_type,
                 'text/plain')
@@ -23,8 +28,7 @@ def store_statement(path, params, content):
     save_statement(statements_dir, confidence, fact_type, content)
     return (200, '', 'text/plain')
 
-def check_statement(factspace, fact_type, content):
-    content_dict = loads(content)
+def check_statement(factspace, fact_type, content_dict):
     actual_keys = sorted(content_dict.keys())
 
     if fact_type == 'constitution_element':
