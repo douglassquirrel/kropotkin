@@ -10,7 +10,7 @@ def store_statement(path, params, content, id_generator):
 
     content_dict = loads(content)
     if 'kropotkin_id' in content_dict:
-        content_dict['kropotkin_id'] = id_generator.next()
+        content_dict['kropotkin_id'] = str(id_generator.next())
         content = dumps(content_dict)
 
     if not check_statement(factspace, fact_type, content_dict):
