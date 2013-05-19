@@ -13,10 +13,17 @@ def store_statement(path, params, content, id_generator):
         content_dict['kropotkin_id'] = str(id_generator.next())
         content = dumps(content_dict)
 
-    if not check_statement(factspace, fact_type, content_dict):
+    translation = check_statement(factspace, fact_type, content_dict)
+    if not translation:
         print "Fact disallowed"
         return (400, 'Fact of type %s blocked by constitution\n' % fact_type,
                 'text/plain')
+
+    try:
+        print confidence + ': ' + (translation % content_dict)
+    except:
+        print "Could not print %s of type %s\n%s\n%s" \
+            % (confidence, fact_type, translation, content_dict)
 
     if (factspace == 'kropotkin'):
         statements_dir = environ['KROPOTKIN_DIR']
@@ -44,7 +51,7 @@ def check_statement(factspace, fact_type, content_dict):
         expected_keys = sorted(constitution_element['keys'])
         translation = constitution_element['translation']
 
-    return expected_keys == actual_keys
+    return translation if expected_keys == actual_keys else False
 
 def save_statement(statements_dir, confidence, fact_type, content):
     temp_statements_dir = join(statements_dir, 'tmp')

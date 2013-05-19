@@ -56,7 +56,7 @@ for c in dirs_in('core'):
 environ['KROPOTKIN_URL'] = KROPOTKIN_URL
 elements = [{'type': 'component_available',
               'keys': ['location'],
-              'translation': 'Component available in %(directory)s'},
+              'translation': 'Component available in %(location)s'},
             {'type': 'component',
              'keys': ['name', 'bytes', 'language', 'content_type'],
              'translation': 'Component %(name)s, language %(language)s, '\
