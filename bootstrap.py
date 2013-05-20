@@ -76,7 +76,7 @@ for e in elements:
         print 'Could not store %s' % e
         exit(1)
 
-for c in dirs_in('components'):
+for c in listdir('components'):
     component_location = abspath(join('components', c))
     if not kropotkin.store_fact('kropotkin', 'component_available',
                                 {'location': component_location}):
