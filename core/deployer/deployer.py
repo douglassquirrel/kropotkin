@@ -16,16 +16,21 @@ def unpack(name, tar_data):
             tar.extractall(path=directory)
     return directory
 
+def inherit(to, from_, keys):
+    for key in keys:
+        if key not in to and key in from_:
+            to[key] = from_[key]
+
 def deploy(name, directory, env={}):
     executable = get_unique_executable(directory)
-    if executable:
-        if 'KROPOTKIN_URL' not in env:
-            env = env.copy()
-            env['KROPOTKIN_URL'] = environ['KROPOTKIN_URL']
-        process = Popen(executable, cwd=directory, env=env)
-        print "Deployed %s to %s with pid %d" % (name, directory, process.pid)
-    else:
+    if not executable:
         print "Cannot locate unique executable in %s" % directory
+        return False
+
+    env = env.copy()
+    inherit(env, environ, ['KROPOTKIN_URL', 'TEMP', 'TMP', 'TMPDIR'])
+    process = Popen(executable, cwd=directory, env=env)
+    print "Deployed %s to %s with pid %d" % (name, directory, process.pid)
 
 def get_unique_executable(directory):
     nodes = listdir(directory)
