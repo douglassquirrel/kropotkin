@@ -4,7 +4,9 @@
     <meta charset="utf-8">
     <title>Kropotkin - Factspace Monitoring</title>
     <script type="text/javascript" src="kropotkin-js"></script>
+    <script type="text/javascript" src="monitor-factspaces.js"></script>
     <script type="text/javascript" src="monitor-statements.js"></script>
+    <script type="text/javascript" src="monitor-constitution.js"></script>
     <script type="text/javascript" src="monitor-components.js"></script>
   </head>
   <body>
@@ -13,11 +15,12 @@
     </header>
 
     <header>
-      <h2>Factspace: <span data-factspace>Kropotkin</span></h2>
+      <h2>Factspace:
+        <select data-factspace><option selected>kropotkin</option></select></h2>
     </header>
 
     <section>
-      <!-- add title -->
+      <caption>Components</caption>
       <table border="1">
         <thead>
           <tr>
@@ -31,7 +34,7 @@
     </section>
 
     <section>
-      <!-- add title -->
+      <caption>Statements</caption>
       <table border="1">
         <thead>
           <tr>
@@ -45,6 +48,21 @@
         </tbody>
       </table>
     </section>
+
+    <section>
+      <caption>Constitution</caption>
+      <table border="1">
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Keys</th>
+          </tr>
+        </thead>
+        <tbody data-constitution>
+        </tbody>
+      </table>
+    </section>
+
 
     <footer>
       <p>Copyright Douglas Squirrel 2013</p>
