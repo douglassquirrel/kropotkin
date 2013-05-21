@@ -12,7 +12,6 @@ function display_factspaces(facts) {
     for (i=0; i<facts.length; i++) {
         var name = facts[i]['name'];
         if (option_values.indexOf(name) < 0) {
-            console.log("Adding " + name);
             var option=document.createElement("option");
             option.text=name;
             options.add(option, null);
