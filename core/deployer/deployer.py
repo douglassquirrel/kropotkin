@@ -1,9 +1,10 @@
 #!/usr/bin/python
 from base64 import b64decode
 from contextlib import closing
-from kropotkin import get_oldest_fact_and_stamp
+from kropotkin import get_oldest_fact_and_stamp, store_fact
 from os import access, environ, listdir, path, X_OK
 from os.path import isdir, join
+from socket import gethostname
 from subprocess import Popen
 from StringIO import StringIO
 from tarfile import open as taropen
@@ -30,7 +31,12 @@ def deploy(name, directory, env={}):
     env = env.copy()
     inherit(env, environ, ['KROPOTKIN_URL', 'TEMP', 'TMP', 'TMPDIR'])
     process = Popen(executable, cwd=directory, env=env)
-    print "Deployed %s to %s with pid %d" % (name, directory, process.pid)
+    content = {'name': name, 'location': gethostname(),
+               'identifier': process.pid}
+    if 'KROPOTKIN_URL' in environ:
+        if not store_fact('kropotkin', 'component_deployed', content):
+            print 'Cannot store component_deployed fact'
+    return process.pid
 
 def get_unique_executable(directory):
     nodes = listdir(directory)

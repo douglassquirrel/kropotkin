@@ -3,8 +3,10 @@ from httplib2 import Http
 from inspect import getsource
 from os import environ, listdir
 from os.path import abspath, isdir, join
+from socket import gethostname
 from sys import exit
 from time import time
+
 try:
     import kropotkin
     with open('libraries/python/kropotkin.py', 'r') as f:
@@ -45,15 +47,13 @@ def dirs_in(parent):
     return [d for d in listdir(parent) if isdir(join(parent, d))]
 
 env = {'KROPOTKIN_URL': KROPOTKIN_URL, 'KROPOTKIN_DIR': KROPOTKIN_DIR}
-deploy('http', 'http', env)
+http_pid = deploy('http', 'http', env)
 if not wait_for_http(10):
     print "Http not starting"
     exit(1)
 
-for c in dirs_in('core'):
-    deploy(c, join('core', c), env)
-
 environ['KROPOTKIN_URL'] = KROPOTKIN_URL
+
 elements = [{'type': 'component_available',
               'keys': ['location'],
               'translation': 'Component available in %(location)s'},
@@ -61,6 +61,10 @@ elements = [{'type': 'component_available',
              'keys': ['name', 'bytes', 'language', 'content_type'],
              'translation': 'Component %(name)s, language %(language)s, '\
                           + 'type %(content_type)s'},
+            {'type': 'component_deployed',
+             'keys': ['name', 'location', 'identifier'],
+             'translation': 'Component %(name)s deployed to %(location)s '\
+                          + 'with identifier %(identifier)s'},
             {'type': 'factspace_wanted',
               'keys': ['name'],
               'translation': 'Factspace %(name)s requested'},
@@ -75,6 +79,13 @@ for e in elements:
     if not kropotkin.store_fact('kropotkin', 'constitution_element', e):
         print 'Could not store %s' % e
         exit(1)
+
+content = {'name': 'http', 'location': gethostname(), 'identifier': http_pid}
+if not kropotkin.store_fact('kropotkin', 'component_deployed', content):
+    print 'Cannot store component_deployed fact for http'
+
+for c in dirs_in('core'):
+    deploy(c, join('core', c), env)
 
 for c in listdir('components'):
     component_location = abspath(join('components', c))
