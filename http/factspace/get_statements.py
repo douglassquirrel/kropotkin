@@ -37,10 +37,11 @@ def _fetch_statements(statements_dir, confidence, fact_type, params):
         if len(files) == 0 and __now_millis() > finish:
             return []
 
-    if result == 'oldest':
+    if result == 'newest':
+        files.reverse()
+
+    if result != 'all':
         files = files[0:1]
-    elif result == 'newest':
-        files = files[-1:]
 
     if stamp:
         try:
