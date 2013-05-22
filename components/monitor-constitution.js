@@ -15,6 +15,13 @@ function display_constitution(facts) {
         row.insertCell(0);
         row.insertCell(1);
     }
+    facts.sort(function(f, g) {
+        var a = f['type'];
+        var b = g['type'];
+        if (a<b) return -1;
+        if (a>b) return 1;
+        return 0;
+    });
     for (i=0; i < facts.length; i++) {
         row = const_table.rows[i];
         row.cells[0].innerHTML = facts[i]['type'];
