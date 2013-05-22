@@ -10,13 +10,14 @@ function store_fact(factspace, type, content) {
 function get_oldest_fact_and_stamp(factspace, type, criteria,
                                    stamp, onresponse) {
     var criteria = criteria.slice(0);
-    criteria['kropotkin_criteria'] = 'stamp-' + stamp + ',result-oldest';
+    kcriteria = 'stamp-' + stamp + ',result-oldest,number-1';
+    criteria['kropotkin_criteria'] = kcriteria;
     get_first_fact(factspace, type, criteria, onresponse);
 }
 
 function get_newest_fact(factspace, type, criteria, onresponse) {
     var criteria = criteria.slice(0);
-    criteria['kropotkin_criteria'] = 'result-newest';
+    criteria['kropotkin_criteria'] = 'result-newest,number-1';
     get_first_fact(factspace, type, criteria, onresponse);
 }
 

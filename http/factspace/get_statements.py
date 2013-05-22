@@ -25,7 +25,7 @@ def get_statements(path, params, content, id_generator):
 
 def _fetch_statements(statements_dir, confidence, fact_type, params):
     params = params.copy()
-    stamp, result = _extract_kropotkin_criteria(params)
+    stamp, result, number = _extract_kropotkin_criteria(params)
     params.pop('kropotkin_criteria', None)
     timeout = 2000 if (result == 'oldest' or result == 'newest') else 0
 
@@ -40,8 +40,8 @@ def _fetch_statements(statements_dir, confidence, fact_type, params):
     if result == 'newest':
         files.reverse()
 
-    if result != 'all':
-        files = files[0:1]
+    if number is not None:
+        files = files[0:number]
 
     if stamp:
         try:
@@ -68,6 +68,7 @@ def _fetch_statements(statements_dir, confidence, fact_type, params):
 def _extract_kropotkin_criteria(params):
     stamp = False
     result = 'all'
+    number = None
     try:
         criteria_str = params['kropotkin_criteria']
         criteria_str = criteria_str.replace('-', '=').replace(',', '&')
@@ -80,9 +81,13 @@ def _extract_kropotkin_criteria(params):
             result = criteria['result']
         except KeyError:
             pass
+        try:
+            number = int(criteria['number'])
+        except KeyError:
+            pass
     except KeyError:
         pass
-    return stamp, result
+    return stamp, result, number
 
 def _dict_match(d1, d2):
     d2 = d2.copy()

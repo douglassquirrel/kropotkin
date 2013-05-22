@@ -4,19 +4,19 @@ from os import environ
 from urllib import urlencode
 from time import time
 
-def make_query_function(confidence, stamped, which):
+def make_query_function(confidence, stamped, which, number):
     if stamped:
         return lambda factspace, type_, criteria, stamp: \
-            _get_statements(confidence, which, stamp,
+            _get_statements(confidence, which, stamp, number,
                             factspace, type_, criteria)
     else:
         return lambda factspace, type_, criteria: \
-            _get_statements(confidence, which, None,
+            _get_statements(confidence, which, None, number,
                             factspace, type_, criteria)
 
-get_oldest_fact_and_stamp = make_query_function('fact', True, 'oldest')
-get_newest_fact = make_query_function('fact', False, 'newest')
-get_all_facts = make_query_function('fact', False, 'all')
+get_oldest_fact_and_stamp = make_query_function('fact', True, 'oldest', 1)
+get_newest_fact = make_query_function('fact', False, 'newest', 1)
+get_all_facts = make_query_function('fact', False, 'all', None)
 
 def store_fact(factspace, type_, content):
     return _store_statement('fact', factspace, type_, content)
@@ -33,20 +33,23 @@ def create_factspace(name, timeout=5):
             return True
     return False
 
-def _get_statements(confidence, which, stamp, factspace, type_, criteria):
+def _get_statements(confidence, which, stamp, number,
+                    factspace, type_, criteria):
     kropotkin_criteria_list = []
     if stamp is not None:
         kropotkin_criteria_list.append('stamp-' + stamp)
     if which != 'all':
         kropotkin_criteria_list.append('result-' + which)
+    if number is not None:
+        kropotkin_criteria_list.append('number-' + str(number))
 
     criteria = criteria.copy()
     if kropotkin_criteria_list:
         criteria['kropotkin_criteria'] = ','.join(kropotkin_criteria_list)
     statements = _get_all_statements(confidence, factspace, type_, criteria)
-    if which == 'all':
+    if statements and (number is None or number > 1):
         return statements
-    elif statements:
+    elif statements and number == 1:
         return statements[0]
     else:
         return None

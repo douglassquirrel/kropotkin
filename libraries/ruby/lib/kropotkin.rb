@@ -2,28 +2,30 @@
 require 'net/http'
 require 'json'
 
-def make_query_function(confidence, stamped, which)
+def make_query_function(confidence, stamped, which, number)
   if stamped
     return lambda {|factspace, type, criteria, stamp| \
-      get_statements(confidence, which, stamp, factspace, type, criteria)}
+      get_statements(confidence, which, stamp, number,
+                     factspace, type, criteria)}
   else
     return lambda {|factspace, type, criteria| \
-      get_statements(confidence, which, false, factspace, type, criteria)}
+      get_statements(confidence, which, false, number,
+                     factspace, type, criteria)}
   end
 end
 
 def get_oldest_fact_and_stamp(factspace, type, criteria, stamp)
-  f = make_query_function('fact', true, 'oldest')
+  f = make_query_function('fact', true, 'oldest', 1)
   f.call(factspace, type, criteria, stamp)
 end
 
 def get_newest_fact(factspace, type, criteria)
-  f = make_query_function('fact', false, 'newest')
+  f = make_query_function('fact', false, 'newest', 1)
   f.call(factspace, type, criteria)
 end
 
 def get_all_facts(factspace, type, criteria)
-  f = make_query_function('fact', false, 'all')
+  f = make_query_function('fact', false, 'all', nil)
   f.call(factspace, type, criteria)
 end
 
@@ -57,7 +59,7 @@ def store_statement(confidence, factspace, type, content)
   return (resp.code == '200')
 end
 
-def get_statements(confidence, which, stamp, factspace, type, criteria)
+def get_statements(confidence, which, stamp, number, factspace, type, criteria)
   kropotkin_criteria_list = []
   if stamp
     kropotkin_criteria_list.push('stamp-' + stamp)
@@ -65,16 +67,21 @@ def get_statements(confidence, which, stamp, factspace, type, criteria)
   if which != 'all'
     kropotkin_criteria_list.push('result-' + which)
   end
+  if number
+    kropotkin_criteria_list.push('number-' + number.to_s)
+  end
 
   criteria = Hash[criteria]
   if kropotkin_criteria_list.length > 0
     criteria['kropotkin_criteria'] = kropotkin_criteria_list.join(',')
   end
   statements = get_all_statements(confidence, factspace, type, criteria)
-  if which == 'all'
+  if statements.length > 0 and (number.nil? or number > 1)
     return statements
-  else
+  elsif statements.length > 0 and number == 1
     return statements[0]
+  else
+    return nil
   end
 end
 
