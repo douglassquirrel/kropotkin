@@ -3,7 +3,7 @@ from json import dumps, load
 from kropotkin import get_newest_fact
 from os import close, environ, mkdir, O_CREAT, O_EXCL, \
                open as osopen, rename, write
-from os.path import exists, join, split
+from os.path import basename, exists, join, split
 from time import time
 from urlparse import parse_qsl
 
@@ -100,6 +100,8 @@ def _stamped_filename(f, stamp):
     return join(split(f)[0], 'stamps', '.'.join([split(f)[1], stamp]))
 
 def _get_statement_files(statements_dir, confidence, fact_type, params, stamp):
+    if confidence == 'statement':
+        confidence = '*'
     files = glob(join(statements_dir, fact_type + ".*." + confidence + "*"))
     files.sort(key=lambda f: int(f.split('.')[1]))
 
@@ -111,7 +113,9 @@ def _get_statement_files(statements_dir, confidence, fact_type, params, stamp):
 
 def _load_statement(filename):
     with open(filename, 'r') as statement_file:
-        return load(statement_file)
+        statement = load(statement_file)
+        statement['kropotkin_confidence'] = basename(filename).split('.')[3]
+        return statement
 
 def __now_millis():
     return int(round(time() * 1000))
