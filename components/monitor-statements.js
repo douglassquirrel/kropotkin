@@ -19,18 +19,30 @@ function translate(str, dict) {
     return start + translate(t.slice(m + value.length), dict);
 }
 
+function get_see_statements_element() {
+    var radio_buttons = document.getElementsByName('const_inspect');
+    for (var i=0; i<radio_buttons.length; i++) {
+        if (radio_buttons[i].checked) return radio_buttons[i].value;
+    }
+    return null;
+}
+
 function check_statements() {
+    var element = get_see_statements_element();
+    if (element == null) return;
     var factspace_select = document.querySelectorAll('*[data-factspace]')[0];
     factspace = factspace_select.value;
-    get_newest_n_statements(factspace, 'component_available', {}, 10,
+    get_newest_n_statements(factspace, element, {}, 10,
                             display_statements);
 }
 
 function display_statements(statements) {
+    var element = get_see_statements_element();
+
     var const_table = document.querySelectorAll('*[data-constitution]')[0];
     var translation = null;
     for (i=0; i<const_table.rows.length; i++) {
-        if (const_table.rows[i].cells[0].innerHTML == 'component_available') {
+        if (const_table.rows[i].cells[0].innerHTML == element) {
             translation = const_table.rows[i].cells[2].innerHTML;
         }
     }
