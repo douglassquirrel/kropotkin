@@ -8,23 +8,42 @@ function get_newest_n_statements(factspace, type, criteria, n, onresponse) {
     });
 }
 
+function translate(str, dict) {
+    r = /%\((.+?)\)s/;
+    m = str.search(r);
+    if (m == -1) return str;
+    key = str.match(r)[1];
+    value = dict[key];
+    t = str.replace(r, value);
+    start = t.slice(0, m + value.length);
+    return start + translate(t.slice(m + value.length), dict);
+}
+
 function check_statements() {
     var factspace_select = document.querySelectorAll('*[data-factspace]')[0];
     factspace = factspace_select.value;
-    get_newest_n_statements(factspace, 'constitution_element', [], 10,
+    get_newest_n_statements(factspace, 'component_available', {}, 10,
                             display_statements);
 }
 
 function display_statements(statements) {
-    console.log(statements);
+    var const_table = document.querySelectorAll('*[data-constitution]')[0];
+    var translation = null;
+    for (i=0; i<const_table.rows.length; i++) {
+        if (const_table.rows[i].cells[0].innerHTML == 'component_available') {
+            translation = const_table.rows[i].cells[2].innerHTML;
+        }
+    }
+    if (null == translation) return;
+
     var statement_table = document.querySelectorAll('*[data-statements]')[0];
-    for (i=0; i < 10; i++) {
+    for (i=0; i<10; i++) {
         var row_data = [];
         if (i < statements.length) {
             row_data.push('');
             row_data.push(statements[i]['kropotkin_confidence']);
             row_data.push('');
-            row_data.push('translation goes here');
+            row_data.push(translate(translation, statements[i]));
         } else {
             row_data = ['', '', '', '']
         }

@@ -1,5 +1,5 @@
 function check_components() {
-    get_all_facts('kropotkin', 'component_deployed', [], display_components);
+    get_all_facts('kropotkin', 'component_deployed', {}, display_components);
 }
 
 function display_components(facts) {

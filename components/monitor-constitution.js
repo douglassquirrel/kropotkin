@@ -1,7 +1,7 @@
 function check_constitution() {
     var factspace_select = document.querySelectorAll('*[data-factspace]')[0];
     factspace = factspace_select.value;
-    get_all_facts(factspace, 'constitution_element', [], display_constitution);
+    get_all_facts(factspace, 'constitution_element', {}, display_constitution);
 }
 
 function display_constitution(facts) {
@@ -14,6 +14,7 @@ function display_constitution(facts) {
         row = const_table.insertRow(-1);
         row.insertCell(0);
         row.insertCell(1);
+        row.insertCell(2);
     }
     facts.sort(function(f, g) {
         var a = f['type'];
@@ -26,6 +27,7 @@ function display_constitution(facts) {
         row = const_table.rows[i];
         row.cells[0].innerHTML = facts[i]['type'];
         row.cells[1].innerHTML = facts[i]['keys'].join();
+        row.cells[2].innerHTML = facts[i]['translation'];
     }
 }
 

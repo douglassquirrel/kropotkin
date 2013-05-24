@@ -1,5 +1,5 @@
 function check_factspaces() {
-    get_all_facts('kropotkin', 'factspace', [], display_factspaces);
+    get_all_facts('kropotkin', 'factspace', {}, display_factspaces);
 }
 
 function display_factspaces(facts) {

@@ -2,6 +2,14 @@ if (!("console" in window) || !("log" in window.console)) {
     window.console = {"log": function(){}};
 }
 
+function shallow_copy(dict) {
+    copy = {};
+    for (key in dict) {
+       copy[key] = dict[key];
+    }
+    return copy;
+}
+
 function store_fact(factspace, type, content) {
     var url = '/factspace/' + factspace + '/fact/' + type;
     http_request(url, 'POST', JSON.stringify(content), null);
@@ -9,14 +17,14 @@ function store_fact(factspace, type, content) {
 
 function get_oldest_fact_and_stamp(factspace, type, criteria,
                                    stamp, onresponse) {
-    var criteria = criteria.slice(0);
+    var criteria = shallow_copy(criteria);
     kcriteria = 'stamp-' + stamp + ',result-oldest,number-1';
     criteria['kropotkin_criteria'] = kcriteria;
     get_first_fact(factspace, type, criteria, onresponse);
 }
 
 function get_newest_fact(factspace, type, criteria, onresponse) {
-    var criteria = criteria.slice(0);
+    var criteria = shallow_copy(criteria);
     criteria['kropotkin_criteria'] = 'result-newest,number-1';
     get_first_fact(factspace, type, criteria, onresponse);
 }
