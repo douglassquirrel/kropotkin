@@ -1,16 +1,23 @@
 #!/usr/bin/python
+from sys import exit, stderr, version, version_info
+
+def fail_and_exit(message):
+    stderr.write(message + '\n')
+    exit(1)
+
+major_version = version_info[0]
+minor_version = version_info[1]
+if (major_version != 2 or minor_version < 7):
+    fail_and_exit('Kropotkin works with Python 2, version 2.7 or greater.\n' \
+                + 'Your version does not match - it is:\n' + version)
+
 from contextlib import closing
 from inspect import getsource
 from os import environ, listdir
 from os.path import abspath, isdir, join
 from socket import gethostname
-from sys import exit, stderr
 from time import time
 from urllib2 import urlopen
-
-def fail_and_exit(message):
-    stderr.write(message + '\n')
-    exit(1)
 
 try:
     import kropotkin
