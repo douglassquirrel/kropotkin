@@ -1,0 +1,16 @@
+Kropotkin is a framework that expressly encourages the practise of Continuous
+Rewriting. It does this by making it easy (and in fact mandatory) to create
+your application from a large number of very loosely coupled, miniscule
+components, which co-operate via a shared factspace containing immutable facts
+about the business domain.
+
+Kropotkin is written in Python but explicitly encourages polyglot programming.
+Components can and should be written in a wide variety of programming
+languages.
+
+To get started, just ensure Python is installed, run bootstrap.py, and follow
+the instructions. You may need to upgrade Python and you will definitely need
+to install one Python module - but nothing else is required.
+
+See the Kropotkin wiki for more information:
+https://github.com/douglassquirrel/kropotkin/wiki
