@@ -34,10 +34,6 @@ else:
     output_dir = argv[1]
 ensure_exists(output_dir)
 
-print "Building Kropotkin python library"
-print "Output directory: %s" % output_dir
-print "Version: %s" % version
-
 setup(name='kropotkin',
       version=version,
       py_modules=['kropotkin'],

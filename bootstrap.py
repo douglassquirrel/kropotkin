@@ -4,8 +4,12 @@ from inspect import getsource
 from os import environ, listdir
 from os.path import abspath, isdir, join
 from socket import gethostname
-from sys import exit
+from sys import exit, stderr
 from time import time
+
+def fail_and_exit(message):
+    stderr.write(message + '\n')
+    exit(1)
 
 try:
     import kropotkin
@@ -16,9 +20,8 @@ try:
 except ImportError:
     kropotkin_imported = False
 if not kropotkin_imported:
-    print "Kropotkin module not installed or out of date."
-    print "See libraries/python/README.txt for installation steps."
-    exit(1)
+    fail_and_exit("Kropotkin module not installed or out of date.\n"
+                + "See libraries/python/README.txt for installation steps.")
 
 from core.deployer.deployer import deploy
 from core.factspace.factspace import create_factspace
@@ -49,8 +52,7 @@ def dirs_in(parent):
 env = {'KROPOTKIN_URL': KROPOTKIN_URL, 'KROPOTKIN_DIR': KROPOTKIN_DIR}
 http_pid = deploy('http', 'http', env)
 if not wait_for_http(10):
-    print "Http not starting"
-    exit(1)
+    fail_and_exit("Http not starting")
 
 environ['KROPOTKIN_URL'] = KROPOTKIN_URL
 
@@ -77,12 +79,11 @@ elements = [{'type': 'component_available',
                           + 'language %(language)s'}]
 for e in elements:
     if not kropotkin.store_fact('kropotkin', 'constitution_element', e):
-        print 'Could not store %s' % e
-        exit(1)
+        fail_and_exit('Could not store %s' % e)
 
 content = {'name': 'http', 'location': gethostname(), 'identifier': http_pid}
 if not kropotkin.store_fact('kropotkin', 'component_deployed', content):
-    print 'Cannot store component_deployed fact for http'
+    fail_and_exit('Cannot store component_deployed fact for http')
 
 for c in dirs_in('core'):
     deploy(c, join('core', c), env)
@@ -91,13 +92,11 @@ for c in listdir('components'):
     component_location = abspath(join('components', c))
     if not kropotkin.store_fact('kropotkin', 'component_available',
                                 {'location': component_location}):
-        print 'Could not store component_available for %s' % c
-        exit(1)
+        fail_and_exit('Could not store component_available for %s' % c)
 
 for lib in dirs_in('libraries'):
     library_location = abspath(join('libraries', lib))
     if not kropotkin.store_fact('kropotkin', 'library_available',
                                 {'directory': library_location,
                                  'language': lib}):
-        print 'Could not store library_available for %s' % lib
-        exit(1)
+        fail_and_exit('Could not store library_available for %s' % lib)

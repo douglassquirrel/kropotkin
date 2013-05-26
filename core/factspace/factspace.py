@@ -4,11 +4,12 @@ from tempfile import mkdtemp
 
 def create_factspace(name):
     directory = mkdtemp()
-    if name != 'kropotkin':
+    if name == 'kropotkin':
+        print "Kropotkin factspace located at: %s" % directory
+    else:
         content = {'name': name, 'directory': directory}
         if not store_fact('kropotkin', 'factspace', content):
             raise Exception("Cannot store factspace fact")
-    print 'Storing facts for %s in %s' % (name, directory)
     return directory
 
 if __name__=="__main__":

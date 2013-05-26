@@ -5,8 +5,9 @@ from kropotkin import get_oldest_fact_and_stamp, store_fact
 from os import access, environ, listdir, path, X_OK
 from os.path import isdir, join
 from socket import gethostname
-from subprocess import Popen
 from StringIO import StringIO
+from subprocess import Popen
+from sys import stderr
 from tarfile import open as taropen
 from tempfile import mkdtemp
 
@@ -25,7 +26,7 @@ def inherit(to, from_, keys):
 def deploy(name, directory, env={}):
     executable = get_unique_executable(directory)
     if not executable:
-        print "Cannot locate unique executable in %s" % directory
+        stderr.write("No unique executable in %s for %s\n" % (directory, name))
         return False
 
     env = env.copy()
@@ -35,7 +36,7 @@ def deploy(name, directory, env={}):
                'identifier': process.pid}
     if 'KROPOTKIN_URL' in environ:
         if not store_fact('kropotkin', 'component_deployed', content):
-            print 'Cannot store component_deployed fact'
+            stderr.write('Cannot store component_deployed fact for %s\n' %name)
     return process.pid
 
 def get_unique_executable(directory):

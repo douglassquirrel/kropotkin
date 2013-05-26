@@ -3,6 +3,8 @@
 require 'fileutils'
 require 'rubygems'
 
+Gem::DefaultUserInteraction.ui = Gem::SilentUI.new
+
 gemspec = Gem::Specification.new do |s|
   s.name = 'kropotkin'
   s.version = '0.0.1'

@@ -5,6 +5,7 @@ from os import access, listdir, X_OK
 from os.path import basename, isdir, join
 from shutil import copy, copytree
 from subprocess import Popen
+from sys import stderr
 from tempfile import mkdtemp
 
 def copy_all(original_dir, dest_dir):
@@ -43,14 +44,15 @@ while True:
 
     executable = get_unique_executable(build_dir)
     if not executable:
-        print "Cannot locate unique executable in %s" % build_dir
+        stderr.write("Cannot locate unique executable in %s\n" % build_dir)
         continue
 
     process = Popen([executable, output_dir], cwd=build_dir)
     process.wait()
     files = listdir(output_dir)
     if len(files) != 1:
-        print 'No single file output for library %s' % basename(original_dir)
+        stderr.write('Library %s output %d files, should be exactly 1\n' \
+                         % (basename(original_dir), len(files)))
         continue
     output_file = join(output_dir, files[0])
 
@@ -61,4 +63,4 @@ while True:
                'content_type': MODULE_TYPES[language],
                'bytes': bytes}
     if not store_fact('kropotkin', 'component', content):
-        print 'Could not store component for %s' % name
+        stderr.write('Could not store component for %s\n' % name)

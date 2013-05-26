@@ -3,6 +3,7 @@ from json import loads, dumps
 from kropotkin import get_newest_fact
 from os import environ, makedirs, rename
 from os.path import join
+from sys import stderr
 from time import time
 
 def store_statement(path, params, content, id_generator):
@@ -15,15 +16,9 @@ def store_statement(path, params, content, id_generator):
 
     translation = check_statement(factspace, fact_type, content_dict)
     if not translation:
-        print "Fact disallowed"
+        stderr.write("Fact of type %s disallowed\n" % fact_type)
         return (400, 'Fact of type %s blocked by constitution\n' % fact_type,
                 'text/plain')
-
-    try:
-        print confidence + ': ' + (translation % content_dict)
-    except:
-        print "Could not print %s of type %s\n%s\n%s" \
-            % (confidence, fact_type, translation, content_dict)
 
     if (factspace == 'kropotkin'):
         statements_dir = environ['KROPOTKIN_DIR']
