@@ -1,21 +1,6 @@
 /* MultiFile - A JavaScript library to load multiple files from
    tar archives (see http://gist.github.com/407595)
 
-  Example: Loading multiple images from a tarball.
-
-  MultiFile.load('images.tar', function(xhr) {
-    this.files.forEach(function(f) {
-      var e = document.createElement('div');
-      document.body.appendChild(e);
-      var p = document.createElement('p');
-      p.appendChild(document.createTextNode(f.filename));
-      e.appendChild(p);
-      var img = new Image();
-      img.src = f.toDataURL();
-      e.appendChild(img);
-    });
-  });
-
 Copyright (c) 2010 Ilmari Heikkinen
 Modified for Kropotkin in 2013 by D Squirrel
 
@@ -38,121 +23,51 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-MultiFile = function(){};
-
-// Load and parse archive, calls onload after loading all files.
-MultiFile.load = function(url, onload) {
-  var o = new MultiFile();
-  o.onload = onload;
-  o.load(url);
-  return o;
+function parseTar(data) {
+    files = [];
+    offset = 0;
+    while (data.length >= offset + 512) {
+        var header = files.length == 0 ? null : files[files.length-1];
+        if (header && header.data == null) {
+            if (offset + header.length <= data.length) {
+                header.data = data.substring(offset, offset+header.length);
+                offset += 512 * Math.ceil(header.length / 512);
+            } else { // not loaded yet
+                break;
+            }
+        } else {
+            var header = this.parseTarHeader(data, offset);
+            if (header.length > 0 || header.filename != '') {
+                files.push(header);
+                offset += 512;
+                header.offset = offset;
+            } else { // empty header, stop processing
+                offset = data.length;
+            }
+        }
+    }
+    return files;
 }
 
-MultiFile.prototype = {
-  onerror : null,
-  onload : null,
-  onstream : null,
-
-  load : function(url) {
-    var xhr = new XMLHttpRequest();
-    var self = this;
-    var offset = 0;
-    this.files = [];
-    xhr.onreadystatechange = function() {
-      if (xhr.readyState == 4) {
-        if (xhr.status == 200 || xhr.status == 0) {
-          offset = self.processTarChunks(xhr.responseText, offset);
-          if (self.onload)
-            self.onload(xhr);
-        } else {
-          if (self.onerror)
-            self.onerror(xhr);
-        }
-      } else if (xhr.readyState == 3) {
-        if (xhr.status == 200 || xhr.status == 0) {
-          offset = self.processTarChunks(xhr.responseText, offset);
-        }
-      }
-    };
-    xhr.open("GET", url, true);
-    xhr.overrideMimeType("text/plain; charset=x-user-defined");
-    xhr.setRequestHeader("Content-Type", "text/plain");
-    xhr.send(null);
-  },
-
-  onerror : function(xhr) {
-    alert("Error: "+xhr.status);
-  },
-
-  cleanHighByte : function(s) {
-    return s.replace(/./g, function(m) {
-      return String.fromCharCode(m.charCodeAt(0) & 0xff);
-    });
-  },
-
-  parseTar : function(text) {
-    this.files = [];
-    this.processTarChunks(text, 0);
-  },
-  processTarChunks : function (responseText, offset) {
-    while (responseText.length >= offset + 512) {
-      var header = this.files.length == 0 ? null : this.files[this.files.length-1];
-      if (header && header.data == null) {
-        if (offset + header.length <= responseText.length) {
-          header.data = responseText.substring(offset, offset+header.length);
-          header.toDataURL = this.__toDataURL;
-          offset += 512 * Math.ceil(header.length / 512);
-          if (this.onstream)
-            this.onstream(header);
-        } else { // not loaded yet
-          break;
-        }
-      } else {
-        var header = this.parseTarHeader(responseText, offset);
-        if (header.length > 0 || header.filename != '') {
-          this.files.push(header);
-          offset += 512;
-          header.offset = offset;
-        } else { // empty header, stop processing
-          offset = responseText.length;
-        }
-      }
-    }
-    return offset;
-  },
-  parseTarHeader : function(text, offset) {
+function parseTarHeader(data, offset) {
     var i = offset || 0;
     var h = {};
-    h.filename = text.substring(i, i+=100).split("\0", 1)[0];
-    h.mode = text.substring(i, i+=8).split("\0", 1)[0];
-    h.uid = text.substring(i, i+=8).split("\0", 1)[0];
-    h.gid = text.substring(i, i+=8).split("\0", 1)[0];
-    h.length = this.parseTarNumber(text.substring(i, i+=12));
-    h.lastModified = text.substring(i, i+=12).split("\0", 1)[0];
-    h.checkSum = text.substring(i, i+=8).split("\0", 1)[0];
-    h.fileType = text.substring(i, i+=1).split("\0", 1)[0];
-    h.linkName = text.substring(i, i+=100).split("\0", 1)[0];
+    h.filename = data.substring(i, i+=100).split("\0", 1)[0];
+    h.mode = data.substring(i, i+=8).split("\0", 1)[0];
+    h.uid = data.substring(i, i+=8).split("\0", 1)[0];
+    h.gid = data.substring(i, i+=8).split("\0", 1)[0];
+    h.length = parseTarNumber(data.substring(i, i+=12));
+    h.lastModified = data.substring(i, i+=12).split("\0", 1)[0];
+    h.checkSum = data.substring(i, i+=8).split("\0", 1)[0];
+    h.fileType = data.substring(i, i+=1).split("\0", 1)[0];
+    h.linkName = data.substring(i, i+=100).split("\0", 1)[0];
     return h;
-  },
-  parseTarNumber : function(text) {
-    // if (text.charCodeAt(0) & 0x80 == 1) {
+}
+
+function parseTarNumber(data) {
+    // if (data.charCodeAt(0) & 0x80 == 1) {
     // GNU tar 8-byte binary big-endian number
     // } else {
-      return parseInt('0'+text.replace(/[^\d]/g, ''));
+    return parseInt('0'+data.replace(/[^\d]/g, ''));
     // }
-  },
-
-  __toDataURL : function() {
-    if (this.data.substring(0,40).match(/^data:[^\/]+\/[^,]+,/)) {
-      return this.data;
-    } else if (MultiFile.prototype.cleanHighByte(this.data.substring(0,10)).match(/\377\330\377\340..JFIF/)) {
-      return 'data:image/jpeg;base64,'+btoa(MultiFile.prototype.cleanHighByte(this.data));
-    } else if (MultiFile.prototype.cleanHighByte(this.data.substring(0,6)) == "\211PNG\r\n") {
-      return 'data:image/png;base64,'+btoa(MultiFile.prototype.cleanHighByte(this.data));
-    } else if (MultiFile.prototype.cleanHighByte(this.data.substring(0,6)).match(/GIF8[79]a/)) {
-      return 'data:image/gif;base64,'+btoa(MultiFile.prototype.cleanHighByte(this.data));
-    } else {
-      throw("toDataURL: I don't know how to handle " + this.filename);
-    }
-  }
 }
