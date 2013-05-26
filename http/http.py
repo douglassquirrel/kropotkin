@@ -3,7 +3,6 @@ from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 from factspace.get_statements import get_statements
 from factspace.store_statement import store_statement
 from component.get_component import get_component
-from httplib2 import Http
 from itertools import count
 from SocketServer import ThreadingMixIn
 from urlparse import urlparse, parse_qsl

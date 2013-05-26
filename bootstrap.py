@@ -1,11 +1,12 @@
 #!/usr/bin/python
-from httplib2 import Http
+from contextlib import closing
 from inspect import getsource
 from os import environ, listdir
 from os.path import abspath, isdir, join
 from socket import gethostname
 from sys import exit, stderr
 from time import time
+from urllib2 import urlopen
 
 def fail_and_exit(message):
     stderr.write(message + '\n')
@@ -32,10 +33,11 @@ KROPOTKIN_DIR=create_factspace('kropotkin')
 
 def wait_for_http(timeout):
     finish = now() + timeout
-    http = Http()
+
     while True:
         try:
-            response, content = http.request(KROPOTKIN_URL, "GET")
+            with closing(urlopen(KROPOTKIN_URL)) as k:
+                k.read()
             return True
         except IOError:
             pass

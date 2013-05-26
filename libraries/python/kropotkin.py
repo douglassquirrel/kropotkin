@@ -1,8 +1,9 @@
-from httplib2 import Http
+from contextlib import closing
 from json import loads, dumps
 from os import environ
-from urllib import urlencode
 from time import time
+from urllib import urlencode
+from urllib2 import urlopen
 
 def make_query_function(confidence, stamped, which, number):
     if stamped:
@@ -54,21 +55,24 @@ def _get_statements(confidence, which, stamp, number,
     else:
         return None
 
+def _http_request(url, data=None):
+    with closing(urlopen(url, data)) as r:
+        return (r.getcode(), r.read())
+
 def _get_all_statements(confidence, factspace, type_, criteria):
     kropotkin_url = environ['KROPOTKIN_URL']
     params = urlencode(criteria)
     url = '%s/factspace/%s/%s/%s?%s' \
         % (kropotkin_url, factspace, confidence, type_, params)
-    resp, content = Http().request(url)
-    if resp.status == 200:
+    status, content = _http_request(url)
+    if status == 200:
         return loads(content)
     else:
-        raise Exception("Unexpected response from server: %d" % resp.status)
+        raise Exception("Unexpected response from server: %d" % status)
 
 def _store_statement(confidence, factspace, type_, content):
     kropotkin_url = environ['KROPOTKIN_URL']
     url = '%s/factspace/%s/%s/%s' \
         % (kropotkin_url, factspace, confidence, type_)
-    headers = {'content-type': 'application/x-www-form-urlencoded'}
-    resp, content = Http().request(url, "POST", dumps(content), headers)
-    return resp.status == 200
+    status, content = _http_request(url, dumps(content))
+    return status == 200
