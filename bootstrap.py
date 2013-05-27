@@ -62,6 +62,8 @@ env = {'KROPOTKIN_URL': KROPOTKIN_URL, 'KROPOTKIN_DIR': KROPOTKIN_DIR}
 http_pid = deploy('http', 'http', env)
 if not wait_for_http(10):
     fail_and_exit("Http not starting")
+else:
+    print "Kropotkin available at %s" % KROPOTKIN_URL
 
 environ['KROPOTKIN_URL'] = KROPOTKIN_URL
 
