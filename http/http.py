@@ -4,7 +4,7 @@ from factspace.get_statements import get_statements
 from factspace.store_statement import store_statement
 from component.get_component import get_component
 from itertools import count
-from SocketServer import ThreadingMixIn
+from SocketServer import ForkingMixIn
 from urlparse import urlparse, parse_qsl
 
 def base(path, params, content, id_generator):
@@ -55,9 +55,9 @@ class handler(BaseHTTPRequestHandler):
         if content:
             self.wfile.write(content)
 
-class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
+class ForkingHTTPServer(ForkingMixIn, HTTPServer):
     pass
 
-server = ThreadedHTTPServer(('', PORT), handler)
+server = ForkingHTTPServer(('', PORT), handler)
 server.id_generator = count(start=1)
 server.serve_forever()
