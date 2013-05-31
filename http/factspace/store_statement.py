@@ -3,6 +3,7 @@ from json import loads, dumps
 from kropotkin import get_newest_fact
 from os import environ, makedirs, rename
 from os.path import join
+from sqlite3 import connect
 from sys import stderr
 from time import time
 
@@ -14,8 +15,7 @@ def store_statement(path, params, content, id_generator):
         content_dict['kropotkin_id'] = str(id_generator.next())
         content = dumps(content_dict)
 
-    translation = check_statement(factspace, fact_type, content_dict)
-    if not translation:
+    if not check_statement(factspace, fact_type, content_dict):
         stderr.write("Fact of type %s disallowed\n" % fact_type)
         return (400, 'Fact of type %s blocked by constitution\n' % fact_type,
                 'text/plain')
@@ -44,11 +44,14 @@ def check_statement(factspace, fact_type, content_dict):
         if not constitution_element:
             return False
         expected_keys = sorted(constitution_element['keys'])
-        translation = constitution_element['translation']
 
-    return translation if expected_keys == actual_keys else False
+    return expected_keys == actual_keys
 
 def save_statement(statements_dir, confidence, fact_type, content):
+    save_statement_file(statements_dir, confidence, fact_type, content)
+    save_statement_db(statements_dir, confidence, fact_type, content)
+
+def save_statement_file(statements_dir, confidence, fact_type, content):
     temp_statements_dir = join(statements_dir, 'tmp')
     ensure_exists(temp_statements_dir)
 
@@ -60,6 +63,18 @@ def save_statement(statements_dir, confidence, fact_type, content):
     with open(temp_path, 'w') as statement_file:
         statement_file.write(content)
     rename(temp_path, real_path)
+
+CREATE_TABLE_TEMPLATE = 'CREATE TABLE IF NOT EXISTS %s (%s)'
+def save_statement_db(statements_dir, confidence, fact_type, content):
+    content_dict = loads(content)
+    keys = content_dict.keys()
+    create_table_sql = CREATE_TABLE_TEMPLATE % \
+        (fact_type, ' TEXT, '.join(keys) + ' TEXT')
+    connection = connect(join(statements_dir, 'factspace.db'))
+    cursor = connection.cursor()
+    cursor.execute(create_table_sql)
+    connection.commit()
+    connection.close()
 
 def ensure_exists(directory):
     try:
