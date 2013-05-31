@@ -64,15 +64,27 @@ def save_statement_file(statements_dir, confidence, fact_type, content):
         statement_file.write(content)
     rename(temp_path, real_path)
 
-CREATE_TABLE_TEMPLATE = 'CREATE TABLE IF NOT EXISTS %s (%s)'
+CREATE_TABLE_TEMPLATE = '''CREATE TABLE IF NOT EXISTS %s
+                           (ID INTEGER PRIMARY KEY,
+                            TIMESTAMP TEXT DEFAULT CURRENT_TIMESTAMP,
+                            %s)'''
+INSERT_TEMPLATE = '''INSERT INTO %s
+                     (%s) VALUES (%s)'''
 def save_statement_db(statements_dir, confidence, fact_type, content):
     content_dict = loads(content)
     keys = content_dict.keys()
+    value_params = ['?' for key in keys]
+    values = [str(content_dict[key]) for key in keys]
+
     create_table_sql = CREATE_TABLE_TEMPLATE % \
         (fact_type, ' TEXT, '.join(keys) + ' TEXT')
+    insert_sql = INSERT_TEMPLATE % \
+        (fact_type, ','.join(keys), ','.join(value_params))
+
     connection = connect(join(statements_dir, 'factspace.db'))
     cursor = connection.cursor()
     cursor.execute(create_table_sql)
+    cursor.execute(insert_sql, values)
     connection.commit()
     connection.close()
 
