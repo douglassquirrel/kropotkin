@@ -3,7 +3,7 @@ from json import loads, dumps
 from kropotkin import get_newest_fact
 from os import environ, makedirs, rename
 from os.path import join
-from sqlite3 import connect
+from sqlite3 import connect, OperationalError
 from sys import stderr
 from time import time
 
@@ -82,18 +82,18 @@ def save_statement_db(statements_dir, confidence, fact_type, content):
     insert_sql = INSERT_TEMPLATE % \
         (fact_type, ','.join(keys), ','.join(value_params))
     connection = connect(join(statements_dir, 'factspace.db'))
-    cursor = connection.cursor()
     try:
+        cursor = connection.cursor()
         cursor.execute(create_table_sql)
         cursor.execute(insert_sql, values)
-    except Exception as exception:
-        stderr.write('''Exception %s
-                        Create table SQL: %s
-                        Insert SQL: %s
-                        Values: %s
-                     ''' % (exception, create_table_sql, insert_sql, values))
-    finally:
         connection.commit()
+    except OperationalError as error:
+        stderr.write('Exception %s\n' \
+                   + 'Create table SQL: %s\n' \
+                   + 'Insert SQL: %s\n' \
+                   + 'Values: %s\n' \
+                     % (error, create_table_sql, insert_sql, values))
+    finally:
         connection.close()
 
 def ensure_exists(directory):
