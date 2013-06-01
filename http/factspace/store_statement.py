@@ -43,7 +43,7 @@ def check_statement(factspace, fact_type, content_dict):
             {'type': fact_type})
         if not constitution_element:
             return False
-        expected_keys = sorted(constitution_element['keys'])
+        expected_keys = sorted(loads(constitution_element['keys']))
 
     return expected_keys == actual_keys
 
@@ -74,19 +74,26 @@ def save_statement_db(statements_dir, confidence, fact_type, content):
     content_dict = loads(content)
     keys = content_dict.keys()
     value_params = ['?' for key in keys]
-    values = [str(content_dict[key]) for key in keys]
+    values = [content_dict[key] for key in keys]
 
     create_table_sql = CREATE_TABLE_TEMPLATE % \
-        (fact_type, ' TEXT, '.join(keys) + ' TEXT')
+        (fact_type, ', '.join(keys))
     insert_sql = INSERT_TEMPLATE % \
         (fact_type, ','.join(keys), ','.join(value_params))
-
     connection = connect(join(statements_dir, 'factspace.db'))
     cursor = connection.cursor()
-    cursor.execute(create_table_sql)
-    cursor.execute(insert_sql, values)
-    connection.commit()
-    connection.close()
+    try:
+        cursor.execute(create_table_sql)
+        cursor.execute(insert_sql, values)
+    except Exception as exception:
+        stderr.write('''Exception %s
+                        Create table SQL: %s
+                        Insert SQL: %s
+                        Values: %s
+                     ''' % (exception, create_table_sql, insert_sql, values))
+    finally:
+        connection.commit()
+        connection.close()
 
 def ensure_exists(directory):
     try:

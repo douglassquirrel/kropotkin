@@ -45,7 +45,7 @@ function display_constitution(facts) {
     for (var i=0; i < facts.length; i++) {
         var row = const_table.rows[i];
         row.cells[0].innerHTML = facts[i]['type'];
-        row.cells[1].innerHTML = JSON.stringify(facts[i]['keys']);
+        row.cells[1].innerHTML = facts[i]['keys'];
         row.cells[2].innerHTML = facts[i]['translation'];
 
         if (selected_element == facts[i]['type']) {

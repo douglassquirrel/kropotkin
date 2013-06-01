@@ -13,6 +13,7 @@ if (major_version != 2 or minor_version < 7):
 
 from contextlib import closing
 from inspect import getsource
+from json import dumps
 from os import environ, listdir
 from os.path import abspath, isdir, join
 from socket import gethostname
@@ -68,24 +69,24 @@ else:
 environ['KROPOTKIN_URL'] = KROPOTKIN_URL
 
 elements = [{'type': 'component_available',
-              'keys': ['location'],
+              'keys': dumps(['location']),
               'translation': 'Component available in %(location)s'},
             {'type': 'component',
-             'keys': ['name', 'bytes', 'language', 'content_type'],
+             'keys': dumps(['name', 'bytes', 'language', 'content_type']),
              'translation': 'Component %(name)s, language %(language)s, '\
                           + 'type %(content_type)s'},
             {'type': 'component_deployed',
-             'keys': ['name', 'location', 'identifier'],
+             'keys': dumps(['name', 'location', 'identifier']),
              'translation': 'Component %(name)s deployed to %(location)s '\
                           + 'with identifier %(identifier)s'},
             {'type': 'factspace_wanted',
-              'keys': ['name'],
+              'keys': dumps(['name']),
               'translation': 'Factspace %(name)s requested'},
             {'type': 'factspace',
-              'keys': ['name', 'directory'],
+              'keys': dumps(['name', 'directory']),
               'translation': 'Factspace %(name)s created in %(directory)s'},
             {'type': 'library_available',
-             'keys': ['directory', 'language'],
+             'keys': dumps(['directory', 'language']),
              'translation': 'Library available in %(directory)s,' \
                           + 'language %(language)s'}]
 for e in elements:
