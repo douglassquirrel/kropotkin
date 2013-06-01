@@ -65,13 +65,14 @@ def save_statement_file(statements_dir, confidence, fact_type, content):
     rename(temp_path, real_path)
 
 CREATE_TABLE_TEMPLATE = '''CREATE TABLE IF NOT EXISTS %s
-                           (ID INTEGER PRIMARY KEY,
-                            TIMESTAMP TEXT DEFAULT CURRENT_TIMESTAMP,
+                           (kropotkin_id INTEGER PRIMARY KEY,
+                            kropotkin_timestamp TEXT DEFAULT CURRENT_TIMESTAMP,
                             %s)'''
 INSERT_TEMPLATE = '''INSERT INTO %s
                      (%s) VALUES (%s)'''
 def save_statement_db(statements_dir, confidence, fact_type, content):
     content_dict = loads(content)
+    content_dict['kropotkin_confidence'] = confidence
     keys = content_dict.keys()
     value_params = ['?' for key in keys]
     values = [content_dict[key] for key in keys]
