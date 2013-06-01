@@ -7,7 +7,9 @@ from tempfile import mkdtemp
 
 STAMPS_TABLE_SQL = '''CREATE TABLE kropotkin_stamps
                       (stamp_id INTEGER PRIMARY_KEY,
-                       fact_type TEXT, id INTEGER, stamp TEXT)'''
+                       timestamp TEXT DEFAULT CURRENT_TIMESTAMP,
+                       fact_type TEXT, id INTEGER, stamp TEXT,
+                       UNIQUE (fact_type, id, stamp))'''
 def create_factspace(name):
     directory = mkdtemp()
 

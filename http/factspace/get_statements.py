@@ -4,6 +4,7 @@ from kropotkin import get_newest_fact
 from os import close, environ, mkdir, O_CREAT, O_EXCL, \
                open as osopen, rename, write
 from os.path import basename, exists, join, split
+from sqlite3 import connect, OperationalError
 from time import time
 from urlparse import parse_qsl
 
@@ -22,6 +23,46 @@ def get_statements(path, params, content, id_generator):
     statements = _fetch_statements(statements_dir, confidence,
                                    fact_type, params)
     return 200, dumps(statements), 'application/json'
+
+STAMP_INSERT_SQL = '''INSERT INTO kropotkin_stamps
+                      (fact_type, id, stamp) VALUES (?, ?, ?)'''
+def apply_stamp_db(statements_dir, files, fact_type, stamp):
+    filtered_files = []
+    connection = connect(join(statements_dir, 'factspace.db'))
+
+    for f in files:
+        values = [fact_type, f.split('.')[2], stamp]
+        try:
+            cursor = connection.cursor()
+            cursor.execute(STAMP_INSERT_SQL, values)
+            connection.commit()
+            filtered_files.append(f)
+        except OperationalError as error:
+            stderr.write('Sqlite error %s\n' \
+                       + 'Values: %s\n' \
+                       % (error, values))
+    connection.close()
+    return filtered_files
+
+def apply_stamp_file(statements_dir, files, stamp):
+    try:
+        mkdir(join(statements_dir, 'stamps'))
+    except OSError:
+        pass
+
+    filtered_files = []
+    for f in files:
+        stamped_file = _stamped_filename(f, stamp)
+        fd = False
+        try:
+            fd = osopen(stamped_file, O_CREAT | O_EXCL)
+            filtered_files.append(f)
+        except OSError: #verify errno 17
+            pass
+        finally:
+            if fd:
+                close(fd)
+    return filtered_files
 
 def _fetch_statements(statements_dir, confidence, fact_type, params):
     params = params.copy()
@@ -44,24 +85,8 @@ def _fetch_statements(statements_dir, confidence, fact_type, params):
         files = files[0:number]
 
     if stamp:
-        try:
-            mkdir(join(statements_dir, 'stamps'))
-        except OSError:
-            pass
-
-        filtered_files = []
-        for f in files:
-            stamped_file = _stamped_filename(f, stamp)
-            fd = False
-            try:
-                fd = osopen(stamped_file, O_CREAT | O_EXCL)
-                filtered_files.append(f)
-            except OSError: #verify errno 17
-                pass
-            finally:
-                if fd:
-                    close(fd)
-        files = filtered_files
+        apply_stamp_db(statements_dir, files, fact_type, stamp)
+        files = apply_stamp_file(statements_dir, files, stamp)
 
     return [_load_statement(f) for f in files]
 
