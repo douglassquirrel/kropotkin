@@ -39,8 +39,8 @@ def check_statement(factspace, fact_type, content_dict):
             + "keys = %(keys)s, translation = %(translation)s"
     else:
         constitution_element = get_newest_fact(factspace,
-            'constitution_element',
-            {'type': fact_type})
+                                               'constitution_element',
+                                               {'type': fact_type})
         if not constitution_element:
             return False
         expected_keys = sorted(loads(constitution_element['keys']))
