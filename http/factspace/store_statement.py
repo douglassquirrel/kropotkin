@@ -68,8 +68,7 @@ CREATE_TABLE_TEMPLATE = '''CREATE TABLE IF NOT EXISTS %s
                            (kropotkin_id INTEGER PRIMARY KEY,
                             kropotkin_timestamp TEXT DEFAULT CURRENT_TIMESTAMP,
                             %s)'''
-INSERT_TEMPLATE = '''INSERT INTO %s
-                     (%s) VALUES (%s)'''
+INSERT_TEMPLATE = '''INSERT INTO %s (%s) VALUES (%s)'''
 def save_statement_db(statements_dir, confidence, fact_type, content):
     content_dict = loads(content)
     content_dict['kropotkin_confidence'] = confidence

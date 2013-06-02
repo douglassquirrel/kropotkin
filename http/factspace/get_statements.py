@@ -54,7 +54,7 @@ STAMPS_TABLE_SQL = '''CREATE TABLE IF NOT EXISTS kropotkin_stamps
                        UNIQUE (fact_type, statement_id, stamp))'''
 STAMP_INSERT_SQL = '''INSERT INTO kropotkin_stamps
                       (fact_type, statement_id, stamp) VALUES (?, ?, ?)'''
-SELECT_TEMPLATE = '''SELECT kropotkin_id, %s
+SELECT_TEMPLATE = '''SELECT %s
                      FROM %s AS f
                      %s /* stamp clause */
                      %s /* WHERE or AND params */
@@ -64,6 +64,7 @@ STAMP_CLAUSE_TEMPLATE = '''LEFT JOIN kropotkin_stamps AS s
                            ON (f.kropotkin_id = s.statement_id
                                AND s.stamp = ?) /* stamp */
                            WHERE s.stamp_id IS NULL'''
+KROPOTKIN_KEYS = ['kropotkin_id', 'kropotkin_timestamp', 'kropotkin_confidence']
 def _get_statements_db(statements_dir, factspace, confidence, fact_type,
                        params, stamp, result, number, timeout):
     if fact_type == 'constitution_element':
@@ -74,7 +75,9 @@ def _get_statements_db(statements_dir, factspace, confidence, fact_type,
                                                {'type': fact_type})
         if not constitution_element:
             raise Exception('queried type that does not exist: %s' % fact_type)
-        type_keys = sorted(loads(constitution_element['keys']))
+        type_keys = loads(constitution_element['keys'])
+    type_keys.extend(KROPOTKIN_KEYS)
+    type_keys.sort()
 
     connection = connect(join(statements_dir, 'factspace.db'))
     cursor = connection.cursor()
@@ -112,9 +115,10 @@ def _get_statements_db(statements_dir, factspace, confidence, fact_type,
     while True:
         try:
             cursor.execute(select_sql, values)
-            statements = cursor.fetchall()
+            statements = [dict(zip(type_keys, r)) for r in cursor.fetchall()]
             if statements and stamp:
-                stamp_values = [(fact_type, s[0], stamp) for s in statements]
+                stamp_values = [(fact_type, s['kropotkin_id'], stamp) \
+                                    for s in statements]
                 cursor.executemany(STAMP_INSERT_SQL, stamp_values)
             connection.commit()
         except OperationalError as error:
