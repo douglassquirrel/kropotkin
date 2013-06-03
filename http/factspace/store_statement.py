@@ -87,11 +87,11 @@ def save_statement_db(statements_dir, confidence, fact_type, content):
         cursor.execute(insert_sql, values)
         connection.commit()
     except OperationalError as error:
-        stderr.write('Sqlite error %s\n' \
-                   + 'Create table SQL: %s\n' \
-                   + 'Insert SQL: %s\n' \
-                   + 'Values: %s\n' \
-                     % (error, create_table_sql, insert_sql, values))
+        stderr.write(('Sqlite error %s\n' \
+                    + 'Create table SQL: %s\n' \
+                    + 'Insert SQL: %s\n' \
+                    + 'Values: %s\n') \
+                      % (error, create_table_sql, insert_sql, values))
     finally:
         connection.close()
 

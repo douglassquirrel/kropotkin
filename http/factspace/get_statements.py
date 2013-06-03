@@ -25,26 +25,6 @@ def get_statements(path, params, content, id_generator):
                                    fact_type, params)
     return 200, dumps(statements), 'application/json'
 
-def apply_stamp_file(statements_dir, files, stamp):
-    try:
-        mkdir(join(statements_dir, 'stamps'))
-    except OSError:
-        pass
-
-    filtered_files = []
-    for f in files:
-        stamped_file = _stamped_filename(f, stamp)
-        fd = False
-        try:
-            fd = osopen(stamped_file, O_CREAT | O_EXCL)
-            filtered_files.append(f)
-        except OSError: #verify errno 17
-            pass
-        finally:
-            if fd:
-                close(fd)
-    return filtered_files
-
 CHECK_TABLE_SQL = '''SELECT name FROM sqlite_master
                      WHERE type='table' AND name=? ''';
 STAMPS_TABLE_SQL = '''CREATE TABLE IF NOT EXISTS kropotkin_stamps
@@ -137,29 +117,8 @@ def _fetch_statements(statements_dir, factspace, confidence, fact_type, params):
     params.pop('kropotkin_criteria', None)
     timeout = 2000 if (result == 'oldest' or result == 'newest') else 0
 
-    db_statements = \
-        _get_statements_db(statements_dir, factspace, confidence, fact_type,
-                           params, stamp, result, number, timeout)
-
-    finish = __now_millis() + timeout
-    files = []
-    while len(files) == 0:
-        files = _get_statement_files(statements_dir, confidence, fact_type,
-                                     params, stamp)
-        if len(files) == 0 and __now_millis() > finish:
-            return []
-
-    if result == 'newest':
-        files.reverse()
-
-    if number is not None:
-        files = files[0:number]
-
-    if stamp:
-        files = apply_stamp_file(statements_dir, files, stamp)
-
-    file_statements = [_load_statement(f) for f in files]
-    return file_statements
+    return _get_statements_db(statements_dir, factspace, confidence, fact_type,
+                              params, stamp, result, number, timeout)
 
 def _extract_kropotkin_criteria(params):
     stamp = False
@@ -184,34 +143,6 @@ def _extract_kropotkin_criteria(params):
     except KeyError:
         pass
     return stamp, result, number
-
-def _dict_match(d1, d2):
-    d2 = d2.copy()
-    for k in d2.keys():
-        if k not in d1:
-            d2.pop(k)
-    return set(d1.items()) <= set(d2.items())
-
-def _stamped_filename(f, stamp):
-    return join(split(f)[0], 'stamps', '.'.join([split(f)[1], stamp]))
-
-def _get_statement_files(statements_dir, confidence, fact_type, params, stamp):
-    if confidence == 'statement':
-        confidence = '*'
-    files = glob(join(statements_dir, fact_type + ".*." + confidence + "*"))
-    files.sort(key=lambda f: int(f.split('.')[1]))
-
-    if stamp:
-        files = [f for f in files if not exists(_stamped_filename(f, stamp))]
-
-    matches = lambda f: _dict_match(params, _load_statement(f))
-    return [f for f in files if matches(f)]
-
-def _load_statement(filename):
-    with open(filename, 'r') as statement_file:
-        statement = load(statement_file)
-        statement['kropotkin_confidence'] = basename(filename).split('.')[3]
-        return statement
 
 def __now_millis():
     return int(round(time() * 1000))
