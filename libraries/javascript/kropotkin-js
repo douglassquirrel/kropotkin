@@ -10,9 +10,9 @@ function shallow_copy(dict) {
     return copy;
 }
 
-function store_fact(factspace, type, content) {
+function store_fact(factspace, type, content, onresponse) {
     var url = '/factspace/' + factspace + '/fact/' + type;
-    http_request(url, 'POST', JSON.stringify(content), null);
+    http_request(url, 'POST', JSON.stringify(content), onresponse);
 }
 
 function get_oldest_fact_and_stamp(factspace, type, criteria,
@@ -59,7 +59,7 @@ function to_query_string(criteria) {
 POST_MIME_TYPE = 'application/x-www-form-urlencoded'
 function http_request(url, verb, content, onresponse) {
     var xmlhttp = new XMLHttpRequest();
-    if (onresponse !== null) {
+    if (onresponse) {
         xmlhttp.onreadystatechange = function() {
             if (xmlhttp.readyState != 4) { return; }
 

@@ -75,4 +75,4 @@ def _store_statement(confidence, factspace, type_, content):
     url = '%s/factspace/%s/%s/%s' \
         % (kropotkin_url, factspace, confidence, type_)
     status, content = _http_request(url, dumps(content))
-    return status == 200
+    return False if status != 200 else int(content)

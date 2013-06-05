@@ -7,7 +7,7 @@ from itertools import count
 from SocketServer import ForkingMixIn
 from urlparse import urlparse, parse_qsl
 
-def base(path, params, content, id_generator):
+def base(path, params, content):
     return 200, 'Kropotkin HTTP\n', 'text/plain'
 
 PORT=2001
@@ -30,13 +30,12 @@ class handler(BaseHTTPRequestHandler):
         params = dict(parse_qsl(parsed_url.query))
         length = int(self.headers.getheader('Content-Length') or 0)
         incoming_content = self.rfile.read(length)
-        id_generator = self.server.id_generator
         route = path.split('/')[1]
 
         try:
             responder = handler.routing[(route, verb)]
             code, content, mime_type = \
-                responder(path, params, incoming_content, id_generator)
+                responder(path, params, incoming_content)
         except KeyError:
             code = 404
             content = 'No route for %s with verb %s\n' % (route, verb)
@@ -59,5 +58,4 @@ class ForkingHTTPServer(ForkingMixIn, HTTPServer):
     pass
 
 server = ForkingHTTPServer(('', PORT), handler)
-server.id_generator = count(start=1)
 server.serve_forever()

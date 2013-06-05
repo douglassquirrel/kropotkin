@@ -56,7 +56,10 @@ def store_statement(confidence, factspace, type, content)
   uri = URI.parse(url)
   http = Net::HTTP.new(uri.host, uri.port)
   resp = http.post(url, JSON.dump(content))
-  return (resp.code == '200')
+  if resp.code != '200'
+    return false
+  else
+    return resp.body.to_i
 end
 
 def get_statements(confidence, which, stamp, number, factspace, type, criteria)

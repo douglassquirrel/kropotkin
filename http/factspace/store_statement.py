@@ -7,13 +7,10 @@ from sqlite3 import connect, OperationalError
 from sys import stderr
 from time import time
 
-def store_statement(path, params, content, id_generator):
+def store_statement(path, params, content):
     factspace, confidence, fact_type = path.split('/')[2:5]
 
     content_dict = loads(content)
-    if 'kropotkin_id' in content_dict:
-        content_dict['kropotkin_id'] = str(id_generator.next())
-        content = dumps(content_dict)
 
     if not check_statement(factspace, fact_type, content_dict):
         stderr.write("Fact of type %s disallowed\n" % fact_type)
@@ -27,8 +24,8 @@ def store_statement(path, params, content, id_generator):
                                          'factspace',
                                          {'name': factspace})['directory']
 
-    save_statement(statements_dir, confidence, fact_type, content)
-    return (200, '', 'text/plain')
+    rowid = save_statement(statements_dir, confidence, fact_type, content)
+    return (200, str(rowid), 'text/plain')
 
 def check_statement(factspace, fact_type, content_dict):
     actual_keys = sorted(content_dict.keys())
@@ -47,29 +44,12 @@ def check_statement(factspace, fact_type, content_dict):
 
     return expected_keys == actual_keys
 
-def save_statement(statements_dir, confidence, fact_type, content):
-    save_statement_file(statements_dir, confidence, fact_type, content)
-    save_statement_db(statements_dir, confidence, fact_type, content)
-
-def save_statement_file(statements_dir, confidence, fact_type, content):
-    temp_statements_dir = join(statements_dir, 'tmp')
-    ensure_exists(temp_statements_dir)
-
-    tstamp = int(time())
-    name = '.'.join([fact_type, str(tstamp), str(hash(content)), confidence])
-    temp_path = join(temp_statements_dir, name)
-    real_path = join(statements_dir,      name)
-
-    with open(temp_path, 'w') as statement_file:
-        statement_file.write(content)
-    rename(temp_path, real_path)
-
 CREATE_TABLE_TEMPLATE = '''CREATE TABLE IF NOT EXISTS %s
                            (kropotkin_id INTEGER PRIMARY KEY,
                             kropotkin_timestamp TEXT DEFAULT CURRENT_TIMESTAMP,
                             %s)'''
 INSERT_TEMPLATE = '''INSERT INTO %s (%s) VALUES (%s)'''
-def save_statement_db(statements_dir, confidence, fact_type, content):
+def save_statement(statements_dir, confidence, fact_type, content):
     content_dict = loads(content)
     content_dict['kropotkin_confidence'] = confidence
     keys = content_dict.keys()
@@ -85,6 +65,7 @@ def save_statement_db(statements_dir, confidence, fact_type, content):
         cursor = connection.cursor()
         cursor.execute(create_table_sql)
         cursor.execute(insert_sql, values)
+        rowid = cursor.lastrowid
         connection.commit()
     except OperationalError as error:
         stderr.write(('Sqlite error %s\n' \
@@ -92,8 +73,11 @@ def save_statement_db(statements_dir, confidence, fact_type, content):
                     + 'Insert SQL: %s\n' \
                     + 'Values: %s\n') \
                       % (error, create_table_sql, insert_sql, values))
+        rowid = 0
     finally:
         connection.close()
+
+    return rowid
 
 def ensure_exists(directory):
     try:
