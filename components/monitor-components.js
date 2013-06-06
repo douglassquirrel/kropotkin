@@ -51,3 +51,4 @@ function show_code(fact) {
 }
 
 setInterval(check_components, 1000);
+report_deployment('monitor-components.js');

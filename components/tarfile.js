@@ -71,3 +71,5 @@ function parseTarNumber(data) {
     return parseInt('0'+data.replace(/[^\d]/g, ''));
     // }
 }
+
+report_deployment('tarfile.js');

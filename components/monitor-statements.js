@@ -67,3 +67,4 @@ function display_statements(statements) {
 }
 
 setInterval(check_statements, 1000);
+report_deployment('monitor-statements.js');

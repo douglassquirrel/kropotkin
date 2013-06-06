@@ -51,6 +51,26 @@ function get_my_computer_name(onresponse) {
     http_request(url, 'GET', null, onresponse);
 }
 
+function report_deployment(component_name) {
+    if (window.kropotkin_components === undefined) {
+        window.kropotkin_components = {'max_id': 0}
+    }
+
+    var local_id = window.kropotkin_components['max_id'];
+    window.kropotkin_components[component_name] = {};
+    window.kropotkin_components[component_name]['local_id'] = local_id;
+    window.kropotkin_components['max_id']++;
+
+    get_my_computer_name(function(computer_name) {
+        var content = {'name': component_name,
+                       'location': computer_name,
+                       'identifier': local_id};
+        store_fact('kropotkin', 'component_deployed', content, function(id) {
+            window.kropotkin_components[component_name]['kropotkin_id'] = id;
+        });
+    });
+}
+
 function to_query_string(criteria) {
     criteria_strings = [];
     for (name in criteria) {
@@ -90,3 +110,5 @@ function http_request(url, verb, content, onresponse) {
         xmlhttp.send(content);
     }
 }
+
+report_deployment('kropotkin-js');

@@ -20,3 +20,4 @@ function display_factspaces(facts) {
 }
 
 setInterval(check_factspaces, 1000);
+report_deployment('monitor-factspaces.js');

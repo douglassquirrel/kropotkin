@@ -96,3 +96,4 @@ function submit_fact(type) {
 }
 
 setInterval(check_constitution, 1000);
+report_deployment('monitor-constitution.js');
