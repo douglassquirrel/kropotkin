@@ -46,6 +46,11 @@ function get_all_facts(factspace, type, criteria, onresponse) {
     });
 }
 
+function get_my_computer_name(onresponse) {
+    url = '/mycomputername';
+    http_request(url, 'GET', null, onresponse);
+}
+
 function to_query_string(criteria) {
     criteria_strings = [];
     for (name in criteria) {

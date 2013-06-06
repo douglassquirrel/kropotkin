@@ -50,6 +50,18 @@ def create_factspace(name, timeout=5)
   return false
 end
 
+def get_my_computer_name()
+  kropotkin_url = ENV['KROPOTKIN_URL']
+  url = '%s/mycomputername' % kropotkin_url
+  uri = URI.parse(url)
+  http = Net::HTTP.new(uri.host, uri.port)
+  resp = http.post(url, JSON.dump(content))
+  if resp.code != '200'
+    return false
+  else
+    return resp.body
+end
+
 def store_statement(confidence, factspace, type, content)
   kropotkin_url = ENV['KROPOTKIN_URL']
   url = '%s/factspace/%s/%s/%s' % [kropotkin_url, factspace, confidence, type]
