@@ -34,6 +34,15 @@ def create_factspace(name, timeout=5):
             return True
     return False
 
+def get_my_computer_name():
+    kropotkin_url = environ['KROPOTKIN_URL']
+    url = '%s/mycomputername' % kropotkin_url
+    status, content = _http_request(url)
+    if status == 200:
+        return content
+    else:
+        raise Exception("Unexpected response from server: %d" % status)
+
 def _get_statements(confidence, which, stamp, number,
                     factspace, type_, criteria):
     kropotkin_criteria_list = []

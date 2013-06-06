@@ -9,7 +9,7 @@ from sys import stderr
 from time import time
 from urlparse import parse_qsl
 
-def get_statements(path, params, content):
+def get_statements(path, params, content, client_ip):
     factspace, confidence, fact_type = path.split('/')[2:5]
     if (factspace == 'kropotkin'):
         statements_dir = environ['KROPOTKIN_DIR']

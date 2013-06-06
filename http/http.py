@@ -1,22 +1,25 @@
 #!/usr/bin/python
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
-from factspace.get_statements import get_statements
-from factspace.store_statement import store_statement
-from component.get_component import get_component
 from itertools import count
 from SocketServer import ForkingMixIn
 from urlparse import urlparse, parse_qsl
 
-def base(path, params, content):
+from component.get_component import get_component
+from factspace.get_statements import get_statements
+from factspace.store_statement import store_statement
+from integration.get_computer_name import get_computer_name
+
+def base(path, params, content, client_ip):
     return 200, 'Kropotkin HTTP\n', 'text/plain'
 
 PORT=2001
 
 class handler(BaseHTTPRequestHandler):
-    routing = {('', 'GET'):           base,
-               ('factspace', 'GET'):  get_statements,
-               ('factspace', 'POST'): store_statement,
-               ('component', 'GET'):  get_component}
+    routing = {('',               'GET'):  base,
+               ('mycomputername', 'GET'):  get_computer_name,
+               ('factspace',      'GET'):  get_statements,
+               ('factspace',      'POST'): store_statement,
+               ('component',      'GET'):  get_component}
 
     def do_GET(self):
         self.route_request('GET')
@@ -30,12 +33,13 @@ class handler(BaseHTTPRequestHandler):
         params = dict(parse_qsl(parsed_url.query))
         length = int(self.headers.getheader('Content-Length') or 0)
         incoming_content = self.rfile.read(length)
+        client_ip = self.client_address[0]
         route = path.split('/')[1]
 
         try:
             responder = handler.routing[(route, verb)]
             code, content, mime_type = \
-                responder(path, params, incoming_content)
+                responder(path, params, incoming_content, client_ip)
         except KeyError:
             code = 404
             content = 'No route for %s with verb %s\n' % (route, verb)

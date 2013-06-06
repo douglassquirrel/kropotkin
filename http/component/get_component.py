@@ -8,7 +8,7 @@ MIME_TYPES = {'component-tar':      'application/x-tar',
               'javascript-library': 'application/javascript',
               'ruby-gem':           'binary/octet-stream'}
 
-def get_component(path, params, content):
+def get_component(path, params, content, client_ip):
     name = path.split('/')[2]
     component = get_newest_fact('kropotkin', 'component', {'name': name})
     if not component:

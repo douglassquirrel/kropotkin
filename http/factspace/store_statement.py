@@ -7,7 +7,7 @@ from sqlite3 import connect, OperationalError
 from sys import stderr
 from time import time
 
-def store_statement(path, params, content):
+def store_statement(path, params, content, client_ip):
     factspace, confidence, fact_type = path.split('/')[2:5]
 
     content_dict = loads(content)
