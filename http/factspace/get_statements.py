@@ -1,12 +1,11 @@
 from glob import glob
 from json import dumps, load, loads
 from kropotkin import get_newest_fact
-from os import close, environ, mkdir, O_CREAT, O_EXCL, \
-               open as osopen, rename, write
-from os.path import basename, exists, join, split
+from os import environ, write
+from os.path import join, split
 from sqlite3 import connect, OperationalError
 from sys import stderr
-from time import time
+from time import sleep, time
 from urlparse import parse_qsl
 
 def get_statements(path, params, content, client_ip):
@@ -108,6 +107,7 @@ def _get_statements_db(statements_dir, factspace, confidence, fact_type,
             break
         if len(statements) > 0 or __now_millis() > finish:
             break
+        sleep(0.1)
 
     connection.close()
     return statements
