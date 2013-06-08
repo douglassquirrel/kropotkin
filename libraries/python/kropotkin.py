@@ -25,8 +25,9 @@ def store_fact(factspace, type_, content):
 def store_opinion(factspace, type_, content):
     return _store_statement('opinion', factspace, type_, content)
 
-def create_factspace(name, timeout=5):
-    if not store_fact('kropotkin', 'factspace_wanted', {'name': name}):
+def create_factspace(name, directory=None, timeout=5):
+    content = {'name': name, 'directory': directory}
+    if not store_fact('kropotkin', 'factspace_wanted', content):
         return False
     finish = int(round(time())) + timeout
     while int(round(time())) < finish:

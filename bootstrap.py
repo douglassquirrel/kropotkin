@@ -81,7 +81,7 @@ elements = [{'type': 'component_available',
              'translation': 'Component %(name)s deployed to %(location)s '\
                           + 'with identifier %(identifier)s'},
             {'type': 'factspace_wanted',
-              'keys': dumps(['name']),
+              'keys': dumps(['name', 'directory']),
               'translation': 'Factspace %(name)s requested'},
             {'type': 'factspace',
               'keys': dumps(['name', 'directory']),
