@@ -42,6 +42,7 @@ SELECT_TEMPLATE = '''SELECT %s
                      %s /* LIMIT number */'''
 STAMP_CLAUSE_TEMPLATE = '''LEFT JOIN kropotkin_stamps AS s
                            ON (f.kropotkin_id = s.statement_id
+                               AND fact_type = ?
                                AND s.stamp = ?) /* stamp */
                            WHERE s.stamp_id IS NULL'''
 KROPOTKIN_KEYS = ['kropotkin_id', 'kropotkin_timestamp', 'kropotkin_confidence']
@@ -74,7 +75,7 @@ def _get_statements_db(statements_dir, factspace, confidence, fact_type,
     if stamp:
         stamp_clause = STAMP_CLAUSE_TEMPLATE
         match_clause = 'AND '
-        values = [stamp]
+        values = [fact_type, stamp]
     else:
         stamp_clause = ''
         match_clause = 'WHERE '
