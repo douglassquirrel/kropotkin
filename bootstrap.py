@@ -17,6 +17,7 @@ from json import dumps
 from os import environ, listdir
 from os.path import abspath, isdir, join
 from socket import gethostname
+from tempfile import mkdtemp
 from time import time
 from urllib2 import urlopen
 
@@ -33,11 +34,11 @@ if not kropotkin_imported:
                 + "See libraries/python/README.txt for installation steps.")
 
 from core.deployer.deployer import deploy
-from core.factspace.factspace import create_factspace
 
 PORT=2001
 KROPOTKIN_URL="http://localhost:%s" % PORT
-KROPOTKIN_DIR=create_factspace('kropotkin')
+KROPOTKIN_DIR=mkdtemp()
+print "Kropotkin factspace located at: %s" % KROPOTKIN_DIR
 
 def wait_for_http(timeout):
     finish = now() + timeout

@@ -3,14 +3,14 @@ from kropotkin import get_oldest_fact_and_stamp, store_fact
 from os.path import join
 from tempfile import mkdtemp
 
-def create_factspace(name):
-    directory = mkdtemp()
-    if name == 'kropotkin':
-        print "Kropotkin factspace located at: %s" % directory
-    else:
-        content = {'name': name, 'directory': directory}
-        if not store_fact('kropotkin', 'factspace', content):
-            raise Exception("Cannot store factspace fact")
+def create_factspace(name, directory):
+    if not directory:
+        directory = mkdtemp()
+
+    content = {'name': name, 'directory': directory}
+    if not store_fact('kropotkin', 'factspace', content):
+        raise Exception("Cannot store factspace fact")
+
     return directory
 
 if __name__=="__main__":
@@ -20,5 +20,5 @@ if __name__=="__main__":
                                                    {},
                                                    'factspace_stamp')
         if factspace_fact:
-            name = factspace_fact['name']
-            create_factspace(name)
+            create_factspace(factspace_fact['name'],
+                             factspace_fact['directory'])
