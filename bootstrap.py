@@ -37,7 +37,10 @@ from core.deployer.deployer import deploy
 
 PORT=2001
 KROPOTKIN_URL="http://localhost:%s" % PORT
-KROPOTKIN_DIR=mkdtemp()
+try:
+    KROPOTKIN_DIR=environ['KROPOTKIN_DIR']
+except KeyError:
+    KROPOTKIN_DIR=mkdtemp()
 print "Kropotkin factspace located at: %s" % KROPOTKIN_DIR
 
 def wait_for_http(timeout):
