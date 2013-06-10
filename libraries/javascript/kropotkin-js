@@ -31,8 +31,10 @@ function get_newest_fact(factspace, type, criteria, onresponse) {
 
 function get_first_fact(factspace, type, criteria, onresponse) {
     get_all_facts(factspace, type, criteria, function(facts) {
-         if (facts.length > 0) {
+        if (facts.length > 0) {
             onresponse(facts[0]);
+        } else {
+            onresponse(null);
         }
     });
 }

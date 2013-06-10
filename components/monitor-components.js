@@ -38,6 +38,7 @@ function get_code(name) {
 }
 
 function show_code(fact) {
+    if (fact == null) { return; }
     tar = atob(fact['bytes']);
     files = parseTar(tar);
     html = '';
