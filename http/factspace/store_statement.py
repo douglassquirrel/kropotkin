@@ -46,7 +46,8 @@ def check_statement(factspace, fact_type, content_dict):
 
 CREATE_TABLE_TEMPLATE = '''CREATE TABLE IF NOT EXISTS %s
                            (kropotkin_id INTEGER PRIMARY KEY,
-                            kropotkin_timestamp TEXT DEFAULT CURRENT_TIMESTAMP,
+                            kropotkin_timestamp INTEGER
+                                DEFAULT (strftime('%%s', 'now')),
                             %s)'''
 INSERT_TEMPLATE = '''INSERT INTO %s (%s) VALUES (%s)'''
 def save_statement(statements_dir, confidence, fact_type, content):

@@ -28,7 +28,7 @@ CHECK_TABLE_SQL = '''SELECT name FROM sqlite_master
                      WHERE type='table' AND name=? ''';
 STAMPS_TABLE_SQL = '''CREATE TABLE IF NOT EXISTS kropotkin_stamps
                       (stamp_id INTEGER PRIMARY KEY,
-                       timestamp TEXT DEFAULT CURRENT_TIMESTAMP,
+                       timestamp TEXT DEFAULT (STRFTIME('%s', 'now')),
                        fact_type TEXT, statement_id INTEGER, stamp TEXT,
                        UNIQUE (fact_type, statement_id, stamp))'''
 STAMP_INSERT_SQL = '''INSERT INTO kropotkin_stamps
