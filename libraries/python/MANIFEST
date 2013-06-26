@@ -1,3 +1,5 @@
 README.txt
 kropotkin.py
+kropotkin/__init__.py
+kropotkin/queue.py
 setup.py
