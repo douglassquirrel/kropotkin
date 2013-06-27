@@ -14,30 +14,34 @@ def dequeue(identifier):
     stderr.write("dequeue from %s\n" % identifier)
     return "fake_message"
 
-action = argv[1]
-if action == 'create_queue':
-    if (len(argv) >= 3):
-        output = create_queue(int(argv[2]))
-    else:
-        output = create_queue()
-    if output:
-        stdout.write(output)
-        succeeded = True
-    else:
-        succeeded = False
-elif action == 'enqueue':
-    message = stdin.read()
-    succeeded = enqueue(argv[2], message)
-elif action == 'dequeue':
-    output = dequeue(argv[2])
-    if output:
-        stdout.write(output)
-        succeeded = True
-    else:
-        succeeded = False
-else:
-    stderr.write("action %s not recognised\n" % action)
+if (len(argv) <= 1):
+    stderr.write('Must supply an action as first argument\n')
     succeeded = False
+else:
+    action = argv[1]
+    if action == 'create_queue':
+        if (len(argv) >= 3):
+            output = create_queue(int(argv[2]))
+        else:
+            output = create_queue()
+        if output:
+            stdout.write(output)
+            succeeded = True
+        else:
+            succeeded = False
+    elif action == 'enqueue' and len(argv) >= 3:
+        message = stdin.read()
+        succeeded = enqueue(argv[2], message)
+    elif action == 'dequeue' and len(argv) >= 3:
+        output = dequeue(argv[2])
+        if output:
+            stdout.write(output)
+            succeeded = True
+        else:
+            succeeded = False
+    else:
+        stderr.write("action %s not recognised or wrong parameters\n" % action)
+        succeeded = False
 
 if succeeded:
     exit(0)

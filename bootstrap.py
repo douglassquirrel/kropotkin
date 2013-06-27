@@ -43,6 +43,12 @@ except KeyError:
     KROPOTKIN_DIR=mkdtemp()
 print "Kropotkin factspace located at: %s" % KROPOTKIN_DIR
 
+try:
+    KROPOTKIN_QUEUE=environ['KROPOTKIN_QUEUE']
+except KeyError:
+    KROPOTKIN_QUEUE=abspath(join('bin', 'boringq'))
+print "Using queue executable %s" % KROPOTKIN_QUEUE
+
 def wait_for_http(timeout):
     finish = now() + timeout
 
@@ -63,7 +69,9 @@ def dirs_in(parent):
     parent = abspath(parent)
     return [d for d in listdir(parent) if isdir(join(parent, d))]
 
-env = {'KROPOTKIN_URL': KROPOTKIN_URL, 'KROPOTKIN_DIR': KROPOTKIN_DIR}
+env = {'KROPOTKIN_URL': KROPOTKIN_URL,
+       'KROPOTKIN_DIR': KROPOTKIN_DIR,
+       'KROPOTKIN_QUEUE': KROPOTKIN_QUEUE}
 http_pid = deploy('http', 'http', env)
 if not wait_for_http(10):
     fail_and_exit("Http not starting")
