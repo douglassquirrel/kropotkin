@@ -12,7 +12,6 @@ if (major_version != 2 or minor_version < 7):
                 + 'Your version does not match - it is:\n' + version)
 
 from contextlib import closing
-from importlib import import_module
 from inspect import getsource
 from json import dumps
 from os import environ, listdir
@@ -22,24 +21,17 @@ from tempfile import mkdtemp
 from time import time
 from urllib2 import urlopen
 
-def import_and_check(module_name, source_file):
-    try:
-        module = import_module(module_name)
-        with open(source_file, 'r') as f:
-            expected_source = f.read()
-        actual_source = getsource(module)
-        if actual_source == expected_source:
-            return module
-    except ImportError as e:
-        print e
-    fail_and_exit('Module %s not installed or out of date.\n'
-                + 'See libraries/python/README.txt for installation steps.'
-                % module_name)
-
-kropotkin = import_and_check('kropotkin',
-                             'libraries/python/kropotkin/__init__.py')
-queue = import_and_check('kropotkin.queue',
-                         'libraries/python/kropotkin/queue.py')
+try:
+    import kropotkin
+    with open('libraries/python/kropotkin.py', 'r') as f:
+        expected_lib_src = f.read()
+    actual_lib_src = getsource(kropotkin)
+    kropotkin_imported = actual_lib_src == expected_lib_src
+except ImportError:
+    kropotkin_imported = False
+if not kropotkin_imported:
+    fail_and_exit("Kropotkin module not installed or out of date.\n"
+                + "See libraries/python/README.txt for installation steps.")
 
 from core.deployer.deployer import deploy
 
