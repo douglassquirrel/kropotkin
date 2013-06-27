@@ -1,4 +1,4 @@
 from distutils.core import setup
 setup(name='kropotkin',
       version='{version}',
-      py_modules=['kropotkin', 'kropotkin.queue'])
+      py_modules=['kropotkin'])

@@ -36,7 +36,7 @@ ensure_exists(output_dir)
 
 setup(name='kropotkin',
       version=version,
-      py_modules=['kropotkin', 'kropotkin.queue'],
+      py_modules=['kropotkin'],
       script_args=['-q', 'sdist', '--dist-dir', output_dir, '--formats', 'tar'],
       script_name='setup.py',
       url='https://github.com/douglassquirrel/kropotkin',
