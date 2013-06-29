@@ -1,10 +1,32 @@
 #!/usr/bin/python
 
+from json import dumps
+from os import fork, mkfifo, rename, setsid
+from os.path import join
+from socket import getfqdn
+from SocketServer import BaseRequestHandler, ForkingMixIn, TCPServer
 from sys import argv, exit, stderr, stdin, stdout
+from tempfile import mkdtemp
+from time import time
 
 def create_queue(message_size=512):
     stderr.write("Creating queue with message size %d\n" % message_size)
-    return "fake_identifier_size_%d" % message_size
+    queue_dir = mkdtemp(prefix='boringq.')
+    pid = fork()
+    if pid == 0: # Child
+        setsid()
+        _run_server(queue_dir, message_size)
+    else: # Parent
+        identifier_file = join(queue_dir, 'identifier.json')
+        finish = int(time()) + 5
+        while int(time()) < finish:
+            try:
+                with open(identifier_file, 'r') as f:
+                    return f.read()
+            except IOError:
+                pass
+        stderr.write('Timed out waiting for socket server.')
+        return False
 
 def enqueue(identifier, message):
     stderr.write("enqueue %s on queue %s\n" % (message, identifier))
@@ -14,10 +36,10 @@ def dequeue(identifier):
     stderr.write("dequeue from %s\n" % identifier)
     return "fake_message"
 
-if (len(argv) <= 1):
-    stderr.write('Must supply an action as first argument\n')
-    succeeded = False
-else:
+def main(argv):
+    if (len(argv) <= 1):
+        stderr.write('Must supply an action as first argument\n')
+        return False
     action = argv[1]
     if action == 'create_queue':
         if (len(argv) >= 3):
@@ -26,24 +48,53 @@ else:
             output = create_queue()
         if output:
             stdout.write(output)
-            succeeded = True
+            return True
         else:
-            succeeded = False
+            return False
     elif action == 'enqueue' and len(argv) >= 3:
         message = stdin.read()
-        succeeded = enqueue(argv[2], message)
+        return enqueue(argv[2], message)
     elif action == 'dequeue' and len(argv) >= 3:
         output = dequeue(argv[2])
         if output:
             stdout.write(output)
-            succeeded = True
+            return True
         else:
-            succeeded = False
+            return False
     else:
-        stderr.write("action %s not recognised or wrong parameters\n" % action)
-        succeeded = False
+        stderr.write("action %s not recognised or wrong params\n" % action)
+        return False
 
-if succeeded:
+def _run_server(queue_dir, message_size):
+    host = getfqdn()
+    pipe = join(queue_dir, 'boringq_pipe')
+    mkfifo(pipe)
+    server = QueueServer(('localhost', 0), QueueRequestHandler)
+    server.message_size = message_size
+    server.pipe = pipe
+    ip, port = server.server_address
+    identifier = {'host': host,
+                  'port': port,
+                  'pipe': pipe,
+                  'message_size': message_size}
+
+    temp_identifier_file = join(queue_dir, 'identifier.json.temp')
+    identifier_file      = join(queue_dir, 'identifier.json')
+    with open(temp_identifier_file, 'w') as f:
+        f.write(dumps(identifier))
+    rename(temp_identifier_file, identifier_file)
+
+    server.serve_forever()
+
+class QueueRequestHandler(BaseRequestHandler):
+    def handle(self):
+        data = self.request.recv(self.server.message_size)
+        print "Received: %s" % data
+
+class QueueServer(ForkingMixIn, TCPServer):
+    pass
+
+if main(argv):
     exit(0)
 else:
     exit(1)

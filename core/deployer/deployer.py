@@ -4,7 +4,7 @@ from contextlib import closing
 from kropotkin import get_oldest_fact_and_stamp, store_fact
 from os import access, environ, listdir, path, X_OK
 from os.path import isdir, join
-from socket import gethostname
+from socket import getfqdn
 from StringIO import StringIO
 from subprocess import Popen
 from sys import stderr
@@ -32,7 +32,7 @@ def deploy(name, directory, env={}):
     env = env.copy()
     inherit(env, environ, ['KROPOTKIN_URL', 'TEMP', 'TMP', 'TMPDIR'])
     process = Popen(executable, cwd=directory, env=env)
-    content = {'name': name, 'location': gethostname(),
+    content = {'name': name, 'location': getfqdn(),
                'identifier': process.pid}
     if 'KROPOTKIN_URL' in environ:
         if not store_fact('kropotkin', 'component_deployed', content):
