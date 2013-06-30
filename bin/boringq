@@ -2,6 +2,9 @@
 
 from json import dumps, loads
 from os import fork, mkfifo, rename, setsid
+from os import close as osclose, open as osopen
+from os import read as osread, write as oswrite
+from os import O_RDONLY, O_WRONLY
 from os.path import join
 from socket import getfqdn, socket, AF_INET, SOCK_STREAM
 from SocketServer import BaseRequestHandler, ForkingMixIn, TCPServer
@@ -49,7 +52,17 @@ def enqueue(identifier, message):
 
 def dequeue(identifier):
     stderr.write("dequeue from %s\n" % identifier)
-    return "fake_message"
+    q_info = loads(identifier)
+    pipe = q_info['pipe']
+    message_size = q_info['message_size']
+    fd = None
+    try:
+        fd = osopen(pipe, O_RDONLY)
+        message = osread(fd, message_size)
+    finally:
+        if fd:
+            osclose(fd)
+    return message
 
 def main(argv):
     if (len(argv) <= 1):
@@ -103,8 +116,14 @@ def _run_server(queue_dir, message_size):
 
 class QueueRequestHandler(BaseRequestHandler):
     def handle(self):
-        data = self.request.recv(self.server.message_size)
-        print "Received: %s" % data
+        message = self.request.recv(self.server.message_size)
+        fd = None
+        try:
+            fd = osopen(self.server.pipe, O_WRONLY)
+            oswrite(fd, message)
+        finally:
+            if fd:
+                osclose(fd)
 
 class QueueServer(ForkingMixIn, TCPServer):
     pass
