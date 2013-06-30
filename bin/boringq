@@ -1,9 +1,9 @@
 #!/usr/bin/python
 
-from json import dumps
+from json import dumps, loads
 from os import fork, mkfifo, rename, setsid
 from os.path import join
-from socket import getfqdn
+from socket import getfqdn, socket, AF_INET, SOCK_STREAM
 from SocketServer import BaseRequestHandler, ForkingMixIn, TCPServer
 from sys import argv, exit, stderr, stdin, stdout
 from tempfile import mkdtemp
@@ -30,6 +30,21 @@ def create_queue(message_size=512):
 
 def enqueue(identifier, message):
     stderr.write("enqueue %s on queue %s\n" % (message, identifier))
+    q_info = loads(identifier)
+    host = q_info['host']
+    port = q_info['port']
+    message_size = q_info['message_size']
+    if len(message) > message_size:
+        stderr.write('Message larger than max size %d' % message_size)
+        return False
+    message = message.ljust(message_size, '\x00')
+
+    sock = socket(AF_INET, SOCK_STREAM)
+    try:
+        sock.connect((host, port))
+        sock.sendall(message)
+    finally:
+        sock.close()
     return True
 
 def dequeue(identifier):
@@ -69,7 +84,7 @@ def _run_server(queue_dir, message_size):
     host = getfqdn()
     pipe = join(queue_dir, 'boringq_pipe')
     mkfifo(pipe)
-    server = QueueServer(('localhost', 0), QueueRequestHandler)
+    server = QueueServer((host, 0), QueueRequestHandler)
     server.message_size = message_size
     server.pipe = pipe
     ip, port = server.server_address
