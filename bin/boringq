@@ -55,14 +55,23 @@ def dequeue(identifier):
     q_info = loads(identifier)
     pipe = q_info['pipe']
     message_size = q_info['message_size']
+
     fd = None
+    messages = []
     try:
         fd = osopen(pipe, O_RDONLY)
-        message = osread(fd, message_size)
+
+        while True:
+            message = osread(fd, message_size)
+            if len(message) == 0:
+                break
+            else:
+                messages.append(message.rstrip('\x00'))
+
     finally:
         if fd:
             osclose(fd)
-    return message
+    return dumps(messages)
 
 def main(argv):
     if (len(argv) <= 1):
