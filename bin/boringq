@@ -15,6 +15,9 @@ from time import time
 def create_queue(message_size=512):
     stderr.write("Creating queue with message size %d\n" % message_size)
     queue_dir = mkdtemp(prefix='boringq.')
+    auxiliary_queue_file = join(queue_dir, 'auxiliary.json')
+    with open(auxiliary_queue_file, 'w') as f:
+        f.write(dumps({}))
     pid = fork()
     if pid == 0: # Child
         setsid()
@@ -53,7 +56,17 @@ def enqueue(identifier, message):
 def dequeue(identifier):
     stderr.write("dequeue from %s\n" % identifier)
     q_info = loads(identifier)
-    pipe = q_info['pipe']
+    queue_dir = q_info['queue_dir']
+    auxiliary_queue_file = join(queue_dir, 'auxiliary.json')
+    with open(auxiliary_queue_file, 'r') as f:
+        auxiliary_queue = loads(f.read())
+    if len(auxiliary_queue) != 0:
+        message = auxiliary_queue.pop(0)
+        with open(auxiliary_queue_file, 'w') as f:
+            f.write(dumps(auxiliary_queue))
+        return message
+
+    pipe = join(queue_dir, 'boringq_pipe')
     message_size = q_info['message_size']
 
     fd = None
@@ -66,12 +79,16 @@ def dequeue(identifier):
             if len(message) == 0:
                 break
             else:
+                print "Received message %s\n" % message.rstrip('\x00')
                 messages.append(message.rstrip('\x00'))
 
     finally:
         if fd:
             osclose(fd)
-    return dumps(messages)
+    message = messages.pop(0)
+    with open(auxiliary_queue_file, 'w') as f:
+        f.write(dumps(messages))
+    return message
 
 def main(argv):
     if (len(argv) <= 1):
@@ -112,7 +129,7 @@ def _run_server(queue_dir, message_size):
     ip, port = server.server_address
     identifier = {'host': host,
                   'port': port,
-                  'pipe': pipe,
+                  'queue_dir': queue_dir,
                   'message_size': message_size}
 
     temp_identifier_file = join(queue_dir, 'identifier.json.temp')
