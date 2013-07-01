@@ -1,27 +1,33 @@
 #!/usr/bin/python
 
 from json import dumps, loads
-from os import fork, mkfifo, rename, setsid
-from os import close as osclose, open as osopen
-from os import read as osread, write as oswrite
-from os import O_RDONLY, O_WRONLY
+from os import fork, rename, setsid
 from os.path import join
 from socket import getfqdn, socket, AF_INET, SOCK_STREAM
 from SocketServer import BaseRequestHandler, ForkingMixIn, TCPServer
+from sqlite3 import connect, OperationalError
 from sys import argv, exit, stderr, stdin, stdout
 from tempfile import mkdtemp
-from time import time
+from time import sleep, time
 
-def create_queue(message_size=512):
-    stderr.write("Creating queue with message size %d\n" % message_size)
+MAX_MESSAGE_SIZE = 4096
+CREATE_TABLE_SQL = '''CREATE TABLE IF NOT EXISTS queue
+                      (id INTEGER PRIMARY KEY,
+                       message TEXT)'''
+GET_MESSAGE_SQL = '''SELECT id, message
+                     FROM queue
+                     ORDER BY id ASC
+                     LIMIT 1'''
+REMOVE_MESSAGE_SQL = '''DELETE FROM queue WHERE id = ?'''
+INSERT_MESSAGE_SQL = '''INSERT INTO queue (message) VALUES (?)'''
+
+def create_queue():
+    stderr.write("Creating queue\n")
     queue_dir = mkdtemp(prefix='boringq.')
-    auxiliary_queue_file = join(queue_dir, 'auxiliary.json')
-    with open(auxiliary_queue_file, 'w') as f:
-        f.write(dumps({}))
     pid = fork()
     if pid == 0: # Child
         setsid()
-        _run_server(queue_dir, message_size)
+        _run_server(queue_dir)
     else: # Parent
         identifier_file = join(queue_dir, 'identifier.json')
         finish = int(time()) + 5
@@ -36,14 +42,12 @@ def create_queue(message_size=512):
 
 def enqueue(identifier, message):
     stderr.write("enqueue %s on queue %s\n" % (message, identifier))
+    if len(message) > MAX_MESSAGE_SIZE:
+        stderr.write("message too large (max %d bytes)\n" % MAX_MESSAGE_SIZE)
+        return False
     q_info = loads(identifier)
     host = q_info['host']
     port = q_info['port']
-    message_size = q_info['message_size']
-    if len(message) > message_size:
-        stderr.write('Message larger than max size %d' % message_size)
-        return False
-    message = message.ljust(message_size, '\x00')
 
     sock = socket(AF_INET, SOCK_STREAM)
     try:
@@ -57,37 +61,22 @@ def dequeue(identifier):
     stderr.write("dequeue from %s\n" % identifier)
     q_info = loads(identifier)
     queue_dir = q_info['queue_dir']
-    auxiliary_queue_file = join(queue_dir, 'auxiliary.json')
-    with open(auxiliary_queue_file, 'r') as f:
-        auxiliary_queue = loads(f.read())
-    if len(auxiliary_queue) != 0:
-        message = auxiliary_queue.pop(0)
-        with open(auxiliary_queue_file, 'w') as f:
-            f.write(dumps(auxiliary_queue))
-        return message
-
-    pipe = join(queue_dir, 'boringq_pipe')
-    message_size = q_info['message_size']
-
-    fd = None
-    messages = []
-    try:
-        fd = osopen(pipe, O_RDONLY)
-
-        while True:
-            message = osread(fd, message_size)
-            if len(message) == 0:
-                break
-            else:
-                print "Received message %s\n" % message.rstrip('\x00')
-                messages.append(message.rstrip('\x00'))
-
-    finally:
-        if fd:
-            osclose(fd)
-    message = messages.pop(0)
-    with open(auxiliary_queue_file, 'w') as f:
-        f.write(dumps(messages))
+    connection = connect(join(queue_dir, 'queue.db'))
+    cursor = connection.cursor()
+    cursor.execute(CREATE_TABLE_SQL)
+    connection.commit()
+    while True:
+        cursor.execute(GET_MESSAGE_SQL)
+        rows = cursor.fetchall()
+        if len(rows) > 0:
+            id, message = rows[0]
+            cursor.execute(REMOVE_MESSAGE_SQL, (id,))
+            connection.commit()
+            break
+        else:
+            connection.commit()
+            sleep(0.1)
+    connection.close()
     return message
 
 def main(argv):
@@ -96,10 +85,7 @@ def main(argv):
         return False
     action = argv[1]
     if action == 'create_queue':
-        if (len(argv) >= 3):
-            output = create_queue(int(argv[2]))
-        else:
-            output = create_queue()
+        output = create_queue()
         if output:
             stdout.write(output)
             return True
@@ -119,18 +105,14 @@ def main(argv):
         stderr.write("action %s not recognised or wrong params\n" % action)
         return False
 
-def _run_server(queue_dir, message_size):
+def _run_server(queue_dir):
     host = getfqdn()
-    pipe = join(queue_dir, 'boringq_pipe')
-    mkfifo(pipe)
     server = QueueServer((host, 0), QueueRequestHandler)
-    server.message_size = message_size
-    server.pipe = pipe
+    server.queue_dir = queue_dir
     ip, port = server.server_address
     identifier = {'host': host,
                   'port': port,
-                  'queue_dir': queue_dir,
-                  'message_size': message_size}
+                  'queue_dir': queue_dir}
 
     temp_identifier_file = join(queue_dir, 'identifier.json.temp')
     identifier_file      = join(queue_dir, 'identifier.json')
@@ -142,14 +124,13 @@ def _run_server(queue_dir, message_size):
 
 class QueueRequestHandler(BaseRequestHandler):
     def handle(self):
-        message = self.request.recv(self.server.message_size)
-        fd = None
-        try:
-            fd = osopen(self.server.pipe, O_WRONLY)
-            oswrite(fd, message)
-        finally:
-            if fd:
-                osclose(fd)
+        message = self.request.recv(MAX_MESSAGE_SIZE)
+        connection = connect(join(self.server.queue_dir, 'queue.db'))
+        cursor = connection.cursor()
+        cursor.execute(CREATE_TABLE_SQL)
+        cursor.execute(INSERT_MESSAGE_SQL, (message,))
+        connection.commit()
+        connection.close()
 
 class QueueServer(ForkingMixIn, TCPServer):
     pass
