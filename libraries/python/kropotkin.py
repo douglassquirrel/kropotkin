@@ -1,6 +1,7 @@
 from contextlib import closing
 from json import loads, dumps
 from os import environ
+from subprocess import PIPE, Popen
 from time import time
 from urllib import urlencode
 from urllib2 import urlopen
@@ -35,14 +36,17 @@ def create_factspace(name, directory=None, timeout=5):
             return True
     return False
 
-def get_my_computer_name():
-    kropotkin_url = environ['KROPOTKIN_URL']
-    url = '%s/mycomputername' % kropotkin_url
-    status, content = _http_request(url)
-    if status == 200:
-        return content
-    else:
-        raise Exception("Unexpected response from server: %d" % status)
+def subscribe(factspace, confidence, type_):
+    queue_executable = environ['KROPOTKIN_QUEUE']
+    p = Popen([queue_executable, 'create_queue'], stdout=PIPE)
+    identifier, error_output = p.communicate()
+    if p.returncode != 0:
+        return False
+    content = {'type': type_, 'confidence': confidence, 'queue': identifier}
+    if not store_fact(factspace, 'subscription', content):
+        return False
+    # store identifier in local cache
+    return True
 
 def _get_statements(confidence, which, stamp, number,
                     factspace, type_, criteria):

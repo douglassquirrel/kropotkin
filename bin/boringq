@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 from json import dumps, loads
-from os import fork, rename, setsid
+from os import chdir, dup2, fork, rename, setsid, umask
 from os.path import join
 from socket import getfqdn, socket, AF_INET, SOCK_STREAM
 from SocketServer import BaseRequestHandler, ForkingMixIn, TCPServer
@@ -22,11 +22,10 @@ REMOVE_MESSAGE_SQL = '''DELETE FROM queue WHERE id = ?'''
 INSERT_MESSAGE_SQL = '''INSERT INTO queue (message) VALUES (?)'''
 
 def create_queue():
-    stderr.write("Creating queue\n")
     queue_dir = mkdtemp(prefix='boringq.')
     pid = fork()
     if pid == 0: # Child
-        setsid()
+        _separate_child()
         _run_server(queue_dir)
     else: # Parent
         identifier_file = join(queue_dir, 'identifier.json')
@@ -41,7 +40,6 @@ def create_queue():
         return False
 
 def enqueue(identifier, message):
-    stderr.write("enqueue %s on queue %s\n" % (message, identifier))
     if len(message) > MAX_MESSAGE_SIZE:
         stderr.write("message too large (max %d bytes)\n" % MAX_MESSAGE_SIZE)
         return False
@@ -58,7 +56,6 @@ def enqueue(identifier, message):
     return True
 
 def dequeue(identifier):
-    stderr.write("dequeue from %s\n" % identifier)
     q_info = loads(identifier)
     queue_dir = q_info['queue_dir']
     connection = connect(join(queue_dir, 'queue.db'))
@@ -104,6 +101,16 @@ def main(argv):
     else:
         stderr.write("action %s not recognised or wrong params\n" % action)
         return False
+
+def _separate_child():
+    chdir('/')
+    setsid()
+    umask(0)
+    devnull = file('/dev/null', 'w')
+    stdout.flush()
+    stderr.flush()
+    dup2(devnull.fileno(), stdout.fileno())
+    dup2(devnull.fileno(), stderr.fileno())
 
 def _run_server(queue_dir):
     host = getfqdn()

@@ -99,8 +99,13 @@ elements = [{'type': 'component_available',
               'translation': 'Factspace %(name)s created in %(directory)s'},
             {'type': 'library_available',
              'keys': dumps(['directory', 'language']),
-             'translation': 'Library available in %(directory)s,' \
-                          + 'language %(language)s'}]
+             'translation': 'Library available in %(directory)s, ' \
+                          + 'language %(language)s'},
+            {'type': 'subscription',
+             'keys': dumps(['type', 'confidence', 'queue']),
+             'translation': 'Subscription to %(confidence)ss ' \
+                          + 'of type %(type)s using queue %(queue)s'}]
+
 for e in elements:
     if not kropotkin.store_fact('kropotkin', 'constitution_element', e):
         fail_and_exit('Could not store %s' % e)
