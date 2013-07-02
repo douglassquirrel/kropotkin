@@ -37,11 +37,10 @@ def create_factspace(name, directory=None, timeout=5):
     return False
 
 def subscribe(factspace, confidence, type_):
-    queue_executable = environ['KROPOTKIN_QUEUE']
-    p = Popen([queue_executable, 'create_queue'], stdout=PIPE)
-    identifier, error_output = p.communicate()
-    if p.returncode != 0:
+    identifier = _execute_queue_command('create_queue')
+    if identifier is False:
         return False
+
     content = {'type': type_, 'confidence': confidence, 'queue': identifier}
     if not store_fact(factspace, 'subscription', content):
         return False
@@ -85,8 +84,27 @@ def _get_all_statements(confidence, factspace, type_, criteria):
         raise Exception("Unexpected response from server: %d" % status)
 
 def _store_statement(confidence, factspace, type_, content):
+    if type_ != 'constitution_element':
+        query_content = {'type': type_, 'confidence': confidence}
+        subscriptions = get_all_facts(factspace, 'subscription', query_content)
+        if subscriptions:
+            for subscription in subscriptions:
+                identifier = subscription['queue']
+                _execute_queue_command('enqueue', dumps(content), identifier)
+
     kropotkin_url = environ['KROPOTKIN_URL']
     url = '%s/factspace/%s/%s/%s' \
         % (kropotkin_url, factspace, confidence, type_)
     status, content = _http_request(url, dumps(content))
     return False if status != 200 else int(content)
+
+def _execute_queue_command(command, input=None, identifier=None):
+    args = [environ['KROPOTKIN_QUEUE'], command]
+    if identifier is not None:
+        args.append(identifier)
+    p = Popen(args, stdin=PIPE, stdout=PIPE)
+    standard_output, error_output = p.communicate(input)
+    if p.returncode != 0:
+        return False
+    else:
+        return standard_output

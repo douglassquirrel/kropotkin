@@ -106,11 +106,13 @@ def _separate_child():
     chdir('/')
     setsid()
     umask(0)
-    devnull = file('/dev/null', 'w')
+    devnull_in  = file('/dev/null', 'r')
+    devnull_out = file('/dev/null', 'w')
     stdout.flush()
     stderr.flush()
-    dup2(devnull.fileno(), stdout.fileno())
-    dup2(devnull.fileno(), stderr.fileno())
+    dup2(devnull_in.fileno(),  stdin.fileno())
+    dup2(devnull_out.fileno(), stdout.fileno())
+    dup2(devnull_out.fileno(), stderr.fileno())
 
 def _run_server(queue_dir):
     host = getfqdn()
