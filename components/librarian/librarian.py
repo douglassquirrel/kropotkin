@@ -1,6 +1,6 @@
 #!/usr/bin/python
 from base64 import b64encode
-from kropotkin import get_oldest_fact_and_stamp, store_fact
+from kropotkin import get_next_statement, store_fact, subscribe
 from os import access, listdir, X_OK
 from os.path import basename, isdir, join
 from shutil import copy, copytree
@@ -29,11 +29,9 @@ MODULE_TYPES = {'python':     'python-module',
                 'javascript': 'javascript-library',
                 'ruby':       'ruby-gem'}
 
+subscribe('kropotkin', 'fact', 'library_available')
 while True:
-    fact = get_oldest_fact_and_stamp('kropotkin', 'library_available',
-                                     {}, 'librarian')
-    if not fact:
-        continue
+    fact = get_next_statement('kropotkin', 'fact', 'library_available')
 
     original_dir = fact['directory']
     language = fact['language']

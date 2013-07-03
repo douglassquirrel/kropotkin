@@ -10,7 +10,7 @@ from sys import argv, exit, stderr, stdin, stdout
 from tempfile import mkdtemp
 from time import sleep, time
 
-MAX_MESSAGE_SIZE = 4096
+MAX_MESSAGE_SIZE = 65536
 CREATE_TABLE_SQL = '''CREATE TABLE IF NOT EXISTS queue
                       (id INTEGER PRIMARY KEY,
                        message TEXT)'''

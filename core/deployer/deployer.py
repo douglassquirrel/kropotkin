@@ -1,7 +1,7 @@
 #!/usr/bin/python
 from base64 import b64decode
 from contextlib import closing
-from kropotkin import get_oldest_fact_and_stamp, store_fact
+from kropotkin import get_next_statement, store_fact, subscribe
 from os import access, environ, listdir, path, X_OK
 from os.path import isdir, join
 from socket import getfqdn
@@ -49,13 +49,10 @@ def is_executable_file(f):
     return (not isdir(f)) and access(f, X_OK)
 
 if __name__=="__main__":
+    subscribe('kropotkin', 'fact', 'component')
     while True:
-        component_fact \
-            = get_oldest_fact_and_stamp('kropotkin',
-                                        'component',
-                                        {'content_type': 'component-tar'},
-                                        'deployer')
-        if component_fact:
+        component_fact = get_next_statement('kropotkin', 'fact', 'component')
+        if component_fact['content_type'] == 'component-tar':
             name = component_fact['name']
             directory = unpack(name, component_fact['bytes'])
             deploy(name, directory)

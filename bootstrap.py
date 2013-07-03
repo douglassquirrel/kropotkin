@@ -18,7 +18,7 @@ from os import environ, listdir
 from os.path import abspath, isdir, join
 from socket import gethostname
 from tempfile import mkdtemp
-from time import time
+from time import sleep, time
 from urllib2 import urlopen
 
 try:
@@ -47,6 +47,7 @@ try:
     KROPOTKIN_QUEUE=environ['KROPOTKIN_QUEUE']
 except KeyError:
     KROPOTKIN_QUEUE=abspath(join('bin', 'boringq'))
+    environ['KROPOTKIN_QUEUE'] = KROPOTKIN_QUEUE
 print "Using queue executable %s" % KROPOTKIN_QUEUE
 
 def wait_for_http(timeout):
@@ -117,11 +118,15 @@ if not kropotkin.store_fact('kropotkin', 'component_deployed', content):
 for c in dirs_in('core'):
     deploy(c, join('core', c), env)
 
+sleep(1) # Hack to let publisher start
+
 for c in listdir('components'):
     component_location = abspath(join('components', c))
     if not kropotkin.store_fact('kropotkin', 'component_available',
                                 {'location': component_location}):
         fail_and_exit('Could not store component_available for %s' % c)
+
+sleep(1) # Hack to let librarian start
 
 for lib in dirs_in('libraries'):
     library_location = abspath(join('libraries', lib))

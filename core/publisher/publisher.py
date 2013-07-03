@@ -1,7 +1,7 @@
 #!/usr/bin/python
 from base64 import b64encode
 from contextlib import closing
-from kropotkin import get_oldest_fact_and_stamp, store_fact
+from kropotkin import get_next_statement, store_fact, subscribe
 from os import access, listdir, path, X_OK
 from os.path import isdir, join, basename
 from StringIO import StringIO
@@ -54,10 +54,7 @@ def archive(files):
         return b64encode(buffer.getvalue())
 
 if __name__=="__main__":
+    subscribe('kropotkin', 'fact', 'component_available')
     while True:
-        fact = get_oldest_fact_and_stamp('kropotkin', \
-                                         'component_available', \
-                                         {}, \
-                                         'publisher')
-        if fact:
-            publish(fact['location'])
+        fact = get_next_statement('kropotkin', 'fact', 'component_available')
+        publish(fact['location'])
