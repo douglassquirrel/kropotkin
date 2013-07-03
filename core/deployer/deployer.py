@@ -30,7 +30,8 @@ def deploy(name, directory, env={}):
         return False
 
     env = env.copy()
-    inherit(env, environ, ['KROPOTKIN_URL', 'TEMP', 'TMP', 'TMPDIR'])
+    inherit(env, environ, ['KROPOTKIN_QUEUE', 'KROPOTKIN_URL',
+                           'TEMP', 'TMP', 'TMPDIR'])
     process = Popen(executable, cwd=directory, env=env)
     content = {'name': name, 'location': getfqdn(),
                'identifier': process.pid}

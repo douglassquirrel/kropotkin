@@ -6,6 +6,8 @@ from time import time
 from urllib import urlencode
 from urllib2 import urlopen
 
+LOCAL_SUBSCRIPTIONS = {}
+
 def make_query_function(confidence, stamped, which, number):
     if stamped:
         return lambda factspace, type_, criteria, stamp: \
@@ -44,8 +46,13 @@ def subscribe(factspace, confidence, type_):
     content = {'type': type_, 'confidence': confidence, 'queue': identifier}
     if not store_fact(factspace, 'subscription', content):
         return False
-    # store identifier in local cache
+    LOCAL_SUBSCRIPTIONS[(factspace, confidence, type_)] = identifier
     return True
+
+def get_next_statement(factspace, confidence, type_):
+    identifier = LOCAL_SUBSCRIPTIONS[(factspace, confidence, type_)]
+    statement_json = _execute_queue_command('dequeue', identifier=identifier)
+    return loads(statement_json)
 
 def _get_statements(confidence, which, stamp, number,
                     factspace, type_, criteria):
