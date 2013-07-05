@@ -11,8 +11,8 @@ from urlparse import parse_qsl
 def get_statements(path, params, content, client_ip):
     factspace, confidence, fact_type = path.split('/')[2:5]
     if ('kropotkin_subscribe' in params):
-        subscribe(factspace, confidence, fact_type)
-        return (200, 'Subscribed', 'text/plain')
+        id = subscribe(factspace, confidence, fact_type)
+        return (200, dumps(id), 'text/plain')
 
     if (factspace == 'kropotkin'):
         statements_dir = environ['KROPOTKIN_DIR']
