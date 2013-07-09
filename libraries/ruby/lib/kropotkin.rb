@@ -60,6 +60,7 @@ def get_my_computer_name()
     return false
   else
     return resp.body
+  end
 end
 
 def store_statement(confidence, factspace, type, content)
@@ -72,6 +73,7 @@ def store_statement(confidence, factspace, type, content)
     return false
   else
     return resp.body.to_i
+  end
 end
 
 def get_statements(confidence, which, stamp, number, factspace, type, criteria)
