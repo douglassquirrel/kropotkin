@@ -1,5 +1,9 @@
 require "kropotkin/version"
 
+require "uri"
+require "net/http"
+require "json"
+
 module Kropotkin
   class << self
     def make_query_function(confidence, stamped, which, number)
