@@ -48,12 +48,6 @@ function get_all_facts(factspace, type, criteria, onresponse) {
     });
 }
 
-function subscribe(factspace, type) {
-    url = '/factspace/' + factspace + '/fact/' + type
-        + '?kropotkin_subscribe=1';
-    http_request(url, 'GET', null, null);
-}
-
 function get_my_computer_name(onresponse) {
     url = '/mycomputername';
     http_request(url, 'GET', null, onresponse);

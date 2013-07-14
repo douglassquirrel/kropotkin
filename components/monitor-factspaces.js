@@ -19,6 +19,5 @@ function display_factspaces(facts) {
     }
 }
 
-subscribe('kropotkin', 'factspace');
 setInterval(check_factspaces, 1000);
 report_deployment('monitor-factspaces.js');
