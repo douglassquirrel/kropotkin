@@ -2,8 +2,6 @@ if (!("console" in window) || !("log" in window.console)) {
     window.console = {"log": function(){}};
 }
 
-LOCAL_SUBSCRIPTIONS = {};
-
 function shallow_copy(dict) {
     copy = {};
     for (key in dict) {
@@ -43,20 +41,17 @@ function get_first_fact(factspace, type, criteria, onresponse) {
 
 function get_all_facts(factspace, type, criteria, onresponse) {
     var query_string = to_query_string(criteria);
-    var url = '/factspace/' + factspace + '/fact/' + type
-            + '?' + to_query_string(criteria);
+    url = '/factspace/' + factspace + '/fact/' + type
+        + '?' + to_query_string(criteria);
     http_request(url, 'GET', null, function(responseText) {
         onresponse(JSON.parse(responseText));
     });
 }
 
 function subscribe(factspace, type) {
-    var url = '/factspace/' + factspace + '/fact/' + type
-            + '?kropotkin_subscribe=1';
-    http_request(url, 'GET', null, function(responseText) {
-        var key = [factspace, type].join('/')
-        LOCAL_SUBSCRIPTIONS[key] = JSON.parse(responseText);
-    });
+    url = '/factspace/' + factspace + '/fact/' + type
+        + '?kropotkin_subscribe=1';
+    http_request(url, 'GET', null, null);
 }
 
 function get_my_computer_name(onresponse) {

@@ -44,11 +44,10 @@ def subscribe(factspace, confidence, type_):
         return False
 
     content = {'type': type_, 'confidence': confidence, 'queue': identifier}
-    subscription_id = store_fact(factspace, 'subscription', content)
-    if not subscription_id:
+    if not store_fact(factspace, 'subscription', content):
         return False
     LOCAL_SUBSCRIPTIONS[(factspace, confidence, type_)] = identifier
-    return subscription_id
+    return True
 
 def get_next_statement(factspace, confidence, type_):
     identifier = LOCAL_SUBSCRIPTIONS[(factspace, confidence, type_)]
