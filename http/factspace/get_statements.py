@@ -1,6 +1,6 @@
 from glob import glob
 from json import dumps, load, loads
-from kropotkin import get_newest_fact, subscribe
+from kropotkin import get_newest_fact
 from os import environ, write
 from os.path import join, split
 from sqlite3 import connect, OperationalError
@@ -10,10 +10,6 @@ from urlparse import parse_qsl
 
 def get_statements(path, params, content, client_ip):
     factspace, confidence, fact_type = path.split('/')[2:5]
-    if ('kropotkin_subscribe' in params):
-        subscribe(factspace, confidence, fact_type)
-        return (200, 'Subscribed', 'text/plain')
-
     if (factspace == 'kropotkin'):
         statements_dir = environ['KROPOTKIN_DIR']
     else:
@@ -26,7 +22,7 @@ def get_statements(path, params, content, client_ip):
         statements_dir = factspace_info['directory']
     statements = _fetch_statements(statements_dir, factspace, confidence,
                                    fact_type, params)
-    return (200, dumps(statements), 'application/json')
+    return 200, dumps(statements), 'application/json'
 
 CHECK_TABLE_SQL = '''SELECT name FROM sqlite_master
                      WHERE type='table' AND name=? ''';
