@@ -11,9 +11,6 @@ def perform_queue_command(path, params, content, client_ip):
         command, identifier = path_elements[2:4]
         identifier = unquote(identifier)
     input_ = content if content else None
-    print "command: %s" % command
-    print "input: %s" % input_
-    print "identifier: %s" % identifier
     output = _execute_queue_command(command, input_, identifier)
     if output is not False:
         return 200, output, 'text/plain'

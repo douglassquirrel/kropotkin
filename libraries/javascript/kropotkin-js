@@ -48,6 +48,20 @@ function get_all_facts(factspace, type, criteria, onresponse) {
     });
 }
 
+function subscribe(factspace, confidence, type) {
+    queue_command('create_queue', null, null, function(identifier) {
+        var content = {'type': type, 
+                       'confidence': confidence, 
+                       'queue': identifier};
+        store_fact(factspace, 'subscription', content, null);
+        if (window.local_subscriptions === undefined) {
+            window.local_subscriptions = {};
+        }
+        key = [factspace, confidence, type].join('/');
+        window.local_subscriptions[key] = identifier;
+    });
+}
+
 function get_my_computer_name(onresponse) {
     url = '/mycomputername';
     http_request(url, 'GET', null, onresponse);
@@ -81,6 +95,14 @@ function to_query_string(criteria) {
 //                              + encodeURIComponent(criteria[name]));
     }
     return criteria_strings.join('&');
+}
+
+function queue_command(command, input, identifier, onresponse) {
+    url = '/queue/' + command;
+    if (identifier != null) {
+        url += '/' + encodeURIComponent(identifier);
+    }
+    http_request(url, 'POST', input, onresponse);
 }
 
 POST_MIME_TYPE = 'application/x-www-form-urlencoded'
