@@ -51,6 +51,5 @@ function show_code(fact) {
     code_div.innerHTML = html;
 }
 
-subscribe('kropotkin', 'component_deployed');
 setInterval(check_components, 1000);
 report_deployment('monitor-components.js');
