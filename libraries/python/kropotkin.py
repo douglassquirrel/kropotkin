@@ -106,12 +106,12 @@ def _store_statement(confidence, factspace, type_, content):
     status, content = _http_request(url, dumps(content))
     return False if status != 200 else int(content)
 
-def _execute_queue_command(command, input=None, identifier=None):
+def _execute_queue_command(command, input_=None, identifier=None):
     args = [environ['KROPOTKIN_QUEUE'], command]
     if identifier is not None:
         args.append(identifier)
     p = Popen(args, stdin=PIPE, stdout=PIPE)
-    standard_output, error_output = p.communicate(input)
+    standard_output, error_output = p.communicate(input_)
     if p.returncode != 0:
         return False
     else:

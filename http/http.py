@@ -8,6 +8,7 @@ from component.get_component import get_component
 from factspace.get_statements import get_statements
 from factspace.store_statement import store_statement
 from integration.get_computer_name import get_computer_name
+from integration.perform_queue_command import perform_queue_command
 
 def base(path, params, content, client_ip):
     return 200, 'Kropotkin HTTP\n', 'text/plain'
@@ -19,7 +20,8 @@ class handler(BaseHTTPRequestHandler):
                ('mycomputername', 'GET'):  get_computer_name,
                ('factspace',      'GET'):  get_statements,
                ('factspace',      'POST'): store_statement,
-               ('component',      'GET'):  get_component}
+               ('component',      'GET'):  get_component,
+               ('queue',          'POST'): perform_queue_command}
 
     def do_GET(self):
         self.route_request('GET')
