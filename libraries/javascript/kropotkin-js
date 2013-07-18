@@ -11,8 +11,16 @@ function shallow_copy(dict) {
 }
 
 function store_fact(factspace, type, content, onresponse) {
-    var url = '/factspace/' + factspace + '/fact/' + type;
-    http_request(url, 'POST', JSON.stringify(content), onresponse);
+    var query_content = {'type': type, 'confidence': 'fact'};
+    get_all_facts(factspace, 'subscription', query_content, function(subs) {
+        for (var i=0; i<subs.length; i++) {
+            var identifier = subs[i]['queue'];
+            queue_command('enqueue', JSON.stringify(content), 
+                          identifier, null);
+        }
+        var url = '/factspace/' + factspace + '/fact/' + type;
+        http_request(url, 'POST', JSON.stringify(content), onresponse);
+    });
 }
 
 function get_oldest_fact_and_stamp(factspace, type, criteria,
@@ -69,7 +77,7 @@ function get_next_statement(factspace, confidence, type, onresponse) {
         if (statement == null) {
             get_next_statement(factspace, confidence, type, onresponse);
         } else {
-            onresponse(statement);
+            onresponse(JSON.parse(statement));
         }
     });
 }
