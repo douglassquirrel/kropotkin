@@ -14,5 +14,7 @@ def perform_queue_command(path, params, content, client_ip):
     output = _execute_queue_command(command, input_, identifier)
     if output is not False:
         return 200, output, 'text/plain'
+    elif command == 'dequeue':
+        return 200, '', 'text/plain'
     else:
         return 400, 'Queue command %s failed' % command, 'text/plain'

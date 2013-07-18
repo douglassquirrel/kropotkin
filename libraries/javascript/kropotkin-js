@@ -15,7 +15,7 @@ function store_fact(factspace, type, content, onresponse) {
     get_all_facts(factspace, 'subscription', query_content, function(subs) {
         for (var i=0; i<subs.length; i++) {
             var identifier = subs[i]['queue'];
-            queue_command('enqueue', JSON.stringify(content), 
+            queue_command('enqueue', JSON.stringify(content),
                           identifier, null);
         }
         var url = '/factspace/' + factspace + '/fact/' + type;
@@ -58,8 +58,8 @@ function get_all_facts(factspace, type, criteria, onresponse) {
 
 function subscribe(factspace, confidence, type) {
     queue_command('create_queue', null, null, function(identifier) {
-        var content = {'type': type, 
-                       'confidence': confidence, 
+        var content = {'type': type,
+                       'confidence': confidence,
                        'queue': identifier};
         store_fact(factspace, 'subscription', content, null);
         if (window.local_subscriptions === undefined) {
@@ -74,7 +74,7 @@ function get_next_statement(factspace, confidence, type, onresponse) {
     var key = [factspace, confidence, type].join('/');
     var identifier = window.local_subscriptions[key];
     queue_command('dequeue', null, identifier, function(statement) {
-        if (statement == null) {
+        if (statement.length == 0) {
             get_next_statement(factspace, confidence, type, onresponse);
         } else {
             onresponse(JSON.parse(statement));
