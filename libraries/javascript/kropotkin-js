@@ -57,8 +57,20 @@ function subscribe(factspace, confidence, type) {
         if (window.local_subscriptions === undefined) {
             window.local_subscriptions = {};
         }
-        key = [factspace, confidence, type].join('/');
+        var key = [factspace, confidence, type].join('/');
         window.local_subscriptions[key] = identifier;
+    });
+}
+
+function get_next_statement(factspace, confidence, type, onresponse) {
+    var key = [factspace, confidence, type].join('/');
+    var identifier = window.local_subscriptions[key];
+    queue_command('dequeue', null, identifier, function(statement) {
+        if (statement == null) {
+            get_next_statement(factspace, confidence, type, onresponse);
+        } else {
+            onresponse(statement);
+        }
     });
 }
 

@@ -51,8 +51,10 @@ def subscribe(factspace, confidence, type_):
 
 def get_next_statement(factspace, confidence, type_):
     identifier = LOCAL_SUBSCRIPTIONS[(factspace, confidence, type_)]
-    statement_json = _execute_queue_command('dequeue', identifier=identifier)
-    return loads(statement_json)
+    while True:
+        result = _execute_queue_command('dequeue', identifier=identifier)
+        if result is not False:
+            return loads(result)
 
 def _get_statements(confidence, which, stamp, number,
                     factspace, type_, criteria):

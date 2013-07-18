@@ -11,6 +11,7 @@ from tempfile import mkdtemp
 from time import sleep, time
 
 MAX_MESSAGE_SIZE = 65536
+DEQUEUE_TIMEOUT = 10
 CREATE_TABLE_SQL = '''CREATE TABLE IF NOT EXISTS queue
                       (id INTEGER PRIMARY KEY,
                        message TEXT)'''
@@ -62,7 +63,10 @@ def dequeue(identifier):
     cursor = connection.cursor()
     cursor.execute(CREATE_TABLE_SQL)
     connection.commit()
-    while True:
+
+    message = None
+    finish = _now() + DEQUEUE_TIMEOUT
+    while _now() < finish:
         cursor.execute(GET_MESSAGE_SQL)
         rows = cursor.fetchall()
         if len(rows) > 0:
@@ -130,6 +134,9 @@ def _run_server(queue_dir):
     rename(temp_identifier_file, identifier_file)
 
     server.serve_forever()
+
+def _now():
+    return int(round(time()))
 
 class QueueRequestHandler(BaseRequestHandler):
     def handle(self):
