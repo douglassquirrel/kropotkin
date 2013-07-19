@@ -98,6 +98,7 @@ function report_deployment(component_name) {
     window.kropotkin_components['max_id']++;
 
     get_my_computer_name(function(computer_name) {
+        window.kropotkin_computer_name = computer_name;
         var content = {'name': component_name,
                        'location': computer_name,
                        'identifier': local_id};

@@ -56,6 +56,12 @@ def get_next_statement(factspace, confidence, type_):
         if result is not False:
             return loads(result)
 
+def get_next_fact(factspace, type_):
+    return get_next_statement(factspace, 'fact', type_);
+
+def get_next_opinion(factspace, type_):
+    return get_next_statement(factspace, 'opinion', type_);
+
 def _get_statements(confidence, which, stamp, number,
                     factspace, type_, criteria):
     kropotkin_criteria_list = []

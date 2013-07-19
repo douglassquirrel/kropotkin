@@ -1,6 +1,6 @@
 #!/usr/bin/python
 from base64 import b64encode
-from kropotkin import get_next_statement, store_fact, subscribe
+from kropotkin import get_next_fact, store_fact, subscribe
 from os import access, listdir, X_OK
 from os.path import basename, isdir, join
 from shutil import copy, copytree
@@ -31,7 +31,7 @@ MODULE_TYPES = {'python':     'python-module',
 
 subscribe('kropotkin', 'fact', 'library_available')
 while True:
-    fact = get_next_statement('kropotkin', 'fact', 'library_available')
+    fact = get_next_fact('kropotkin', 'library_available')
 
     original_dir = fact['directory']
     language = fact['language']
