@@ -82,6 +82,10 @@ function get_next_statement(factspace, confidence, type, onresponse) {
     });
 }
 
+function get_next_fact(factspace, type, onresponse) {
+    get_next_statement(factspace, 'fact', type, onresponse);
+}
+
 function get_my_computer_name(onresponse) {
     url = '/mycomputername';
     http_request(url, 'GET', null, onresponse);
