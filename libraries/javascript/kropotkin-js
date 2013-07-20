@@ -3,7 +3,7 @@ if (!("console" in window) || !("log" in window.console)) {
 }
 
 function shallow_copy(dict) {
-    copy = {};
+    var copy = {};
     for (key in dict) {
        copy[key] = dict[key];
     }
@@ -26,7 +26,7 @@ function store_fact(factspace, type, content, onresponse) {
 function get_oldest_fact_and_stamp(factspace, type, criteria,
                                    stamp, onresponse) {
     var criteria = shallow_copy(criteria);
-    kcriteria = 'stamp-' + stamp + ',result-oldest,number-1';
+    var kcriteria = 'stamp-' + stamp + ',result-oldest,number-1';
     criteria['kropotkin_criteria'] = kcriteria;
     get_first_fact(factspace, type, criteria, onresponse);
 }
@@ -49,7 +49,7 @@ function get_first_fact(factspace, type, criteria, onresponse) {
 
 function get_all_facts(factspace, type, criteria, onresponse) {
     var query_string = to_query_string(criteria);
-    url = '/factspace/' + factspace + '/fact/' + type
+    var url = '/factspace/' + factspace + '/fact/' + type
         + '?' + to_query_string(criteria);
     http_request(url, 'GET', null, function(responseText) {
         onresponse(JSON.parse(responseText));
@@ -57,7 +57,7 @@ function get_all_facts(factspace, type, criteria, onresponse) {
 }
 
 function subscribe(factspace, confidence, type) {
-    queue_command('create_queue', null, null, function(identifier) {
+    queue_command('create_queue', type, null, function(identifier) {
         var content = {'type': type,
                        'confidence': confidence,
                        'queue': identifier};
@@ -87,7 +87,7 @@ function get_next_fact(factspace, type, onresponse) {
 }
 
 function get_my_computer_name(onresponse) {
-    url = '/mycomputername';
+    var url = '/mycomputername';
     http_request(url, 'GET', null, onresponse);
 }
 
@@ -113,7 +113,7 @@ function report_deployment(component_name) {
 }
 
 function to_query_string(criteria) {
-    criteria_strings = [];
+    var criteria_strings = [];
     for (name in criteria) {
         criteria_strings.push(name + "=" + criteria[name]);
 //        criteria_strings.push(encodeURIComponent(name) + "="
@@ -123,14 +123,14 @@ function to_query_string(criteria) {
 }
 
 function queue_command(command, input, identifier, onresponse) {
-    url = '/queue/' + command;
+    var url = '/queue/' + command;
     if (identifier != null) {
         url += '/' + encodeURIComponent(identifier);
     }
     http_request(url, 'POST', input, onresponse);
 }
 
-POST_MIME_TYPE = 'application/x-www-form-urlencoded'
+POST_MIME_TYPE = 'application/x-www-form-urlencoded';
 function http_request(url, verb, content, onresponse) {
     var xmlhttp = new XMLHttpRequest();
     if (onresponse) {
