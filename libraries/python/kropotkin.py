@@ -50,9 +50,20 @@ def subscribe(factspace, confidence, type_):
     return True
 
 def get_next_statement(factspace, confidence, type_):
+    return _get_next_statement(factspace, confidence, type_, True)
+
+def get_next_statement_noblock(factspace, confidence, type_):
+    return _get_next_statement(factspace, confidence, type_, False)
+
+def _get_next_statement(factspace, confidence, type_, block):
+    if block is True:
+        dequeue_command = 'dequeue'
+    else:
+        dequeue_command = 'dequeue_noblock'
+
     identifier = LOCAL_SUBSCRIPTIONS[(factspace, confidence, type_)]
     while True:
-        result = _execute_queue_command('dequeue', identifier=identifier)
+        result = _execute_queue_command(dequeue_command, identifier=identifier)
         if result is not False:
             return loads(result)
 
