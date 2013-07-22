@@ -12,6 +12,8 @@ from time import sleep, time
 
 MAX_MESSAGE_SIZE = 65536
 DEQUEUE_TIMEOUT = 10
+POLLING_PERIOD = 0.1
+
 CREATE_TABLE_SQL = '''CREATE TABLE IF NOT EXISTS queue
                       (id INTEGER PRIMARY KEY,
                        message TEXT)'''
@@ -56,7 +58,13 @@ def enqueue(identifier, message):
         sock.close()
     return True
 
-def dequeue(identifier):
+def dequeue_block(identifier):
+    return _dequeue(identifier, DEQUEUE_TIMEOUT)
+
+def dequeue_noblock(identifier):
+    return _dequeue(identifier, None)
+
+def _dequeue(identifier, block_for):
     q_info = loads(identifier)
     queue_dir = q_info['queue_dir']
     connection = connect(join(queue_dir, 'queue.db'))
@@ -65,18 +73,22 @@ def dequeue(identifier):
     connection.commit()
 
     message = None
-    finish = _now() + DEQUEUE_TIMEOUT
-    while _now() < finish:
+    if block_for is not None:
+        finish = _now() + block_for
+
+    while True:
         cursor.execute(GET_MESSAGE_SQL)
         rows = cursor.fetchall()
         if len(rows) > 0:
             id, message = rows[0]
             cursor.execute(REMOVE_MESSAGE_SQL, (id,))
-            connection.commit()
+        connection.commit()
+
+        if message is not None or block_for is None or _now() >= finish:
             break
         else:
-            connection.commit()
-            sleep(0.1)
+            sleep(POLLING_PERIOD)
+
     connection.close()
     return message
 
@@ -95,8 +107,14 @@ def main(argv):
     elif action == 'enqueue' and len(argv) >= 3:
         message = stdin.read()
         return enqueue(argv[2], message)
-    elif action == 'dequeue' and len(argv) >= 3:
-        output = dequeue(argv[2])
+    elif (action == 'dequeue' or action == 'dequeue_noblock') \
+            and len(argv) >= 3:
+        if action == 'dequeue':
+            output = dequeue_block(argv[2])
+        elif action == 'dequeue_noblock':
+            output = dequeue_noblock(argv[2])
+        else: # How did we get here?!
+            return False
         if output:
             stdout.write(output)
             return True
