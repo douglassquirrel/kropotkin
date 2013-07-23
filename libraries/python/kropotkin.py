@@ -68,7 +68,7 @@ def _get_next_statement(factspace, confidence, type_, block):
         result = _execute_queue_command(dequeue_command, identifier=identifier)
         if result is not False:
             return loads(result)
-        else if block = False:
+        elif block == False:
             return False
 
 def get_next_fact(factspace, type_):
@@ -86,7 +86,7 @@ def subscribe_sets(factspace, confidence, type_, \
     if not subscribe(factspace, confidence, type_):
         return False
     identifier = (factspace, confidence, type_)
-    sets = IndexableDict()
+    sets = AgeIndexedDict()
     LOCAL_SET_SUBSCRIPTIONS[identifier] = \
         (set_classify, set_size, patience, sets)
     return True
@@ -98,7 +98,7 @@ def get_next_set(factspace, confidence, type_):
     identifier = (factspace, confidence, type_)
     set_classify, set_size, patience, sets = LOCAL_SET_SUBSCRIPTIONS[identifier]
     while True:
-        if sets.len() > 0 and sets.index(0).patience_has_run_out():
+        if sets.len() > 0 and sets.oldest().patience_has_run_out():
             return sets.pop_oldest().to_list()
         statement = get_next_statement_noblock(factspace, confidence, type_)
         if statement is False:
@@ -115,7 +115,7 @@ def get_next_set(factspace, confidence, type_):
             sets.remove(id)
             return set_.to_list()
 
-class IndexableDict:
+class AgeIndexedDict:
     def __init__(self):
         self.dict = {}
         self.ordered_keys = []
@@ -123,8 +123,10 @@ class IndexableDict:
     def len(self):
         return len(self.ordered_keys)
 
-    def index(self, n):
-        return self.dict[self.ordered_keys[n]]
+    def oldest(self):
+        if self.len() == 0:
+            raise IndexError()
+        return self.dict[self.ordered_keys[0]]
 
     def pop_oldest(self):
         if self.len() == 0:
@@ -144,8 +146,8 @@ class IndexableDict:
         del self.dict[key]
 
 class StatementSet:
-    def __init__(self, set_size, patience):
-        self.set_size = set_size
+    def __init__(self, size_when_full, patience):
+        self.size_when_full = size_when_full
         self.deadline = now() + patience
         self.statements = []
 
@@ -153,7 +155,7 @@ class StatementSet:
         return self.statements
 
     def is_complete(self):
-        return len(self.statements) >= self.set_size
+        return len(self.statements) >= self.size_when_full
 
     def patience_has_run_out(self):
         return now() > self.deadline
