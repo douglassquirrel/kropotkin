@@ -60,7 +60,7 @@ def subscribe(factspace, confidence, type)
   end
 
   content = {'type' => type, 'confidence' => confidence, 'queue' => identifier}
-  if !store_fact('kropotkin', 'subscription', content)
+  if !store_fact(factspace, 'subscription', content)
     return false
   end
 
