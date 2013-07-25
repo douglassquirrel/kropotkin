@@ -123,6 +123,17 @@ def get_my_computer_name()
 end
 
 def store_statement(confidence, factspace, type, content)
+  if type != 'constitution_element'
+    query_content = {'type' => type, 'confidence' => confidence}
+    subscriptions = get_all_facts(factspace, 'subscription', query_content)
+    if subscriptions and subscriptions.length > 0
+      for subscription in subscriptions
+        identifier = subscription['queue']
+        execute_queue_command('enqueue', JSON.dump(content), identifier)
+      end
+    end
+  end
+
   kropotkin_url = ENV['KROPOTKIN_URL']
   url = '%s/factspace/%s/%s/%s' % [kropotkin_url, factspace, confidence, type]
   uri = URI.parse(url)
