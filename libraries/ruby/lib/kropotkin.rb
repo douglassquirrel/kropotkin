@@ -1,6 +1,9 @@
 #!/usr/bin/ruby
 require 'net/http'
 require 'json'
+require 'open3'
+
+LOCAL_SUBSCRIPTIONS = {}
 
 def make_query_function(confidence, stamped, which, number)
   if stamped
@@ -48,6 +51,62 @@ def create_factspace(name, timeout=5)
     end
   end
   return false
+end
+
+def subscribe(factspace, confidence, type)
+  identifier = execute_queue_command('create_queue')
+  if !identifier
+    return false
+  end
+
+  content = {'type' => type, 'confidence' => confidence, 'queue' => identifier}
+  if !store_fact('kropotkin', 'subscription', content)
+    return false
+  end
+
+  LOCAL_SUBSCRIPTIONS[[factspace, confidence, type]] = identifier
+  return true
+end
+
+def get_next_statement(factspace, confidence, type)
+    return internal_get_next_statement(factspace, confidence, type, true)
+end
+
+def get_next_statement_noblock(factspace, confidence, type)
+    return internal_get_next_statement(factspace, confidence, type, false)
+end
+
+def internal_get_next_statement(factspace, confidence, type, block)
+    if block == true
+        dequeue_command = 'dequeue'
+    else
+        dequeue_command = 'dequeue_noblock'
+    end
+
+    identifier = LOCAL_SUBSCRIPTIONS[[factspace, confidence, type]]
+    loop do
+      result = execute_queue_command(dequeue_command, nil, identifier)
+      if result
+        return JSON.parse(result)
+      elsif block == false
+        return false
+      end
+    end
+end
+
+def execute_queue_command(command, input=nil, identifier=nil)
+  queue = ENV['KROPOTKIN_QUEUE']
+  if identifier
+    result = Open3.capture3(queue, command, identifier, :stdin_data=>input)
+  else
+    result = Open3.capture3(queue, command, :stdin_data=>input)
+  end
+  output, error, status = result
+  if status.exitstatus != 0
+    return false
+  else
+    return output
+  end
 end
 
 def get_my_computer_name()
