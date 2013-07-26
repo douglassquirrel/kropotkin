@@ -26,27 +26,14 @@ def get_statements(path, params, content, client_ip):
 
 CHECK_TABLE_SQL = '''SELECT name FROM sqlite_master
                      WHERE type='table' AND name=? ''';
-STAMPS_TABLE_SQL = '''CREATE TABLE IF NOT EXISTS kropotkin_stamps
-                      (stamp_id INTEGER PRIMARY KEY,
-                       timestamp TEXT DEFAULT (STRFTIME('%s', 'now')),
-                       fact_type TEXT, statement_id INTEGER, stamp TEXT,
-                       UNIQUE (fact_type, statement_id, stamp))'''
-STAMP_INSERT_SQL = '''INSERT INTO kropotkin_stamps
-                      (fact_type, statement_id, stamp) VALUES (?, ?, ?)'''
 SELECT_TEMPLATE = '''SELECT %s
                      FROM %s AS f
-                     %s /* stamp clause */
-                     %s /* WHERE or AND params */
+                     %s /* WHERE params */
                      ORDER BY f.kropotkin_timestamp %s
                      %s /* LIMIT number */'''
-STAMP_CLAUSE_TEMPLATE = '''LEFT JOIN kropotkin_stamps AS s
-                           ON (f.kropotkin_id = s.statement_id
-                               AND fact_type = ?
-                               AND s.stamp = ?) /* stamp */
-                           WHERE s.stamp_id IS NULL'''
 KROPOTKIN_KEYS = ['kropotkin_id', 'kropotkin_timestamp', 'kropotkin_confidence']
 def _get_statements_db(statements_dir, factspace, confidence, fact_type,
-                       params, stamp, result, number, timeout):
+                       params, result, number, timeout):
     if fact_type == 'constitution_element':
         type_keys = ['keys', 'translation', 'type']
     else:
@@ -65,44 +52,34 @@ def _get_statements_db(statements_dir, factspace, confidence, fact_type,
     if 0 == len(cursor.fetchall()):
         connection.close()
         return []
-    cursor.execute(STAMPS_TABLE_SQL)
     connection.commit()
 
     if confidence != 'statement':
         params['kropotkin_confidence'] = confidence
 
-    if stamp:
-        stamp_clause = STAMP_CLAUSE_TEMPLATE
-        match_clause = 'AND '
-        values = [fact_type, stamp]
-    else:
-        stamp_clause = ''
-        match_clause = 'WHERE '
-        values = []
+    values = []
 
     param_keys = sorted(params.keys())
     if param_keys:
-        match_clause += ' AND '.join(['%s = ?' % key for key in param_keys])
+        match_clause = 'WHERE ' + \
+                       ' AND '.join(['%s = ?' % key for key in param_keys])
     else:
         match_clause = ''
     values.extend([params[key] for key in param_keys])
     order = 'DESC' if result == 'newest' else 'ASC'
     limit = 'LIMIT %d' % number if number else ''
     select_sql = SELECT_TEMPLATE % (','.join(type_keys), fact_type,
-                                    stamp_clause, match_clause, order, limit)
+                                    match_clause, order, limit)
 
     finish = __now_millis() + timeout
     while True:
         try:
             cursor.execute(select_sql, values)
             statements = [dict(zip(type_keys, r)) for r in cursor.fetchall()]
-            if statements and stamp:
-                stamp_values = [(fact_type, s['kropotkin_id'], stamp) \
-                                    for s in statements]
-                cursor.executemany(STAMP_INSERT_SQL, stamp_values)
             connection.commit()
         except OperationalError as error:
             stderr.write('Sqlite error %s\n' % error)
+            stderr.write('Select SQL: %s' % select_sql)
             statements = []
             break
         if len(statements) > 0 or __now_millis() > finish:
@@ -114,25 +91,20 @@ def _get_statements_db(statements_dir, factspace, confidence, fact_type,
 
 def _fetch_statements(statements_dir, factspace, confidence, fact_type, params):
     params = params.copy()
-    stamp, result, number = _extract_kropotkin_criteria(params)
+    result, number = _extract_kropotkin_criteria(params)
     params.pop('kropotkin_criteria', None)
     timeout = 2000 if (result == 'oldest' or result == 'newest') else 0
 
     return _get_statements_db(statements_dir, factspace, confidence, fact_type,
-                              params, stamp, result, number, timeout)
+                              params, result, number, timeout)
 
 def _extract_kropotkin_criteria(params):
-    stamp = False
     result = 'all'
     number = None
     try:
         criteria_str = params['kropotkin_criteria']
         criteria_str = criteria_str.replace('-', '=').replace(',', '&')
         criteria = dict(parse_qsl(criteria_str))
-        try:
-            stamp  = criteria['stamp']
-        except KeyError:
-            pass
         try:
             result = criteria['result']
         except KeyError:
@@ -143,7 +115,7 @@ def _extract_kropotkin_criteria(params):
             pass
     except KeyError:
         pass
-    return stamp, result, number
+    return result, number
 
 def __now_millis():
     return int(round(time() * 1000))

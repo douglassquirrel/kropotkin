@@ -5,30 +5,20 @@ require 'open3'
 
 LOCAL_SUBSCRIPTIONS = {}
 
-def make_query_function(confidence, stamped, which, number)
-  if stamped
-    return lambda {|factspace, type, criteria, stamp| \
-      get_statements(confidence, which, stamp, number,
-                     factspace, type, criteria)}
-  else
-    return lambda {|factspace, type, criteria| \
-      get_statements(confidence, which, false, number,
-                     factspace, type, criteria)}
-  end
+def make_query_function(confidence, which, number)
+  return lambda {|factspace, type, criteria| \
+    get_statements(confidence, which, number,
+                   factspace, type, criteria)}
 end
 
-def get_oldest_fact_and_stamp(factspace, type, criteria, stamp)
-  f = make_query_function('fact', true, 'oldest', 1)
-  f.call(factspace, type, criteria, stamp)
-end
 
 def get_newest_fact(factspace, type, criteria)
-  f = make_query_function('fact', false, 'newest', 1)
+  f = make_query_function('fact', 'newest', 1)
   f.call(factspace, type, criteria)
 end
 
 def get_all_facts(factspace, type, criteria)
-  f = make_query_function('fact', false, 'all', nil)
+  f = make_query_function('fact', 'all', nil)
   f.call(factspace, type, criteria)
 end
 
@@ -146,11 +136,8 @@ def store_statement(confidence, factspace, type, content)
   end
 end
 
-def get_statements(confidence, which, stamp, number, factspace, type, criteria)
+def get_statements(confidence, which, number, factspace, type, criteria)
   kropotkin_criteria_list = []
-  if stamp
-    kropotkin_criteria_list.push('stamp-' + stamp)
-  end
   if which != 'all'
     kropotkin_criteria_list.push('result-' + which)
   end

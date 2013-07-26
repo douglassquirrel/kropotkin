@@ -23,14 +23,6 @@ function store_fact(factspace, type, content, onresponse) {
     });
 }
 
-function get_oldest_fact_and_stamp(factspace, type, criteria,
-                                   stamp, onresponse) {
-    var criteria = shallow_copy(criteria);
-    var kcriteria = 'stamp-' + stamp + ',result-oldest,number-1';
-    criteria['kropotkin_criteria'] = kcriteria;
-    get_first_fact(factspace, type, criteria, onresponse);
-}
-
 function get_newest_fact(factspace, type, criteria, onresponse) {
     var criteria = shallow_copy(criteria);
     criteria['kropotkin_criteria'] = 'result-newest,number-1';

@@ -10,19 +10,13 @@ LOCAL_SUBSCRIPTIONS = {}
 LOCAL_SET_SUBSCRIPTIONS = {}
 POLL_DELAY = 0.1
 
-def make_query_function(confidence, stamped, which, number):
-    if stamped:
-        return lambda factspace, type_, criteria, stamp: \
-            _get_statements(confidence, which, stamp, number,
-                            factspace, type_, criteria)
-    else:
-        return lambda factspace, type_, criteria: \
-            _get_statements(confidence, which, None, number,
-                            factspace, type_, criteria)
+def make_query_function(confidence, which, number):
+    return lambda factspace, type_, criteria: \
+        _get_statements(confidence, which, number,
+                        factspace, type_, criteria)
 
-get_oldest_fact_and_stamp = make_query_function('fact', True, 'oldest', 1)
-get_newest_fact = make_query_function('fact', False, 'newest', 1)
-get_all_facts = make_query_function('fact', False, 'all', None)
+get_newest_fact = make_query_function('fact', 'newest', 1)
+get_all_facts = make_query_function('fact', 'all', None)
 
 def store_fact(factspace, type_, content):
     return _store_statement('fact', factspace, type_, content)
@@ -163,11 +157,9 @@ class StatementSet:
     def add(self, statement):
         self.statements.append(statement)
 
-def _get_statements(confidence, which, stamp, number,
+def _get_statements(confidence, which, number,
                     factspace, type_, criteria):
     kropotkin_criteria_list = []
-    if stamp is not None:
-        kropotkin_criteria_list.append('stamp-' + stamp)
     if which != 'all':
         kropotkin_criteria_list.append('result-' + which)
     if number is not None:
