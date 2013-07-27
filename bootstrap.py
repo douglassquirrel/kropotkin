@@ -76,8 +76,6 @@ env = {'KROPOTKIN_URL': KROPOTKIN_URL,
 http_pid = deploy('http', 'http', env)
 if not wait_for_http(10):
     fail_and_exit("Http not starting")
-else:
-    print "Kropotkin available at %s" % KROPOTKIN_URL
 
 environ['KROPOTKIN_URL'] = KROPOTKIN_URL
 
@@ -92,6 +90,10 @@ elements = [{'type': 'component_available',
              'keys': dumps(['name', 'location', 'identifier']),
              'translation': 'Component %(name)s deployed to %(location)s '\
                           + 'with identifier %(identifier)s'},
+            {'type': 'home_component',
+             'keys': dumps(['factspace', 'home_name']),
+             'translation': 'Factspace %(factspace)s has home component '\
+                          + '%(home_name)'},
             {'type': 'factspace_wanted',
               'keys': dumps(['name', 'directory']),
               'translation': 'Factspace %(name)s requested'},
@@ -134,3 +136,10 @@ for lib in dirs_in('libraries'):
                                 {'directory': library_location,
                                  'language': lib}):
         fail_and_exit('Could not store library_available for %s' % lib)
+
+if not kropotkin.store_fact('kropotkin', 'home_component',
+                            {'factspace': 'kropotkin',
+                             'home_name': 'kropotkin_home.html'}):
+    fail_and_exit('Could not store home_component')
+
+print "Kropotkin available at %s" % KROPOTKIN_URL

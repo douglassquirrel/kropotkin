@@ -1,0 +1,59 @@
+<!doctype HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Kropotkin - Home</title>
+  </head>
+  <body>
+    <header>
+      <h1>Kropotkin - Home</h1>
+    </header>
+
+    <p>
+      Kropotkin is a framework that expressly encourages the practise of
+      Continuous Rewriting. It does this by making it easy (and in fact
+      mandatory) to create your application from a large number of very loosely
+      coupled, miniscule components, which co-operate via a shared factspace
+      containing immutable facts about the business domain.
+    </p>
+
+    <p>
+      This page is a table of contents of sorts, linking you to various
+      parts of this Kropotkin instance. The page is "live" in that as elements
+      are started or terminated, the lists on the page are updated right away.
+      (Pages built using the Kropotkin framework normally do have this
+      live-update characteristic.)
+    </p>
+
+    <section>
+      <h2>Factspaces</h2>
+      <p>
+        This instance of Kropotkin currently contains the factspaces listed
+        below. Next to each is a link to its home component, which should tell
+        you a bit more about the factspace and what it is for.
+      </p>
+      <ul data-factspaces>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Components</h2>
+      <p>
+        This instance of Kropotkin currently contains the components listed
+        below.
+      </p>
+      <ul data-components>
+      </ul>
+    </section>
+
+    <footer>
+      <p>Copyright Douglas Squirrel 2013</p>
+    </footer>
+
+    <script type="text/javascript" src="kropotkin-js"></script>
+    <script type="text/javascript" src="kropotkin_home.js"></script>
+    <script type="text/javascript">
+      report_deployment('kropotkin_home.html');
+    </script>
+  </body>
+</html>
