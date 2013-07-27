@@ -91,9 +91,8 @@ elements = [{'type': 'component_available',
              'translation': 'Component %(name)s deployed to %(location)s '\
                           + 'with identifier %(identifier)s'},
             {'type': 'home_component',
-             'keys': dumps(['factspace', 'home_name']),
-             'translation': 'Factspace %(factspace)s has home component '\
-                          + '%(home_name)'},
+             'keys': dumps(['name']),
+             'translation': 'The home component is %(name)'},
             {'type': 'factspace_wanted',
               'keys': dumps(['name', 'directory']),
               'translation': 'Factspace %(name)s requested'},
@@ -138,8 +137,7 @@ for lib in dirs_in('libraries'):
         fail_and_exit('Could not store library_available for %s' % lib)
 
 if not kropotkin.store_fact('kropotkin', 'home_component',
-                            {'factspace': 'kropotkin',
-                             'home_name': 'kropotkin_home.html'}):
+                            {'name': 'kropotkin_home.html'}):
     fail_and_exit('Could not store home_component')
 
 print "Kropotkin available at %s" % KROPOTKIN_URL

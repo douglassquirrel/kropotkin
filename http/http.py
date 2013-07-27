@@ -1,6 +1,7 @@
 #!/usr/bin/python
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 from itertools import count
+from kropotkin import get_newest_fact
 from SocketServer import ForkingMixIn
 from urlparse import urlparse, parse_qsl
 
@@ -11,7 +12,14 @@ from integration.get_computer_name import get_computer_name
 from integration.perform_queue_command import perform_queue_command
 
 def base(path, params, content, client_ip):
-    return 200, 'Kropotkin HTTP\n', 'text/plain'
+    test = get_newest_fact('kropotkin', 'constitution_element',
+                           {'type': 'home_component'})
+    if not test:
+        return 200, 'Kropotkin HTTP\n', 'text/plain'
+
+    home_fact = get_newest_fact('kropotkin', 'home_component', {})
+    substitute_path = '/component/%s' % home_fact['name']
+    return get_component(substitute_path, params, content, client_ip)
 
 PORT=2001
 

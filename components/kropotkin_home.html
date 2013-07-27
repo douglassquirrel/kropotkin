@@ -18,19 +18,42 @@
     </p>
 
     <p>
-      This page is a table of contents of sorts, linking you to various
-      parts of this Kropotkin instance. The page is "live" in that as elements
-      are started or terminated, the lists on the page are updated right away.
-      (Pages built using the Kropotkin framework normally do have this
-      live-update characteristic.)
+      This page is a both an introduction to Kropotkin and a table of contents
+      of sorts, linking you to various elements of this Kropotkin instance and
+      providing a guide to their usage.
     </p>
+
+    <p>
+      Notice that the page is "live" - as data arrives and processes start or
+      finish, the lists on the page update themselves right away. It's natural
+      to create "live" pages like this in the Kropotkin framework.
+    </p>
+
+    <section>
+      <h2>Facts</h2>
+      <p>
+        Facts are the basic unit of data in a Kropotkin system. A fact is
+        immutable and public; it should describe something about the domain
+        that your Kropotkin system is designed for.
+      </p>
+
+      <p>
+        This Kropotkin system currently contains
+        <span data-num-facts>...</span>
+        facts.
+      </p>
 
     <section>
       <h2>Factspaces</h2>
       <p>
+        Factspaces contain collections of related facts. A set of special facts
+        called the <em>constitution</em> describe what facts can be stored in
+        a factspace.
+      </p>
+
+      <p>
         This instance of Kropotkin currently contains the factspaces listed
-        below. Next to each is a link to its home component, which should tell
-        you a bit more about the factspace and what it is for.
+        below.
       </p>
       <ul data-factspaces>
       </ul>
@@ -38,6 +61,9 @@
 
     <section>
       <h2>Components</h2>
+      <p>
+        Components are very small units of computation. They read and write
+        facts as well as interacting with the larger environment.
       <p>
         This instance of Kropotkin currently contains the components listed
         below.
