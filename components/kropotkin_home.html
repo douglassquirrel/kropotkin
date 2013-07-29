@@ -9,75 +9,87 @@
       <h1>Kropotkin - Home</h1>
     </header>
 
-    <p>
-      Kropotkin is a framework that expressly encourages the practise of
-      Continuous Rewriting. It does this by making it easy (and in fact
-      mandatory) to create your application from a large number of very loosely
-      coupled, miniscule components, which co-operate via a shared factspace
-      containing immutable facts about the business domain.
-    </p>
-
-    <p>
-      This page is a both an introduction to Kropotkin and a table of contents
-      of sorts, linking you to various elements of this Kropotkin instance and
-      providing a guide to their usage.
-    </p>
-
-    <p>
-      Notice that the page is "live" - as data arrives and processes start or
-      finish, the lists on the page update themselves right away. It's natural
-      to create "live" pages like this in the Kropotkin framework.
-    </p>
-
     <section>
-      <h2>Facts</h2>
+      <h2>Introduction</h2>
       <p>
-        Facts are the basic unit of data in a Kropotkin system. A fact is
-        immutable and public; it should describe something about the domain
-        that your Kropotkin system is designed for.
+        Kropotkin is a framework that expressly encourages the practise of
+        Continuous Rewriting. It does this by making it easy (and in fact
+        mandatory) to create your application from a large number of very
+        loosely coupled, miniscule components, which co-operate via a shared
+        factspace containing immutable facts about the business domain.
       </p>
 
       <p>
-        This Kropotkin system currently contains
-        <span data-num-facts>...</span>
-        facts.
+        This page is a "table of contents" for Kropotkin generally and this
+        instance in particular. It links you to pages that describe how
+        Kropotkin works and why works that way, as well as "live" pages showing
+        the current state of this Kropotkin installation.
+      </p>
+
+      <p>
+        When you first start Kropotkin, this page is displayed on the root path,
+        typically <code>http://yourdomain.com:2001</code>. Once you deploy one
+        or more applications using Kropotkin, you will normally replace this
+        page with one of your own (by storing a fact of type
+        <code>home_component</code>). Once you do this, you will still be able
+        to find this page at its normal component address, for example
+        <code>http://yourdomain.com:2001/component/kropotkin_home</code>.
+        See <strong>[add component page link here]</strong> for more details.
       </p>
 
     <section>
-      <h2>Factspaces</h2>
+      <h2>Contents</h2>
+
+      <h3>What's happening</h3>
       <p>
-        Factspaces contain collections of related facts. A set of special facts
-        called the <em>constitution</em> describe what facts can be stored in
-        a factspace.
+        To see how this Kropotkin instance is configured and what it is doing,
+        have a look at one of these pages.
+        <ul>
+          <li>
+            The <a href="/component/monitor-statements.html">Statements
+            Monitor</a> shows the types of facts and opinions that can be
+            stored in the factspaces of this instance, as well as recent
+            examples of facts actually stored. You can also insert facts or
+            opinions yourself on this page if you want to.
+          </li>
+          <li>
+            The <a href="/component/monitor-components.html">Components
+            Monitor</a> shows the different components that are currently
+            running. You can see where each is deployed and view its source
+            code.
+          </li>
+        </ul>
       </p>
 
+      <h3>Usage</h3>
       <p>
-        This instance of Kropotkin currently contains the factspaces listed
-        below.
+        To learn how Kropotkin works and what you can do with it, try these
+        pages.
       </p>
-      <ul data-factspaces>
+
+      <ul>
+        <li>
+          <strong>Insert guide pages here</strong>
+        </li>
       </ul>
-    </section>
 
-    <section>
-      <h2>Components</h2>
+      <h3>Philosophy</h3>
       <p>
-        Components are very small units of computation. They read and write
-        facts as well as interacting with the larger environment.
+        To learn about Continuous Rewriting and the other guiding principles
+        of Kropotkin development, have a look at these pages.
       <p>
-        This instance of Kropotkin currently contains the components listed
-        below.
-      </p>
-      <ul data-components>
+
+      <ul>
+        <li>
+          <strong>Insert philosophy pages here</strong>
+        </li>
       </ul>
-    </section>
 
     <footer>
       <p>Copyright Douglas Squirrel 2013</p>
     </footer>
 
     <script type="text/javascript" src="kropotkin-js"></script>
-    <script type="text/javascript" src="kropotkin_home.js"></script>
     <script type="text/javascript">
       report_deployment('kropotkin_home.html');
     </script>
