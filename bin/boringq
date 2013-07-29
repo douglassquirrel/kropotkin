@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 from json import dumps, loads
-from os import chdir, dup2, fork, rename, setsid, umask
+from os import chdir, dup2, fork, getpid, rename, setsid, umask
 from os.path import join
 from socket import getfqdn, socket, AF_INET, SOCK_STREAM
 from SocketServer import BaseRequestHandler, ForkingMixIn, TCPServer
@@ -142,6 +142,7 @@ def _run_server(queue_dir):
     server.queue_dir = queue_dir
     ip, port = server.server_address
     identifier = {'host': host,
+                  'pid': getpid(),
                   'port': port,
                   'queue_dir': queue_dir}
 
