@@ -8,7 +8,7 @@ Kropotkin is written in Python but explicitly encourages polyglot programming.
 Components can and should be written in a wide variety of programming
 languages.
 
-To get started, just ensure Python is installed, run bootstrap.py, and follow
+To get started, just ensure Python is installed, run run.py, and follow
 the instructions. You may need to upgrade Python and you will definitely need
 to install one Python module - but nothing else is required.
 

@@ -1,5 +1,5 @@
 #!/usr/bin/python
-from sys import exit, stderr, version, version_info
+from sys import argv, exit, stderr, version, version_info
 
 def fail_and_exit(message):
     stderr.write(message + '\n')
@@ -37,11 +37,6 @@ from core.deployer.deployer import deploy
 
 PORT=2001
 KROPOTKIN_URL="http://localhost:%s" % PORT
-try:
-    KROPOTKIN_DIR=environ['KROPOTKIN_DIR']
-except KeyError:
-    KROPOTKIN_DIR=mkdtemp()
-print "Kropotkin factspace located at: %s" % KROPOTKIN_DIR
 
 try:
     KROPOTKIN_QUEUE=environ['KROPOTKIN_QUEUE']
@@ -49,6 +44,21 @@ except KeyError:
     KROPOTKIN_QUEUE=abspath(join('bin', 'boringq'))
     environ['KROPOTKIN_QUEUE'] = KROPOTKIN_QUEUE
 print "Using queue executable %s" % KROPOTKIN_QUEUE
+
+if len(argv) > 1 and argv[1] == 'stop':
+    environ['KROPOTKIN_URL'] = KROPOTKIN_URL
+    print 'Stopping Kropotkin instance running on %s' % KROPOTKIN_URL
+    content = {'location': 'all', 'identifier': 'all'}
+    if not kropotkin.store_fact('kropotkin', 'stop_requested', content):
+        fail_and_exit('Could not store stop-requested fact')
+    print 'Kropotkin stopping'
+    exit(0)
+
+try:
+    KROPOTKIN_DIR=environ['KROPOTKIN_DIR']
+except KeyError:
+    KROPOTKIN_DIR=mkdtemp()
+print "Kropotkin factspace located at: %s" % KROPOTKIN_DIR
 
 def wait_for_http(timeout):
     finish = now() + timeout
@@ -99,6 +109,10 @@ elements = [{'type': 'component_available',
             {'type': 'factspace',
               'keys': dumps(['name', 'directory']),
               'translation': 'Factspace %(name)s created in %(directory)s'},
+            {'type': 'stop_requested',
+              'keys': dumps(['location', 'identifier']),
+              'translation': 'Component stop requested for location '\
+                           + '%(location)s and identifier %(identifier)s'},
             {'type': 'library_available',
              'keys': dumps(['directory', 'language']),
              'translation': 'Library available in %(directory)s, ' \
@@ -141,3 +155,4 @@ if not kropotkin.store_fact('kropotkin', 'home_component',
     fail_and_exit('Could not store home_component')
 
 print "Kropotkin available at %s" % KROPOTKIN_URL
+print "To stop Kropotkin, execute %s stop" % argv[0]
