@@ -37,6 +37,7 @@ from core.deployer.deployer import deploy
 
 PORT=2001
 KROPOTKIN_URL="http://localhost:%s" % PORT
+environ['KROPOTKIN_URL'] = KROPOTKIN_URL
 
 try:
     KROPOTKIN_QUEUE=environ['KROPOTKIN_QUEUE']
@@ -46,7 +47,6 @@ except KeyError:
 print "Using queue executable %s" % KROPOTKIN_QUEUE
 
 if len(argv) > 1 and argv[1] == 'stop':
-    environ['KROPOTKIN_URL'] = KROPOTKIN_URL
     print 'Stopping Kropotkin instance running on %s' % KROPOTKIN_URL
     content = {'location': 'all', 'identifier': 'all'}
     if not kropotkin.store_fact('kropotkin', 'stop_requested', content):
@@ -58,6 +58,7 @@ try:
     KROPOTKIN_DIR=environ['KROPOTKIN_DIR']
 except KeyError:
     KROPOTKIN_DIR=mkdtemp()
+    environ['KROPOTKIN_DIR'] = KROPOTKIN_DIR
 print "Kropotkin factspace located at: %s" % KROPOTKIN_DIR
 
 def wait_for_http(timeout):
@@ -80,14 +81,9 @@ def dirs_in(parent):
     parent = abspath(parent)
     return [d for d in listdir(parent) if isdir(join(parent, d))]
 
-env = {'KROPOTKIN_URL': KROPOTKIN_URL,
-       'KROPOTKIN_DIR': KROPOTKIN_DIR,
-       'KROPOTKIN_QUEUE': KROPOTKIN_QUEUE}
-http_pid = deploy('http', 'http', env)
+http_pid = deploy('http', 'http', True)
 if not wait_for_http(10):
     fail_and_exit("Http not starting")
-
-environ['KROPOTKIN_URL'] = KROPOTKIN_URL
 
 elements = [{'type': 'component_available',
               'keys': dumps(['location']),
@@ -102,7 +98,7 @@ elements = [{'type': 'component_available',
                           + 'with identifier %(identifier)s'},
             {'type': 'home_component',
              'keys': dumps(['name']),
-             'translation': 'The home component is %(name)'},
+             'translation': 'The home component is %(name)s'},
             {'type': 'factspace_wanted',
               'keys': dumps(['name', 'directory']),
               'translation': 'Factspace %(name)s requested'},
@@ -131,7 +127,7 @@ if not kropotkin.store_fact('kropotkin', 'component_deployed', content):
     fail_and_exit('Cannot store component_deployed fact for http')
 
 for c in dirs_in('core'):
-    deploy(c, join('core', c), env)
+    deploy(c, join('core', c))
 
 sleep(1) # Hack to let publisher start
 

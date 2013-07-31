@@ -2,7 +2,7 @@
 from base64 import b64encode
 from kropotkin import get_next_fact, store_fact, subscribe
 from os import access, listdir, X_OK
-from os.path import basename, isdir, join
+from os.path import abspath, basename, isdir, join
 from shutil import copy, copytree
 from subprocess import Popen
 from sys import stderr
@@ -20,7 +20,7 @@ def copy_all(original_dir, dest_dir):
 def get_unique_executable(directory):
     nodes = listdir(directory)
     executables = [f for f in nodes if is_executable_file(join(directory, f))]
-    return executables[0] if len(executables) == 1 else None
+    return join(directory, executables[0]) if len(executables) == 1 else None
 
 def is_executable_file(f):
     return (not isdir(f)) and access(f, X_OK)

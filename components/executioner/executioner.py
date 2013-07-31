@@ -4,6 +4,7 @@ from kropotkin import get_all_facts, get_next_fact, subscribe
 from os import kill
 from signal import SIGTERM
 from socket import getfqdn
+from sys import stderr
 
 THIS_MACHINE = getfqdn()
 
@@ -31,7 +32,10 @@ def execute_all():
             execute_pid(pid)
 
 def execute_pid(pid):
-    kill(pid, SIGTERM)
+    try:
+        kill(pid, SIGTERM)
+    except OSError, err:
+        stderr.write('Exception when killing %d: %s\n' % (pid, str(err)))
 
 if __name__=="__main__":
     subscribe('kropotkin', 'fact', 'stop_requested')

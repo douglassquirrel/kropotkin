@@ -3,7 +3,7 @@ from base64 import b64decode
 from contextlib import closing
 from kropotkin import get_next_fact, store_fact, subscribe
 from os import access, environ, listdir, path, X_OK
-from os.path import isdir, join
+from os.path import abspath, isdir, join
 from socket import getfqdn
 from StringIO import StringIO
 from subprocess import Popen
@@ -23,19 +23,18 @@ def inherit(to, from_, keys):
         if key not in to and key in from_:
             to[key] = from_[key]
 
-def deploy(name, directory, env={}):
+def deploy(name, directory, bootstrapping=False):
+    directory = abspath(directory)
     executable = get_unique_executable(directory)
     if not executable:
         stderr.write("No unique executable in %s for %s\n" % (directory, name))
         return False
 
-    env = env.copy()
-    inherit(env, environ, ['KROPOTKIN_QUEUE', 'KROPOTKIN_URL',
-                           'TEMP', 'TMP', 'TMPDIR'])
-    process = Popen(executable, cwd=directory, env=env)
-    content = {'name': name, 'location': getfqdn(),
-               'identifier': process.pid}
-    if 'KROPOTKIN_URL' in environ:
+    process = Popen(executable, cwd=directory)
+
+    if bootstrapping is False:
+        content = {'name': name, 'location': getfqdn(),
+                   'identifier': process.pid}
         if not store_fact('kropotkin', 'component_deployed', content):
             stderr.write('Cannot store component_deployed fact for %s\n' %name)
     return process.pid
@@ -43,7 +42,7 @@ def deploy(name, directory, env={}):
 def get_unique_executable(directory):
     nodes = listdir(directory)
     executables = [f for f in nodes if is_executable_file(join(directory, f))]
-    return executables[0] if len(executables) == 1 else None
+    return join(directory, executables[0]) if len(executables) == 1 else None
 
 def is_executable_file(f):
     return (not isdir(f)) and access(f, X_OK)
