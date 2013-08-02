@@ -18,26 +18,34 @@ def unpack(name, tar_data):
             tar.extractall(path=directory)
     return directory
 
-def inherit(to, from_, keys):
-    for key in keys:
-        if key not in to and key in from_:
-            to[key] = from_[key]
-
-def deploy(name, directory, bootstrapping=False):
+def deploy(name, directory, store_deployed_fact=True, temp_output=False):
     directory = abspath(directory)
     executable = get_unique_executable(directory)
     if not executable:
         stderr.write("No unique executable in %s for %s\n" % (directory, name))
         return False
 
-    process = Popen(executable, cwd=directory)
+    if temp_output is True:
+        output_directory = mkdtemp(prefix=name)
+    else:
+        output_directory = directory
 
-    if bootstrapping is False:
-        content = {'name': name, 'location': getfqdn(),
-                   'identifier': process.pid}
+    stdout_file = open_output_file(output_directory, name, 'stdout')
+    stderr_file = open_output_file(output_directory, name, 'stderr')
+
+    process = Popen(executable, cwd=directory,
+                    stdout=stdout_file, stderr=stderr_file)
+
+    content = {'name': name,
+               'location': getfqdn(),
+               'identifier': process.pid,
+               'stdout_file': stdout_file.name,
+               'stderr_file': stderr_file.name}
+
+    if store_deployed_fact is True:
         if not store_fact('kropotkin', 'component_deployed', content):
             stderr.write('Cannot store component_deployed fact for %s\n' %name)
-    return process.pid
+    return content
 
 def get_unique_executable(directory):
     nodes = listdir(directory)
@@ -46,6 +54,11 @@ def get_unique_executable(directory):
 
 def is_executable_file(f):
     return (not isdir(f)) and access(f, X_OK)
+
+def open_output_file(directory, process_name, file_name):
+    basename = '.'.join([process_name, file_name, 'log'])
+    filename = join(directory, basename)
+    return open(filename, 'w')
 
 if __name__=="__main__":
     subscribe('kropotkin', 'fact', 'component')

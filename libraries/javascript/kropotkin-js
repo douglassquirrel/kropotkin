@@ -97,7 +97,9 @@ function report_deployment(component_name) {
         window.kropotkin_computer_name = computer_name;
         var content = {'name': component_name,
                        'location': computer_name,
-                       'identifier': local_id};
+                       'identifier': local_id,
+                       'stdout_file': 'console',
+                       'stderr_file': 'console'};
         store_fact('kropotkin', 'component_deployed', content, function(id) {
             window.kropotkin_components[component_name]['kropotkin_id'] = id;
         });

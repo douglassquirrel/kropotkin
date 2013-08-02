@@ -81,7 +81,8 @@ def dirs_in(parent):
     parent = abspath(parent)
     return [d for d in listdir(parent) if isdir(join(parent, d))]
 
-http_pid = deploy('http', 'http', True)
+http_content = deploy('http', 'http',
+                      store_deployed_fact=False, temp_output=True)
 if not wait_for_http(10):
     fail_and_exit("Http not starting")
 
@@ -93,7 +94,8 @@ elements = [{'type': 'component_available',
              'translation': 'Component %(name)s, language %(language)s, '\
                           + 'type %(content_type)s'},
             {'type': 'component_deployed',
-             'keys': dumps(['name', 'location', 'identifier']),
+             'keys': dumps(['name', 'location', 'identifier',
+                            'stdout_file', 'stderr_file']),
              'translation': 'Component %(name)s deployed to %(location)s '\
                           + 'with identifier %(identifier)s'},
             {'type': 'home_component',
@@ -122,12 +124,11 @@ for e in elements:
     if not kropotkin.store_fact('kropotkin', 'constitution_element', e):
         fail_and_exit('Could not store %s' % e)
 
-content = {'name': 'http', 'location': gethostname(), 'identifier': http_pid}
-if not kropotkin.store_fact('kropotkin', 'component_deployed', content):
+if not kropotkin.store_fact('kropotkin', 'component_deployed', http_content):
     fail_and_exit('Cannot store component_deployed fact for http')
 
 for c in dirs_in('core'):
-    deploy(c, join('core', c))
+    deploy(c, join('core', c), temp_output=True)
 
 sleep(1) # Hack to let publisher start
 
