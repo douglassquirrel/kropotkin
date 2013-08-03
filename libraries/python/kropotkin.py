@@ -1,7 +1,8 @@
 from contextlib import closing
 from json import loads, dumps
-from os import environ
+from os import environ, fdopen
 from subprocess import PIPE, Popen
+from sys import stdout
 from time import sleep, time
 from urllib import urlencode
 from urllib2 import urlopen
@@ -9,6 +10,11 @@ from urllib2 import urlopen
 LOCAL_SUBSCRIPTIONS = {}
 LOCAL_SET_SUBSCRIPTIONS = {}
 POLL_DELAY = 0.1
+
+stdout = fdopen(stdout.fileno(), 'w', 0)
+
+def print_stdout(message):
+    stdout.write(message + '\n')
 
 def make_query_function(confidence, which, number):
     return lambda factspace, type_, criteria: \
