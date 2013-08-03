@@ -1,10 +1,11 @@
 #!/usr/bin/python
 from collections import namedtuple
-from kropotkin import get_all_facts, get_next_fact_noblock
+from kropotkin import get_all_facts, get_next_fact_noblock, store_fact
 from kropotkin import print_stdout, subscribe
 from os import SEEK_END
 from os.path import getsize
 from socket import getfqdn
+from sys import stderr
 from time import sleep, time
 
 class LogFile:
@@ -24,7 +25,7 @@ class LogFile:
 LOG_FILES = set()
 THIS_MACHINE = getfqdn()
 POLL_INTERVAL = 1
-MAX_FACT_SIZE = 4000
+MAX_FACT_SIZE = 2000
 
 def should_check_component(component_fact):
     location = component_fact['location']
@@ -52,9 +53,13 @@ def check_log_file(log_file):
     with open(log_file.path, 'r') as f:
         f.seek(-bytes_to_read, SEEK_END)
         log_data = f.read(MAX_FACT_SIZE)
+        content = {'component': log_file.component,
+                   'type':      log_file.type,
+                   'file':      log_file.path,
+                   'data':      log_data}
+        if not store_fact('kropotkin', 'log_data', content):
+            stderr.write("Could not store log_data\n")
         log_file.position += len(log_data)
-    print_stdout('Log file %s at %d' % (str(log_file), time()))
-    print_stdout(log_data)
 
 subscribe('kropotkin', 'fact', 'component_deployed')
 component_facts = get_all_facts('kropotkin', 'component_deployed', {})

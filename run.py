@@ -107,14 +107,18 @@ elements = [{'type': 'component_available',
             {'type': 'factspace',
               'keys': dumps(['name', 'directory']),
               'translation': 'Factspace %(name)s created in %(directory)s'},
-            {'type': 'stop_requested',
-              'keys': dumps(['location', 'identifier']),
-              'translation': 'Component stop requested for location '\
-                           + '%(location)s and identifier %(identifier)s'},
             {'type': 'library_available',
              'keys': dumps(['directory', 'language']),
              'translation': 'Library available in %(directory)s, ' \
                           + 'language %(language)s'},
+            {'type': 'log_data',
+              'keys': dumps(['component', 'type', 'file', 'data']),
+              'translation': 'Logging of type %(type)s from %(component)s '\
+                           + 'in file %(file)s: %(data)s'},
+            {'type': 'stop_requested',
+              'keys': dumps(['location', 'identifier']),
+              'translation': 'Component stop requested for location '\
+                           + '%(location)s and identifier %(identifier)s'},
             {'type': 'subscription',
              'keys': dumps(['type', 'confidence', 'queue']),
              'translation': 'Subscription to %(confidence)ss ' \
@@ -138,7 +142,7 @@ for c in listdir('components'):
                                 {'location': component_location}):
         fail_and_exit('Could not store component_available for %s' % c)
 
-sleep(1) # Hack to let librarian start
+sleep(5) # Hack to let librarian start
 
 for lib in dirs_in('libraries'):
     library_location = abspath(join('libraries', lib))
