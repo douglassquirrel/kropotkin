@@ -159,4 +159,6 @@ if not kropotkin.store_fact('kropotkin', 'home_component',
 print "Kropotkin available at %s" % KROPOTKIN_URL
 print "To stop Kropotkin, run the command %s stop" % argv[0]
 
-call(join('bin', 'monitor.py'))
+choice = raw_input("1. Start monitor 2. Exit ")
+if choice == '1':
+    call(join('bin', 'monitor.py'))
