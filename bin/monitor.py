@@ -28,6 +28,10 @@ class FactCounter:
 def monitor(screen):
     curs_set(0)
     screen.nodelay(1)
+    error_window = screen.subwin(3, 0)
+    error_window.idlok(1)
+    error_window.scrollok(1)
+    error_window_height = error_window.getmaxyx()[0]
 
     factspaces = FactCounter('kropotkin', 'factspace', {})
     components = FactCounter('kropotkin', 'component_deployed', {})
@@ -41,14 +45,17 @@ def monitor(screen):
         components.update()
         error_fact = errors.update()
         if error_fact is not False:
-            screen.addstr(3, 0, 'Error in %s - see %s\n' \
-                              % (error_fact['component'], error_fact['file']))
+            line = min(errors.count - 1, error_window_height - 1)
+            error_text = 'Error in %(component)s - see %(file)s\n' % error_fact
+            error_window.addstr(line, 0, error_text)
+            error_window.refresh()
 
         time_run = int(round(time() - start))
-        screen.addstr(2, 0,
-                      'Factspaces: %d  Components: %d  Errors: %d  Time: %d\r' \
+        status_text = 'Factspaces: %d  Components: %d  Errors: %d  Time: %d\r' \
                           % (factspaces.count, components.count, errors.count,
-                             time_run))
+                             time_run)
+        screen.addstr(2, 0, status_text)
+        screen.refresh()
 
         key = screen.getch()
         if key == ord('q'):
