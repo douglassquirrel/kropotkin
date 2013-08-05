@@ -17,6 +17,7 @@ from json import dumps
 from os import environ, listdir
 from os.path import abspath, isdir, join
 from socket import gethostname
+from subprocess import call
 from tempfile import mkdtemp
 from time import sleep, time
 from urllib2 import urlopen
@@ -156,4 +157,6 @@ if not kropotkin.store_fact('kropotkin', 'home_component',
     fail_and_exit('Could not store home_component')
 
 print "Kropotkin available at %s" % KROPOTKIN_URL
-print "To stop Kropotkin, execute %s stop" % argv[0]
+print "To stop Kropotkin, run the command %s stop" % argv[0]
+
+call(join('bin', 'monitor.py'))

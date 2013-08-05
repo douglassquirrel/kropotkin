@@ -14,7 +14,9 @@ POLL_DELAY = 0.1
 stdout = fdopen(stdout.fileno(), 'w', 0)
 
 def print_stdout(message):
-    stdout.write(message + '\n')
+    write_stdout(message + '\n')
+def write_stdout(message):
+    stdout.write(message)
 
 def make_query_function(confidence, which, number):
     return lambda factspace, type_, criteria: \
