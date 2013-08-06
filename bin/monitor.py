@@ -1,5 +1,6 @@
 #!/usr/bin/python
-from curses import curs_set, wrapper
+from curses import COLOR_BLACK, COLOR_RED, COLOR_WHITE, color_pair, \
+                   curs_set, init_pair, wrapper
 from kropotkin import get_all_facts, get_next_fact_noblock, \
                       subscribe, write_stdout
 from time import sleep, time
@@ -25,9 +26,18 @@ class FactCounter:
         else:
             return False
 
+def make_style(n, foreground, background):
+    init_pair(n, foreground, background)
+    return color_pair(n)
+
 def monitor(screen):
     curs_set(0)
     screen.nodelay(1)
+
+    normal_style = make_style(1, COLOR_BLACK, COLOR_WHITE)
+    error_style  = make_style(2, COLOR_RED, COLOR_WHITE)
+    screen.bkgd(normal_style)
+
     error_window = screen.subwin(3, 0)
     error_window.idlok(1)
     error_window.scrollok(1)
@@ -37,8 +47,9 @@ def monitor(screen):
     components = FactCounter('kropotkin', 'component_deployed', {})
     errors     = FactCounter('kropotkin', 'log_data', {'type': 'stderr'})
 
-    screen.addstr(0, 0, '---Monitoring Kropotkin---')
-    screen.addstr(1, 0, 'q stops monitoring but _not_ Kropotkin itself')
+    screen.addstr(0, 0, '---Monitoring Kropotkin---', normal_style)
+    screen.addstr(1, 0, 'q stops monitoring but _not_ Kropotkin itself',
+                  normal_style)
     start = time()
     while True:
         factspaces.update()
@@ -47,14 +58,14 @@ def monitor(screen):
         if error_fact is not False:
             line = min(errors.count - 1, error_window_height - 1)
             error_text = 'Error in %(component)s - see %(file)s\n' % error_fact
-            error_window.addstr(line, 0, error_text)
+            error_window.addstr(line, 0, error_text, error_style)
             error_window.refresh()
 
         time_run = int(round(time() - start))
         status_text = 'Factspaces: %d  Components: %d  Errors: %d  Time: %d\r' \
                           % (factspaces.count, components.count, errors.count,
                              time_run)
-        screen.addstr(2, 0, status_text)
+        screen.addstr(2, 0, status_text, normal_style)
         screen.refresh()
 
         key = screen.getch()
