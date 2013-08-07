@@ -14,7 +14,7 @@ function display_components(facts) {
     }
     for (i=0; i<facts.length-initial_table_rows; i++) {
         row = comp_table.insertRow(-1);
-        for (var j=0; j<4; j++) { row.insertCell(j); }
+        for (var j=0; j<6; j++) { row.insertCell(j); }
     }
     facts.sort(function(f, g) {
         var a = f['name'];
@@ -28,8 +28,10 @@ function display_components(facts) {
         row.cells[0].innerHTML = facts[i]['name'];
         row.cells[1].innerHTML = facts[i]['location'];
         row.cells[2].innerHTML = facts[i]['identifier'];
+        row.cells[3].innerHTML = facts[i]['stdout_file'];
+        row.cells[4].innerHTML = facts[i]['stderr_file'];
         button_html = COMP_BUTTON_HTML.replace('NAME', facts[i]['name']);
-        row.cells[3].innerHTML = button_html;
+        row.cells[5].innerHTML = button_html;
     }
 }
 
