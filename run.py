@@ -78,6 +78,14 @@ def wait_for_http(timeout):
 def now():
     return int(round(time()))
 
+def wait_for_fact(factspace, type_, criteria, timeout):
+    finish = now() + timeout
+    while now() < finish:
+        result = kropotkin.get_newest_fact(factspace, type_, criteria)
+        if result is not None:
+            return True
+    return False
+
 def dirs_in(parent):
     parent = abspath(parent)
     return [d for d in listdir(parent) if isdir(join(parent, d))]
@@ -135,7 +143,10 @@ if not kropotkin.store_fact('kropotkin', 'component_deployed', http_content):
 for c in dirs_in('core'):
     deploy(c, join('core', c), temp_output=True)
 
-sleep(1) # Hack to let publisher start
+publisher_started = wait_for_fact('kropotkin', 'subscription',
+                                  {'type': 'component_available'}, 10)
+if publisher_started is False:
+    fail_and_exit('Publisher failed to start')
 
 for c in listdir('components'):
     component_location = abspath(join('components', c))
@@ -143,7 +154,10 @@ for c in listdir('components'):
                                 {'location': component_location}):
         fail_and_exit('Could not store component_available for %s' % c)
 
-sleep(5) # Hack to let librarian start
+librarian_started = wait_for_fact('kropotkin', 'subscription',
+                                  {'type': 'library_available'}, 10)
+if librarian_started is False:
+    fail_and_exit('Librarian failed to start')
 
 for lib in dirs_in('libraries'):
     library_location = abspath(join('libraries', lib))
