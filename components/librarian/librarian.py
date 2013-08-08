@@ -1,7 +1,7 @@
 #!/usr/bin/python
 from base64 import b64encode
-from kropotkin import get_next_fact, store_fact, subscribe
-from os import access, listdir, X_OK
+from kropotkin import get_next_fact, print_stdout, store_fact, subscribe
+from os import access, environ, listdir, X_OK
 from os.path import abspath, basename, isdir, join
 from shutil import copy, copytree
 from subprocess import Popen
@@ -28,6 +28,7 @@ def is_executable_file(f):
 MODULE_TYPES = {'python':     'python-module',
                 'javascript': 'javascript-library',
                 'ruby':       'ruby-gem'}
+CAN_BUILD = environ['KROPOTKIN_CAN_BUILD'].split(',')
 
 subscribe('kropotkin', 'fact', 'library_available')
 while True:
@@ -35,6 +36,11 @@ while True:
 
     original_dir = fact['directory']
     language = fact['language']
+
+    if language not in CAN_BUILD:
+        print_stdout('Skipping library %s as language %s not buildable' \
+                     % (original_dir, language))
+        continue
 
     build_dir = mkdtemp(prefix='library-build-%s' % basename(original_dir))
     output_dir = mkdtemp(prefix='library-%s' % basename(original_dir))

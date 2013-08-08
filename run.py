@@ -62,6 +62,9 @@ except KeyError:
     environ['KROPOTKIN_DIR'] = KROPOTKIN_DIR
 print "Kropotkin factspace located at: %s" % KROPOTKIN_DIR
 
+if 'KROPOTKIN_CAN_BUILD' not in environ:
+    environ['KROPOTKIN_CAN_BUILD'] = 'python,javascript'
+
 def wait_for_http(timeout):
     finish = now() + timeout
 
