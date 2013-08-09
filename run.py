@@ -51,7 +51,7 @@ if len(argv) > 1 and argv[1] == 'stop':
     print 'Stopping Kropotkin instance running on %s' % KROPOTKIN_URL
     content = {'location': 'all', 'identifier': 'all'}
     if not kropotkin.store_fact('kropotkin', 'stop_requested', content):
-        fail_and_exit('Could not store stop-requested fact')
+        fail_and_exit('Could not store stop_requested fact')
     print 'Kropotkin stopping'
     exit(0)
 
@@ -142,6 +142,9 @@ for e in elements:
 
 if not kropotkin.store_fact('kropotkin', 'component_deployed', http_content):
     fail_and_exit('Cannot store component_deployed fact for http')
+if not kropotkin.store_fact('kropotkin', 'factspace',
+                            {'name': 'kropotkin', 'directory': KROPOTKIN_DIR}):
+    fail_and_exit('Cannot store factspace fact for kropotkin')
 
 for c in dirs_in('core'):
     deploy(c, join('core', c), temp_output=True)

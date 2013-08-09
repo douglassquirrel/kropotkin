@@ -20,12 +20,13 @@ def extract_local_process(queue_identifier):
 def execute_all():
     component_facts = get_all_facts('kropotkin', 'component_deployed',
                                     {'location': THIS_MACHINE})
-    subscription_facts = get_all_facts('kropotkin', 'subscription', {})
+    subscription_facts = []
+    for f in get_all_facts('kropotkin', 'factspace', {}):
+        subscription_facts += get_all_facts(f['name'], 'subscription', {})
 
     for f in component_facts:
         if f['name'] != 'executioner':
             execute_pid(f['identifier'])
-
     for f in subscription_facts:
         pid = extract_local_process(f['queue'])
         if pid is not None:
