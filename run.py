@@ -1,6 +1,8 @@
 #!/usr/bin/python
 from sys import argv, exit, stderr, version, version_info
 
+print "Welcome to Kropotkin!"
+
 def fail_and_exit(message):
     stderr.write(message + '\n')
     exit(1)
@@ -45,7 +47,6 @@ try:
 except KeyError:
     KROPOTKIN_QUEUE=abspath(join('bin', 'boringq'))
     environ['KROPOTKIN_QUEUE'] = KROPOTKIN_QUEUE
-print "Using queue executable %s" % KROPOTKIN_QUEUE
 
 if len(argv) > 1 and argv[1] == 'stop':
     print 'Stopping Kropotkin instance running on %s' % KROPOTKIN_URL
@@ -60,10 +61,25 @@ try:
 except KeyError:
     KROPOTKIN_DIR=mkdtemp()
     environ['KROPOTKIN_DIR'] = KROPOTKIN_DIR
-print "Kropotkin factspace located at: %s" % KROPOTKIN_DIR
 
 if 'KROPOTKIN_CAN_BUILD' not in environ:
     environ['KROPOTKIN_CAN_BUILD'] = 'python,javascript'
+can_build = environ['KROPOTKIN_CAN_BUILD'].split(',')
+
+print "----Environment variables----"
+print "KROPOTKIN_URL:       %s (main HTTP endpoint)" % KROPOTKIN_URL
+print "KROPOTKIN_DIR:       %s (Kropotkin files, chiefly factspace.db)"\
+                                 % KROPOTKIN_DIR
+print "KROPOTKIN_QUEUE:     %s (queue executable)" % KROPOTKIN_QUEUE
+print "KROPOTKIN_CAN_BUILD: %s (libraries built for these languages)"\
+                                 % environ['KROPOTKIN_CAN_BUILD']
+
+wont_build = [f for f in listdir('libraries') if f not in can_build]
+if wont_build:
+    print "Libraries for these languages are available but won't be built:"
+    print ','.join(wont_build)
+    print "To build one or more of these, add to the "
+    print "KROPOTKIN_CAN_BUILD environment variable."
 
 def wait_for_http(timeout):
     finish = now() + timeout
@@ -176,7 +192,7 @@ if not kropotkin.store_fact('kropotkin', 'home_component',
                             {'name': 'kropotkin_home.html'}):
     fail_and_exit('Could not store home_component')
 
-print "Kropotkin available at %s" % KROPOTKIN_URL
+print "\nKropotkin available at %s" % KROPOTKIN_URL
 print "To stop Kropotkin, run the command %s stop" % argv[0]
 
 choice = raw_input("1. Start monitor 2. Exit ")
