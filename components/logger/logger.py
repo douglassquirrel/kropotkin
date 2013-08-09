@@ -1,6 +1,7 @@
 #!/usr/bin/python
 from collections import namedtuple
-from kropotkin import get_all_facts, get_next_fact_noblock, store_fact
+from kropotkin import get_all_facts, get_next_fact_noblock, \
+                      print_stdout, store_fact
 from kropotkin import print_stdout, subscribe
 from os import SEEK_END
 from os.path import getsize
