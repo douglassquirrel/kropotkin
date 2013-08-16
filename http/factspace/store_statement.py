@@ -31,9 +31,10 @@ def check_statement(factspace, fact_type, content_dict):
     actual_keys = sorted(content_dict.keys())
 
     if fact_type == 'constitution_element':
-        expected_keys = ['keys', 'translation', 'type']
+        expected_keys = ['keys', 'options', 'translation', 'type']
         translation = "Constitution amended: type = %(type)s, " \
-            + "keys = %(keys)s, translation = %(translation)s"
+            + "keys = %(keys)s, options = %(options)s, " \
+            + "translation = %(translation)s"
     else:
         constitution_element = get_newest_fact(factspace,
                                                'constitution_element',

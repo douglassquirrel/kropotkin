@@ -116,41 +116,51 @@ if not wait_for_http(10):
 
 elements = [{'type': 'component_available',
               'keys': dumps(['location']),
-              'translation': 'Component available in %(location)s'},
+              'translation': 'Component available in %(location)s',
+             'options': ''},
             {'type': 'component',
              'keys': dumps(['name', 'bytes', 'language', 'content_type']),
              'translation': 'Component %(name)s, language %(language)s, '\
-                          + 'type %(content_type)s'},
+                          + 'type %(content_type)s',
+             'options': ''},
             {'type': 'component_deployed',
              'keys': dumps(['name', 'location', 'identifier',
                             'stdout_file', 'stderr_file']),
              'translation': 'Component %(name)s deployed to %(location)s '\
-                          + 'with identifier %(identifier)s'},
+                          + 'with identifier %(identifier)s',
+             'options': ''},
             {'type': 'home_component',
              'keys': dumps(['name']),
-             'translation': 'The home component is %(name)s'},
+             'translation': 'The home component is %(name)s',
+             'options': ''},
             {'type': 'factspace_wanted',
-              'keys': dumps(['name', 'directory']),
-              'translation': 'Factspace %(name)s requested'},
+             'keys': dumps(['name', 'directory']),
+             'translation': 'Factspace %(name)s requested',
+             'options': ''},
             {'type': 'factspace',
-              'keys': dumps(['name', 'directory']),
-              'translation': 'Factspace %(name)s created in %(directory)s'},
+             'keys': dumps(['name', 'directory']),
+             'translation': 'Factspace %(name)s created in %(directory)s',
+             'options': ''},
             {'type': 'library_available',
              'keys': dumps(['directory', 'language']),
              'translation': 'Library available in %(directory)s, ' \
-                          + 'language %(language)s'},
+                          + 'language %(language)s',
+             'options': ''},
             {'type': 'log_data',
-              'keys': dumps(['component', 'type', 'file', 'data']),
-              'translation': 'Logging of type %(type)s from %(component)s '\
-                           + 'in file %(file)s: %(data)s'},
+             'keys': dumps(['component', 'type', 'file', 'data']),
+             'translation': 'Logging of type %(type)s from %(component)s '\
+                           + 'in file %(file)s: %(data)s',
+             'options': ''},
             {'type': 'stop_requested',
-              'keys': dumps(['location', 'identifier']),
-              'translation': 'Component stop requested for location '\
-                           + '%(location)s and identifier %(identifier)s'},
+             'keys': dumps(['location', 'identifier']),
+             'translation': 'Component stop requested for location '\
+                           + '%(location)s and identifier %(identifier)s',
+             'options': ''},
             {'type': 'subscription',
              'keys': dumps(['type', 'confidence', 'queue']),
              'translation': 'Subscription to %(confidence)ss ' \
-                          + 'of type %(type)s using queue %(queue)s'}]
+                          + 'of type %(type)s using queue %(queue)s',
+             'options': ''}]
 
 for e in elements:
     if not kropotkin.store_fact('kropotkin', 'constitution_element', e):
