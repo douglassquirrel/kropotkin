@@ -35,7 +35,7 @@ KROPOTKIN_KEYS = ['kropotkin_id', 'kropotkin_timestamp', 'kropotkin_confidence']
 def _get_statements_db(statements_dir, factspace, confidence, fact_type,
                        params, result, number, timeout):
     if fact_type == 'constitution_element':
-        type_keys = ['keys', 'translation', 'type']
+        type_keys = ['keys', 'options', 'translation', 'type']
     else:
         constitution_element = get_newest_fact(factspace,
                                                'constitution_element',

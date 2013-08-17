@@ -12,8 +12,12 @@ def store_statement(path, params, content, client_ip):
 
     content_dict = loads(content)
 
-    if not check_statement(factspace, fact_type, content_dict):
-        stderr.write("Fact of type %s disallowed\n" % fact_type)
+    try:
+        if should_save(factspace, fact_type, content_dict) is False:
+            return (200, '0', 'text/plain')
+    except Exception as e:
+        stderr.write("Fact of type %s disallowed:\n%s: %s\n" \
+                         % (fact_type, type(e), str(e)))
         return (400, 'Fact of type %s blocked by constitution\n' % fact_type,
                 'text/plain')
 
@@ -27,7 +31,7 @@ def store_statement(path, params, content, client_ip):
     rowid = save_statement(statements_dir, confidence, fact_type, content)
     return (200, str(rowid), 'text/plain')
 
-def check_statement(factspace, fact_type, content_dict):
+def should_save(factspace, fact_type, content_dict):
     actual_keys = sorted(content_dict.keys())
 
     if fact_type == 'constitution_element':
@@ -35,15 +39,20 @@ def check_statement(factspace, fact_type, content_dict):
         translation = "Constitution amended: type = %(type)s, " \
             + "keys = %(keys)s, options = %(options)s, " \
             + "translation = %(translation)s"
+        options = ''
     else:
         constitution_element = get_newest_fact(factspace,
                                                'constitution_element',
                                                {'type': fact_type})
         if not constitution_element:
-            return False
+            raise Exception('Statement type %s not recognised' % fact_type)
         expected_keys = sorted(loads(constitution_element['keys']))
+        options = constitution_element['options']
 
-    return expected_keys == actual_keys
+    if expected_keys != actual_keys:
+        raise Exception('Wrong keys for statement type %s' % fact_type)
+
+    return 'memory_only' not in options
 
 CREATE_TABLE_TEMPLATE = '''CREATE TABLE IF NOT EXISTS %s
                            (kropotkin_id INTEGER PRIMARY KEY,
