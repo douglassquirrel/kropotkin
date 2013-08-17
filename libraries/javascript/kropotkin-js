@@ -119,6 +119,7 @@ function to_query_string(criteria) {
 function queue_command(command, input, identifier, onresponse) {
     var url = '/queue/' + command;
     if (identifier != null) {
+        identifier = identifier.replace(/\//g, '|')
         url += '/' + encodeURIComponent(identifier);
     }
     http_request(url, 'POST', input, onresponse);

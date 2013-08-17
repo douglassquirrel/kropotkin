@@ -9,7 +9,7 @@ def perform_queue_command(path, params, content, client_ip):
         command, identifier = path_elements[2], None
     else:
         command, identifier = path_elements[2:4]
-        identifier = unquote(identifier)
+        identifier = unquote(identifier).replace('|', '/')
     input_ = content if content else None
     output = _execute_queue_command(command, input_, identifier)
     if output is not False:
